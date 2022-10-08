@@ -8,6 +8,13 @@ import {
   ServiceResponse,
 } from "roslib";
 import { TopicSettings } from "../interfaces/ros";
+import {
+  IFrameResult,
+  IFrameResultLoop,
+  IRosFrameExecutor,
+  IRosFrameExecutorPeriodic,
+} from "../interfaces/frames";
+import { LiteEvent, LiteEventHandler } from "../utils/LiteEvent";
 
 interface IRosContextConfiguration {
   host: string;
@@ -17,16 +24,19 @@ interface IRosContextConfiguration {
 class RosinouContext extends ConnectionContext {
   private ros: Ros;
 
-  public get isConnected(): boolean {
+  private handlers: Map<string, LiteEventHandler<Message>[]>;
+
+  public override get isConnected(): boolean {
     return this.ros.isConnected;
   }
 
   constructor(config: IRosContextConfiguration) {
     super("rosinou", config);
     this.ros = new Ros({});
+    this.handlers = new Map<string, LiteEventHandler<Message>[]>();
   }
 
-  public connect(): Promise<boolean> {
+  public override connect(): Promise<boolean> {
     return new Promise((resolve, reject) => {
       this.ros.on("connection", () => {
         console.log("Connected to websocket server.");
@@ -46,83 +56,138 @@ class RosinouContext extends ConnectionContext {
     });
   }
 
-  public disconnect(): Promise<boolean> {
+  public override disconnect(): Promise<boolean> {
     this.ros.close();
     return Promise.resolve(true);
   }
 
-  public request(executor: any): Promise<any> {
+  public request(executor: IRosFrameExecutor): Promise<IFrameResult> {
     return new Promise((resolve, reject) => {
       const onSuccess = (result: ServiceResponse) => {
-        resolve(result);
+        resolve({
+          success: true,
+          result: result,
+        });
       };
       const onError = (error: any) => {
         reject(error);
       };
 
-      const { serviceType, payload } = executor;
+      const { methodType, payload, format } = executor;
       const service = new Service({
         ros: this.ros,
-        name: serviceType,
-        serviceType: payload.format,
+        name: methodType,
+        serviceType: format,
       });
       const serviceRequest = new ServiceRequest(payload.data);
       service.callService(serviceRequest, onSuccess, onError);
     });
   }
 
-  public send(executor: any): Promise<any> {
-    const { serviceType, payload } = executor;
+  public override send(executor: IRosFrameExecutor): Promise<IFrameResult> {
+    const { methodType, payload, format } = executor;
     const topicSettings: TopicSettings = {
-      topic: serviceType,
-      messageType: payload.format,
+      topic: methodType,
+      messageType: format,
     };
-    const topicInstance = this.getTopic(topicSettings);
+    const topicInstance: Topic<Message> = this.getTopic(topicSettings);
     const message = new Message(payload.data);
     topicInstance.publish(message);
     topicInstance.unadvertise();
-    return Promise.resolve(true);
+    return Promise.resolve({
+      success: true,
+      result: null,
+    });
   }
 
-  public sendLoop(executor: any): any {
-    const { serviceType, payload, period } = executor;
+  public override sendLoop(
+    executor: IRosFrameExecutorPeriodic
+  ): Promise<IFrameResultLoop> {
+    const { methodType, payload, format, period } = executor;
     const topicSettings: TopicSettings = {
-      topic: serviceType,
-      messageType: payload.format,
+      topic: methodType,
+      messageType: format,
     };
+    const onSent = new LiteEvent<IFrameResult>();
     const topicInstance = this.getTopic(topicSettings);
     const message = new Message(payload.data);
     const interval = setInterval(() => {
       topicInstance.publish(message);
-      console.log("publishing");
+      onSent.trigger({
+        success: true,
+        result: null,
+      });
     }, (1 / period) * 1000);
-    return {
-      interval,
+    const stop = () => {
+      clearInterval(interval);
+      topicInstance.unadvertise();
     };
+    return Promise.resolve({
+      success: true,
+      result: null,
+      event: onSent,
+      stop: stop,
+    });
   }
 
-  public subscribe(executor: any): Promise<any> {
-    const { serviceType, payload, onMessage } = executor;
+  public override on<T>(
+    executor: IRosFrameExecutor,
+    handler: LiteEventHandler<T>
+  ): void {
+    const { methodType, format } = executor;
     const topicSettings: TopicSettings = {
-      topic: serviceType,
-      messageType: payload.format,
+      topic: methodType,
+      messageType: format,
     };
+    this.addHandler(methodType, handler);
     const topicInstance = this.getTopic(topicSettings);
-    const message = new Message(payload.data);
-    topicInstance.subscribe((message: any) => onMessage);
-    return Promise.resolve(true);
+    topicInstance.subscribe((message: Message) => {
+      this.triggerHandlers(methodType, message);
+    });
   }
 
-  public execute(executor: any): Promise<any> {
-    switch (executor.type) {
+  public override off<T>(
+    executor: IRosFrameExecutor,
+    handler?: LiteEventHandler<T>
+  ): void {
+    const { methodType, payload } = executor;
+    const remainingHandlersCount = this.removeHandler(methodType, handler);
+    if (remainingHandlersCount === 0) {
+      const topicSettings: TopicSettings = {
+        topic: methodType,
+        messageType: payload.format,
+      };
+      const topicInstance = this.getTopic(topicSettings);
+      topicInstance.unsubscribe(handler);
+    }
+  }
+
+  public override removeAllListeners(): void {
+    const removeTopicList = (list: { topics: string[]; types: string[] }) => {
+      const { topics, types } = list;
+      topics.forEach((topic, index) => {
+        const topicSettings: TopicSettings = {
+          topic: topic,
+          messageType: types[index],
+        };
+        const topicInstance = this.getTopic(topicSettings);
+        topicInstance.unsubscribe();
+      });
+    };
+    const handleError = (error: any) => {
+      console.log("Error getting topics: ", error);
+    };
+    this.ros.getTopics(removeTopicList, handleError);
+  }
+
+  public override execute(executor: IRosFrameExecutor): Promise<any> {
+    switch (executor.method) {
       case "request":
         return this.request(executor);
       case "send":
         return this.send(executor);
       case "sendLoop":
-        return this.sendLoop(executor);
-      case "subscribe":
-        return this.subscribe(executor);
+        return this.sendLoop(executor as IRosFrameExecutorPeriodic);
       default:
         return Promise.reject("Unknown executor type");
     }
@@ -139,6 +204,38 @@ class RosinouContext extends ConnectionContext {
       queue_size: settings.queueSize || 10,
     };
     return new Topic(options);
+  }
+
+  private addHandler(topic: string, handler: LiteEventHandler<Message>): void {
+    if (!this.handlers.has(topic)) {
+      this.handlers.set(topic, []);
+    }
+    this.handlers.get(topic).push(handler);
+  }
+
+  private triggerHandlers(topic: string, message: Message): void {
+    this.handlers.get(topic).forEach((handler) => {
+      handler(message);
+    });
+  }
+
+  private removeHandler(
+    topic: string,
+    handler: LiteEventHandler<Message>
+  ): number {
+    if (!this.handlers.has(topic)) {
+      return;
+    }
+    const handlers = this.handlers.get(topic);
+    const index = handlers.indexOf(handler);
+    if (index > -1) {
+      handlers.splice(index, 1);
+    }
+    if (handlers.length === 0) {
+      this.handlers.delete(topic);
+      return 0;
+    }
+    return handlers.length;
   }
 }
 

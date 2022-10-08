@@ -33,7 +33,7 @@ describe("frame factory", () => {
 });
 
 describe("frames", () => {
- const framePackages = []
+//  const framePackages = []
 
   test("should build a frame executor from a frame", () => {
     const frameFactory = new FrameFactory();
