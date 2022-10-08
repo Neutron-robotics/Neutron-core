@@ -1,5 +1,5 @@
 import { ServiceResponse } from "roslib";
-import { RosContext } from "../context/RosContext";
+import { RosContext } from "../context/RosContext.ts.bak";
 
 export interface ICameraConfiguration {
   ip: string;

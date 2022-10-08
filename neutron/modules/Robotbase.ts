@@ -1,10 +1,12 @@
-import { IRobotConnectionContext } from "../context/RosContext";
+import { IRobotConnectionContext } from "../context/RosContext.ts.bak";
 import { IBatteryInfo } from "../interfaces/RobotConnection";
 import { inRange } from "../utils/math";
 
 export type Direction = "forward" | "backward" | "left" | "right";
 
 export interface IRobotBaseConfiguration {
+    id: string;
+    name: string;
     directionnalSpeed: number;
     rotationSpeed: number;
 }

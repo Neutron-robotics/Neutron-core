@@ -1,4 +1,4 @@
-import { IFrameExecutor } from "../interfaces/frames";
+import { IFrameExecutor, IFrameResult } from "../interfaces/frames";
 import { LiteEventHandler } from "../utils/LiteEvent";
 
 interface IConnectionContextConfiguration {
@@ -6,7 +6,22 @@ interface IConnectionContextConfiguration {
   port: number;
 }
 
-abstract class ConnectionContext {
+interface IConnectionContext {
+  connect(): Promise<boolean>;
+  disconnect(): Promise<boolean>;
+  isConnected: boolean;
+  hostname: string;
+  port: number;
+
+  request(frame: IFrameExecutor): Promise<IFrameResult>;
+  send(frame: IFrameExecutor): Promise<IFrameResult>;
+  sendLoop(frame: IFrameExecutor): Promise<IFrameResult>;
+  on<T>(executor: IFrameExecutor, handler: LiteEventHandler<T>): void;
+  off<T>(executor: IFrameExecutor, handler: LiteEventHandler<T>): void;
+  execute(executor: IFrameExecutor): Promise<IFrameResult>;
+}
+
+abstract class ConnectionContext implements IConnectionContext {
   public type: string;
 
   public hostname: string;
@@ -25,11 +40,11 @@ abstract class ConnectionContext {
 
   public abstract disconnect(): Promise<boolean>;
 
-  public abstract request(executor: IFrameExecutor): Promise<any>;
+  public abstract request(executor: IFrameExecutor): Promise<IFrameResult>;
 
-  public abstract send(executor: IFrameExecutor): Promise<any>;
+  public abstract send(executor: IFrameExecutor): Promise<IFrameResult>;
 
-  public abstract sendLoop(executor: IFrameExecutor): Promise<any>;
+  public abstract sendLoop(executor: IFrameExecutor): Promise<IFrameResult>;
 
   public abstract on<T>(
     executor: IFrameExecutor,
@@ -43,7 +58,7 @@ abstract class ConnectionContext {
 
   public abstract removeAllListeners(): void;
 
-  public abstract execute(executor: IFrameExecutor): Promise<any>;
+  public abstract execute(executor: IFrameExecutor): Promise<IFrameResult>;
 }
 
-export { ConnectionContext };
+export { ConnectionContext, IConnectionContext };

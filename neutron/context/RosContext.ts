@@ -1,133 +1,196 @@
-import ROSLIB, {
-  Message,
+import { ConnectionContext } from "./ConnectionContext";
+import {
+  Ros,
+  Topic,
   Service,
+  Message,
   ServiceRequest,
   ServiceResponse,
-  Topic,
 } from "roslib";
-import { Ros } from "roslib";
-import { Core } from "..";
-import {
-  IRobotConnectionConfiguration,
-  RobotConnectionType,
-} from "../interfaces/RobotConnection";
 import { TopicSettings } from "../interfaces/ros";
+import {
+  IFrameResult,
+  IFrameResultLoop,
+  IRosFrameExecutor,
+  IRosFrameExecutorPeriodic,
+} from "../interfaces/frames";
+import { LiteEvent, LiteEventHandler } from "../utils/LiteEvent";
 
-export interface IRobotConnectionContext {
-  type: RobotConnectionType;
-  connectionConfiguration: IRobotConnectionConfiguration;
-  isConnected: boolean;
-
-  connect(): Promise<void>;
-  disconnect(): Promise<void>;
+interface IRosContextConfiguration {
+  host: string;
+  port: number;
 }
 
-export const makeConnectionContext = (
-  coreConfiguration: Core
-): IRobotConnectionContext => {
-  switch (coreConfiguration.contextConfiguration.type) {
-    case RobotConnectionType.ROSBRIDGE:
-      return new RosContext(coreConfiguration.getConnectionInfos());
-    default:
-      throw new Error("Invalid connection type");
-  }
-};
+class RosContext extends ConnectionContext {
+  private ros: Ros;
 
-export class RosContext implements IRobotConnectionContext {
-  public ros: ROSLIB.Ros;
+  private handlers: Map<string, LiteEventHandler<Message>[]>;
 
-  public type: RobotConnectionType;
-
-  public connectionConfiguration: IRobotConnectionConfiguration;
-
-  public get isConnected(): boolean {
+  public override get isConnected(): boolean {
     return this.ros.isConnected;
   }
 
-  constructor(connectionConfiguration: IRobotConnectionConfiguration) {
+  constructor(config: IRosContextConfiguration) {
+    super("rosinou", config);
     this.ros = new Ros({});
-    this.type = RobotConnectionType.ROSBRIDGE;
-    this.connectionConfiguration = connectionConfiguration;
+    this.handlers = new Map<string, LiteEventHandler<Message>[]>();
   }
 
-  public connect(): Promise<void> {
+  public override connect(): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      const { hostname, port } = this.connectionConfiguration.connection;
-
       this.ros.on("connection", () => {
         console.log("Connected to websocket server.");
-        resolve();
+        resolve(true);
       });
+
       this.ros.on("error", (error) => {
         console.log("Error connecting to websocket server: ", error);
-        reject(error);
+        resolve(false);
       });
+
       this.ros.on("close", () => {
         console.log("Connection to websocket server closed.");
       });
-      console.log(`Connecting to ws://${hostname}:${port}`);
-      this.ros.connect(`ws://${hostname}:${port}`);
+
+      this.ros.connect(`ws://${this.hostname}:${this.port}`);
     });
   }
 
-  public disconnect(): Promise<void> {
-    return new Promise((resolve) => {
-      this.ros.close();
-      resolve();
+  public override disconnect(): Promise<boolean> {
+    this.ros.close();
+    return Promise.resolve(true);
+  }
+
+  public request(executor: IRosFrameExecutor): Promise<IFrameResult> {
+    return new Promise((resolve, reject) => {
+      const onSuccess = (result: ServiceResponse) => {
+        resolve({
+          success: true,
+          result: result,
+        });
+      };
+      const onError = (error: any) => {
+        reject(error);
+      };
+
+      const { methodType, payload, format } = executor;
+      const service = new Service({
+        ros: this.ros,
+        name: methodType,
+        serviceType: format,
+      });
+      const serviceRequest = new ServiceRequest(payload.data);
+      service.callService(serviceRequest, onSuccess, onError);
     });
   }
 
-  public publishOnce(topic: string, messageType: string, message: Message) {
-    const publisher = new ROSLIB.Topic({
-      ros: this.ros,
-      name: topic,
-      messageType,
-    });
-    publisher.publish(message);
-    publisher.unadvertise();
-  }
-
-  public publishLoop(
-    topic: string,
-    messageType: string,
-    message: Message,
-    frequency: number
-  ) {
+  public override send(executor: IRosFrameExecutor): Promise<IFrameResult> {
+    const { methodType, payload, format } = executor;
     const topicSettings: TopicSettings = {
-      topic,
-      messageType,
+      topic: methodType,
+      messageType: format,
     };
-    const publisher = this.getTopic(topicSettings);
-    const period = Math.round(1000 / frequency);
+    const topicInstance: Topic<Message> = this.getTopic(topicSettings);
+    const message = new Message(payload.data);
+    topicInstance.publish(message);
+    topicInstance.unadvertise();
+    return Promise.resolve({
+      success: true,
+      result: null,
+    });
+  }
+
+  public override sendLoop(
+    executor: IRosFrameExecutorPeriodic
+  ): Promise<IFrameResultLoop> {
+    const { methodType, payload, format, period } = executor;
+    const topicSettings: TopicSettings = {
+      topic: methodType,
+      messageType: format,
+    };
+    const onSent = new LiteEvent<IFrameResult>();
+    const topicInstance = this.getTopic(topicSettings);
+    const message = new Message(payload.data);
     const interval = setInterval(() => {
-      console.log("publish", message);
-      publisher.publish(message);
-    }, period);
-    return () => {
+      topicInstance.publish(message);
+      onSent.trigger({
+        success: true,
+        result: null,
+      });
+    }, (1 / period) * 1000);
+    const stop = () => {
       clearInterval(interval);
-      publisher.unadvertise();
+      topicInstance.unadvertise();
     };
+    return Promise.resolve({
+      success: true,
+      result: null,
+      event: onSent,
+      stop: stop,
+    });
   }
 
-  public subscribe(
-    settings: TopicSettings,
-    callback: (message: Message) => void
-  ): Topic {
-    const topic = this.getTopic(settings);
-    topic.subscribe(callback);
-    return topic;
+  public override on<T>(
+    executor: IRosFrameExecutor,
+    handler: LiteEventHandler<T>
+  ): void {
+    const { methodType, format } = executor;
+    const topicSettings: TopicSettings = {
+      topic: methodType,
+      messageType: format,
+    };
+    this.addHandler(methodType, handler);
+    const topicInstance = this.getTopic(topicSettings);
+    topicInstance.subscribe((message: Message) => {
+      this.triggerHandlers(methodType, message);
+    });
   }
 
-  public callService(
-    name: string,
-    serviceType: string,
-    request?: object,
-    callback: (resp: ServiceResponse) => void = (resp) => {},
-    failedCallback?: (error: any) => void
-  ) {
-    const service = new Service({ ros: this.ros, name, serviceType });
-    const serviceRequest = new ServiceRequest(request);
-    service.callService(serviceRequest, callback, failedCallback);
+  public override off<T>(
+    executor: IRosFrameExecutor,
+    handler?: LiteEventHandler<T>
+  ): void {
+    const { methodType, payload } = executor;
+    const remainingHandlersCount = this.removeHandler(methodType, handler);
+    if (remainingHandlersCount === 0) {
+      const topicSettings: TopicSettings = {
+        topic: methodType,
+        messageType: payload.format,
+      };
+      const topicInstance = this.getTopic(topicSettings);
+      topicInstance.unsubscribe(handler);
+    }
+  }
+
+  public override removeAllListeners(): void {
+    const removeTopicList = (list: { topics: string[]; types: string[] }) => {
+      const { topics, types } = list;
+      topics.forEach((topic, index) => {
+        const topicSettings: TopicSettings = {
+          topic: topic,
+          messageType: types[index],
+        };
+        const topicInstance = this.getTopic(topicSettings);
+        topicInstance.unsubscribe();
+      });
+    };
+    const handleError = (error: any) => {
+      console.log("Error getting topics: ", error);
+    };
+    this.ros.getTopics(removeTopicList, handleError);
+  }
+
+  public override execute(executor: IRosFrameExecutor): Promise<any> {
+    switch (executor.method) {
+      case "request":
+        return this.request(executor);
+      case "send":
+        return this.send(executor);
+      case "sendLoop":
+        return this.sendLoop(executor as IRosFrameExecutorPeriodic);
+      default:
+        return Promise.reject("Unknown executor type");
+    }
   }
 
   private getTopic(settings: TopicSettings): Topic {
@@ -142,4 +205,38 @@ export class RosContext implements IRobotConnectionContext {
     };
     return new Topic(options);
   }
+
+  private addHandler(topic: string, handler: LiteEventHandler<Message>): void {
+    if (!this.handlers.has(topic)) {
+      this.handlers.set(topic, []);
+    }
+    this.handlers.get(topic).push(handler);
+  }
+
+  private triggerHandlers(topic: string, message: Message): void {
+    this.handlers.get(topic).forEach((handler) => {
+      handler(message);
+    });
+  }
+
+  private removeHandler(
+    topic: string,
+    handler: LiteEventHandler<Message>
+  ): number {
+    if (!this.handlers.has(topic)) {
+      return;
+    }
+    const handlers = this.handlers.get(topic);
+    const index = handlers.indexOf(handler);
+    if (index > -1) {
+      handlers.splice(index, 1);
+    }
+    if (handlers.length === 0) {
+      this.handlers.delete(topic);
+      return 0;
+    }
+    return handlers.length;
+  }
 }
+
+export { RosContext };

@@ -1,4 +1,4 @@
-import { RosinouContext } from "../neutron/context/RosinouContext";
+import { RosContext } from "../neutron/context/RosContext";
 import { Ros, Service, ServiceRequest, Topic, Message } from "roslib";
 import {
   IRosFrameExecutor,
@@ -25,7 +25,7 @@ describe("Ros Contexts", () => {
   });
 
   test("Instanciate", () => {
-    const rosContext = new RosinouContext({
+    const rosContext = new RosContext({
       host: "localhost",
       port: 9090,
     });
@@ -37,7 +37,7 @@ describe("Ros Contexts", () => {
   });
 
   test("Connect", () => {
-    const rosContext = new RosinouContext({
+    const rosContext = new RosContext({
       host: "localhost",
       port: 9090,
     });
@@ -53,7 +53,7 @@ describe("Ros Contexts", () => {
   });
 
   test("Disconnect", () => {
-    const rosContext = new RosinouContext({
+    const rosContext = new RosContext({
       host: "localhost",
       port: 9090,
     });
@@ -75,7 +75,7 @@ describe("Ros Contexts", () => {
         y: 0,
       },
     };
-    const rosContext = new RosinouContext({
+    const rosContext = new RosContext({
       host: "localhost",
       port: 9090,
     });
@@ -110,7 +110,7 @@ describe("Ros Contexts", () => {
         y: 0,
       },
     };
-    const rosContext = new RosinouContext({
+    const rosContext = new RosContext({
       host: "localhost",
       port: 9090,
     });
@@ -146,7 +146,7 @@ describe("Ros Contexts", () => {
       },
       period: 3,
     };
-    const rosContext = new RosinouContext({
+    const rosContext = new RosContext({
       host: "localhost",
       port: 9090,
     });
@@ -190,7 +190,7 @@ describe("Ros Contexts", () => {
         y: 0,
       },
     };
-    const rosContext = new RosinouContext({
+    const rosContext = new RosContext({
       host: "localhost",
       port: 9090,
     });
@@ -223,7 +223,7 @@ describe("Ros Contexts", () => {
         y: 0,
       },
     };
-    const rosContext = new RosinouContext({
+    const rosContext = new RosContext({
       host: "localhost",
       port: 9090,
     });
@@ -260,7 +260,7 @@ describe("Ros Contexts", () => {
         y: 0,
       },
     };
-    const rosContext = new RosinouContext({
+    const rosContext = new RosContext({
       host: "localhost",
       port: 9090,
     });

@@ -1,12 +1,13 @@
 import { IFrame } from "../../interfaces/frames"
+import { IMovementMatrix } from "../../interfaces/robotbase"
 
 const moveFrame: IFrame = {
     id: "move",
     name: "Move",
-    build: (body: any) => {
+    build: (body: IMovementMatrix) => {
         return {
             id: "move",
-            methodType: "publishLoop",
+            methodType: "publish",
             method: "set_velocity",
             payload: body,
         }
