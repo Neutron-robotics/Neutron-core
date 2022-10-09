@@ -1,5 +1,7 @@
-import { RobotBase } from "../neutron/modules/OsoyooBase";
+import { RobotBase } from "../neutron/modules/RobotBase";
 import { RosContext } from "../neutron/context/RosContext";
+import { IRobotBaseCartesianMovement } from "../neutron/interfaces/robotbase";
+import OsoyooBaseFrames from "../neutron/frames/OsoyooBaseFrames/index";
 
 jest.mock("../neutron/context/RosContext");
 
@@ -9,12 +11,16 @@ describe("robot base tests", () => {
   beforeEach(() => {
     (RosContext as any).mockClear();
     const context = new RosContext({ host: "localhost", port: 9090 });
-    robotBase = new RobotBase({
+    robotBase = new RobotBase(
+      {
         id: "1",
         name: "test",
-        directionnalSpeed: 0.5,
+        directionnalSpeed: 1,
         rotationSpeed: 0.5,
-    }, context, []);
+      },
+      context,
+      OsoyooBaseFrames.frames
+    );
   });
 
   test("Instanciate", () => {
@@ -23,25 +29,41 @@ describe("robot base tests", () => {
     expect(robotBase.name).toBe("test");
   });
 
-//   test.todo("move", () => {
-//     const robotBaseFramePackage = new RobotBaseFramePackage();
-//     const robotBase = new RobotBase({
-//       id: "test",
-//       name: "test",
-//       type: "test",
-//       status: "test",
-//       battery: 100,
-//       connection: {
-//         hostname: "localhost",
-//         port: 9090,
-//         type: "ros",
-//       },
-//       modules: [],
-//     });
-//     robotBase.move(robotBaseFramePackage);
-//   });
+  test("move", async () => {
+    const movement = [1, 0, 0, 0, 0, 1];
+    await robotBase.move(movement);
+    expect(robotBase.speed).toBe(50);
+    const mockcallExecute = (RosContext as any).mock.instances[0].execute;
+    expect(mockcallExecute).toHaveBeenCalledTimes(1);
+    expect(mockcallExecute).toHaveBeenCalledWith({
+      id: expect.anything(),
+      methodType: "set_velocity",
+      format: "/myrobotics/velocity",
+      method: "send",
+      payload: {
+        x: 50,
+        y: 0,
+        z: 0,
+        roll: 0,
+        pitch: 0,
+        yaw: 25,
+      },
+      next: expect.anything(),
+    });
+  });
 
-//   test.todo("rotate", () => {});
-
-//   test.todo("stop", () => {});
+  test("stop", async () => {
+    await robotBase.stop();
+    expect(robotBase.speed).toBe(50);
+    const mockcallExecute = (RosContext as any).mock.instances[0].execute;
+    expect(mockcallExecute).toHaveBeenCalledTimes(1);
+    expect(mockcallExecute).toHaveBeenCalledWith({
+      id: expect.anything(),
+      methodType: "stop",
+      format: "std_msgs/String",
+      method: "send",
+      loopCancellationToken: "keep_alive",
+      payload: {},
+    });
+  });
 });

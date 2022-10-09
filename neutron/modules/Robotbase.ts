@@ -1,5 +1,5 @@
 import { IConnectionContext } from "../context/ConnectionContext";
-import { IFrame } from "../interfaces/frames";
+import { IFrame, IFrameResult } from "../interfaces/frames";
 import { IMovementMatrix } from "../interfaces/robotbase";
 import { inRange } from "../utils/math";
 
@@ -68,8 +68,7 @@ export class RobotBase {
     return response;
   }
 
-  //todo: set this async
-  public stop() {
+  public stop(): Promise<IFrameResult> {
     const frame = this.frames["stop"];
     if (!frame) throw new Error("No frame found for stop command");
     const executor = frame.build({});

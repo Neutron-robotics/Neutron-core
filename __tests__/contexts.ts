@@ -4,6 +4,8 @@ import {
   IRosFrameExecutor,
   IRosFrameExecutorPeriodic,
 } from "../neutron/interfaces/frames";
+import { moveFrame } from "../neutron/frames/OsoyooBaseFrames/moveFrame";
+import { stopFrame } from "../neutron/frames/OsoyooBaseFrames/stopFrame";
 import { sleep } from "../neutron/utils/time";
 
 jest.mock("roslib");
@@ -279,5 +281,45 @@ describe("Ros Contexts", () => {
       name: "/move_something",
       serviceType: "/std_types/Float64Array",
     });
+  });
+
+  test("Execute multiple frame", async () => {
+    const rosContext = new RosContext({
+      host: "localhost",
+      port: 9090,
+    });
+    const moveExecutor = moveFrame.build([0, 0, 0, 0, 0, 0]);
+    const res = await rosContext.execute(moveExecutor);
+    expect(res.success).toBeTruthy();
+    await sleep(2000);
+    const stopExecutor = stopFrame.build({});
+    const res2 = await rosContext.execute(stopExecutor);
+    expect(res2.success).toBeTruthy();
+    await sleep(2000)
+
+    expect(Topic).toHaveBeenCalledTimes(3);
+    expect(Topic).toHaveBeenCalledWith({
+      ros: (Ros as any).mock.instances[0],
+      name: "set_velocity",
+      messageType: "/myrobotics/velocity",
+      throttle_rate: 10,
+      latch: false,
+      queue_length: 1,
+      queue_size: 10,
+    });
+    expect(Topic).toHaveBeenCalledWith({
+      ros: (Ros as any).mock.instances[0],
+      name: "keep_alive",
+      messageType: "std_msgs/String",
+      throttle_rate: 10,
+      latch: false,
+      queue_length: 1,
+      queue_size: 10,
+    });
+    const mockpublishInstance = (Topic as any).mock.instances[0].publish;
+    expect(mockpublishInstance).toHaveBeenCalledTimes(1);
+    const mockpublishInstance2 = (Topic as any).mock.instances[1].publish;
+    expect(mockpublishInstance2.mock.calls.length).toBeGreaterThan(4);
+    expect(mockpublishInstance2.mock.calls.length).toBeLessThan(8);
   });
 });

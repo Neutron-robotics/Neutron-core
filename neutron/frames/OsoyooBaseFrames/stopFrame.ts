@@ -10,7 +10,7 @@ const stopFrame: IFrame = {
   build: (body: any) => {
     const configuration: IRosFrameExecutorConfig = {
       method: "send",
-      methodType: "set_velocity",
+      methodType: "stop",
       format: "std_msgs/String",
     };
     return makeFrameExecutor(
