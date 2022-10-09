@@ -25,7 +25,7 @@ export {
   IRobotBaseConfiguration,
   RobotBase,
 } from "./modules/Robotbase";
-export { OsoyooBaseROS } from "./modules/OsoyooBase";
+export { OsoyooBaseROS } from "./modules/RobotBase";
 
 // Utils
 export { inRange } from "./utils/math";

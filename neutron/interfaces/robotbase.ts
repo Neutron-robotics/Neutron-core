@@ -1,5 +1,5 @@
 export type Direction = "forward" | "backward" | "left" | "right";
-export type Rotation = "left" | "right";
+export type Rotation = "anticlockwise" | "clockwise";
 
 export interface IRobotBaseCartesianMovement {
     direction: Direction;

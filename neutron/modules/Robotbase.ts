@@ -1,49 +1,87 @@
-import { IRobotConnectionContext } from "../context/RosContext.ts.bak";
-import { IBatteryInfo } from "../interfaces/RobotConnection";
+import { IConnectionContext } from "../context/ConnectionContext";
+import { IFrame } from "../interfaces/frames";
+import { IMovementMatrix } from "../interfaces/robotbase";
 import { inRange } from "../utils/math";
 
-export type Direction = "forward" | "backward" | "left" | "right";
-
 export interface IRobotBaseConfiguration {
-    id: string;
-    name: string;
-    directionnalSpeed: number;
-    rotationSpeed: number;
+  id: string;
+  name: string;
+  directionnalSpeed: number;
+  rotationSpeed: number;
 }
 
-export abstract class RobotBase {
+export class RobotBase {
+  private context: IConnectionContext;
 
-    public id: string;
+  private frames: { [key: string]: IFrame };
 
-    public name: string;
+  public id: string;
 
-    public configuration: IRobotBaseConfiguration;
+  public name: string;
 
-    public batteryInfo: IBatteryInfo;
+  public configuration: IRobotBaseConfiguration;
 
-    public speed: number;
+  public speed: number;
 
-    protected abstract context: IRobotConnectionContext;
+  constructor(
+    configuration: IRobotBaseConfiguration,
+    context: IConnectionContext,
+    frames: IFrame[]
+  ) {
+    this.frames = frames.reduce((acc, frame) => {
+      acc[frame.id] = frame;
+      return acc;
+    }, {} as { [key: string]: IFrame });
+    this.context = context;
+    this.name = configuration.name;
+    this.configuration = configuration;
+    if (
+      !inRange(configuration.directionnalSpeed, 0, 1) ||
+      !inRange(configuration.rotationSpeed, 0, 1)
+    )
+      throw new Error("Invalid speed configuration: speed range is [0, 1]");
+    this.id = configuration.id;
+    this.speed = 50;
+  }
 
-    constructor(id: string, name: string, configuration: IRobotBaseConfiguration) {
-        this.name = name;
-        this.configuration = configuration;
-        if (!inRange(configuration.directionnalSpeed, 0, 1) || !inRange(configuration.rotationSpeed, 0, 1)) 
-            throw new Error("Invalid speed configuration: speed range is [0, 1]");
-        this.id = id;
-        this.batteryInfo = {
-            level: -1,
-            measurement: "percent",
-            charging: false,
-        };
-        this.speed = 50;
-    }
+  public async move(movement: number[], speed = this.speed) {
+    const frame = this.frames["move"];
+    if (!frame) throw new Error("No frame found for move command");
+    const scaledMovement = [
+      movement[0] * this.configuration.directionnalSpeed * speed,
+      movement[1] * this.configuration.directionnalSpeed * speed,
+      0,
+      0,
+      0,
+      movement[5] * this.configuration.rotationSpeed * speed,
+    ];
+    const framePayload: IMovementMatrix = {
+      x: scaledMovement[0],
+      y: scaledMovement[1],
+      z: 0,
+      pitch: 0,
+      roll: 0,
+      yaw: scaledMovement[5],
+    };
+    const executor = frame.build(framePayload);
+    const response = await this.context.execute(executor);
+    return response;
+  }
 
-    public abstract move(direction: Direction): void;
+  //todo: set this async
+  public stop() {
+    const frame = this.frames["stop"];
+    if (!frame) throw new Error("No frame found for stop command");
+    const executor = frame.build({});
+    const response = this.context.execute(executor);
+    return response;
+  }
 
-    public abstract stop(): void;
-
-    public abstract rotate(direction: Direction): void;
-
-    public abstract setSpeed(speed: number): void
+  public setSpeed(speed: number): void {
+    this.speed = speed;
+    const frame = this.frames["speed"];
+    if (!frame) throw new Error("No frame found for speed command");
+    const executor = frame.build({ speed });
+    this.context.execute(executor);
+  }
 }

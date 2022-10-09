@@ -31,7 +31,7 @@ class RosContext extends ConnectionContext {
   }
 
   constructor(config: IRosContextConfiguration) {
-    super("rosinou", config);
+    super("ros", config);
     this.ros = new Ros({});
     this.handlers = new Map<string, LiteEventHandler<Message>[]>();
   }
@@ -122,6 +122,11 @@ class RosContext extends ConnectionContext {
       clearInterval(interval);
       topicInstance.unadvertise();
     };
+    const loopHandler: LiteEventHandler<void> = () => {
+      stop();
+      this.handlers.delete(`loop-${methodType}`);
+    };
+    this.loopHandlers.set(`loop-${methodType}`, loopHandler);
     return Promise.resolve({
       success: true,
       result: null,
@@ -180,19 +185,6 @@ class RosContext extends ConnectionContext {
     this.ros.getTopics(removeTopicList, handleError);
   }
 
-  public override execute(executor: IRosFrameExecutor): Promise<any> {
-    switch (executor.method) {
-      case "request":
-        return this.request(executor);
-      case "send":
-        return this.send(executor);
-      case "sendLoop":
-        return this.sendLoop(executor as IRosFrameExecutorPeriodic);
-      default:
-        return Promise.reject("Unknown executor type");
-    }
-  }
-
   private getTopic(settings: TopicSettings): Topic {
     const options = {
       ros: this.ros,
@@ -236,6 +228,13 @@ class RosContext extends ConnectionContext {
       return 0;
     }
     return handlers.length;
+  }
+
+  protected override stopLoop(cancellationToken: string): void {
+    const loopHandler = this.loopHandlers.get(`loop-${cancellationToken}`);
+    if (loopHandler) {
+      loopHandler();
+    }
   }
 }
 

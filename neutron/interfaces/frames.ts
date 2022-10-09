@@ -1,10 +1,10 @@
+import { IConnectionContext } from "../context/ConnectionContext";
 import { ILiteEvent } from "../utils/LiteEvent";
 
 interface IFrame {
   id: string;
   name: string;
   build(body: any): IFrameExecutor;
-  callBackFrames?: string[];
 }
 
 interface IFramePackage {
@@ -18,6 +18,8 @@ interface IFrameExecutor {
   methodType: string;
   method: string;
   payload: any;
+  next?: (response: IFrameResult) => IFrameExecutor;
+  loopCancellationToken?: string;
 }
 
 interface IRosFrameExecutor extends IFrameExecutor {
@@ -35,6 +37,7 @@ interface IRosFrameExecutorPeriodic extends IRosFrameExecutor {
 interface IFrameResult {
   success: boolean;
   result: any;
+  next?: IFrameResult;
 }
 
 interface IFrameResultLoop extends IFrameResult {

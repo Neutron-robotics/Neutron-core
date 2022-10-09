@@ -32,7 +32,10 @@ abstract class ConnectionContext implements IConnectionContext {
     this.type = type;
     this.hostname = config.host;
     this.port = config.port;
+    this.loopHandlers = new Map<string, LiteEventHandler<void>>();
   }
+
+  protected loopHandlers: Map<string, LiteEventHandler<void>>;
 
   public abstract get isConnected(): boolean;
 
@@ -58,7 +61,37 @@ abstract class ConnectionContext implements IConnectionContext {
 
   public abstract removeAllListeners(): void;
 
-  public abstract execute(executor: IFrameExecutor): Promise<IFrameResult>;
+  public async execute(executor: IFrameExecutor): Promise<IFrameResult> {
+    let result = null;
+
+    if (executor.loopCancellationToken)
+      this.stopLoop(executor.loopCancellationToken);
+
+    switch (executor.method) {
+      case "request":
+        result = await this.request(executor);
+        break;
+      case "send":
+        result = await this.send(executor);
+        break;
+      case "sendLoop":
+        result = await this.sendLoop(executor);
+        break;
+      default:
+        return Promise.reject("Unknown executor type");
+    }
+    if (executor.next) {
+      const nextExecutor = executor.next(result);
+      const nextResult = this.execute(nextExecutor);
+      return {
+        ...result,
+        next: nextResult,
+      };
+    }
+    return result;
+  }
+
+  protected abstract stopLoop(cancellationToken: string): void;
 }
 
 export { ConnectionContext, IConnectionContext };

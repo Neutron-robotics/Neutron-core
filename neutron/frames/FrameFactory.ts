@@ -28,13 +28,6 @@ export default class FrameFactory {
       if (!frame.id || !frame.name || !frame.build) {
         throw new Error("Invalid frame");
       }
-      if (frame.callBackFrames) {
-        frame.callBackFrames.forEach((cbf) => {
-          if (!framePackage.frames.find((f) => f.name === cbf)) {
-            throw new Error("Callback frame not found");
-          }
-        });
-      }
     });
   }
 }
