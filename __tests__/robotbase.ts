@@ -1,6 +1,5 @@
 import { RobotBase } from "../neutron/modules/RobotBase";
 import { RosContext } from "../neutron/context/RosContext";
-import { IRobotBaseCartesianMovement } from "../neutron/interfaces/robotbase";
 import OsoyooBaseFrames from "../neutron/frames/OsoyooBaseFrames/index";
 
 jest.mock("../neutron/context/RosContext");
