@@ -1,5 +1,5 @@
 import { ServiceResponse } from "roslib";
-import { RosContext } from "../context/RosContext.ts.bak";
+import { RosContext } from "../context/RosContext";
 
 export interface ICameraConfiguration {
   ip: string;
@@ -40,13 +40,13 @@ export class Camera {
         console.log(res);
         reject(res);
       };
-      this.context.callService(
-        "/start_camera",
-        "myrobotics_protocol/srv/GlobalResult",
-        {},
-        handleConnectSuccess,
-        handleConnectFailure
-      );
+      // this.context.callService(
+      //   "/start_camera",
+      //   "myrobotics_protocol/srv/GlobalResult",
+      //   {},
+      //   handleConnectSuccess,
+      //   handleConnectFailure
+      // );
     });
   }
 
@@ -61,13 +61,13 @@ export class Camera {
         console.log(res);
         reject(res);
       };
-      this.context.callService(
-        "/stop_camera",
-        "myrobotics_protocol/srv/GlobalResult",
-        {},
-        handleDisconnectSuccess,
-        handleDisconnectFailure
-      );
+      // this.context.callService(
+      //   "/stop_camera",
+      //   "myrobotics_protocol/srv/GlobalResult",
+      //   {},
+      //   handleDisconnectSuccess,
+      //   handleDisconnectFailure
+      // );
     });
   }
 }
