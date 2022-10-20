@@ -41,6 +41,31 @@ export class Core {
 
   public modules: ICoreModule[];
 
+  public get connectionConfiguration(): IRobotConnectionConfiguration {
+    return {
+      id: this.id,
+      name: this.name,
+      type: this.type,
+      batteryInfo: {
+        level: this.battery,
+        measurement: "percent",
+        charging: false,
+      },
+      status: this.status,
+      context: {
+        hostname: this.contextConfiguration.hostname,
+        port: this.contextConfiguration.port,
+        type: this.contextConfiguration.type,
+      },
+      core: {
+        hostname: this.connection.hostname,
+        port: this.connection.port,
+        type: this.connection.type,
+      },
+      modules: this.modules,
+    };
+  }
+
   constructor(connection: IRobotConnectionInfo) {
     this.connection = connection;
     this.axios = axios.create({
@@ -59,7 +84,7 @@ export class Core {
     };
   }
 
-  public setConnectionInfo = async (): Promise<void> => {
+  public getConnectionInfo = async (): Promise<void> => {
     const response = await this.axios.get("/robot/configuration");
     const data = response.data;
     const payload = data.robot;
@@ -83,32 +108,7 @@ export class Core {
     });
   };
 
-  public getConnectionInfos = (): IRobotConnectionConfiguration => {
-    return {
-      id: this.id,
-      name: this.name,
-      type: this.name,
-      batteryInfo: {
-        level: this.battery,
-        measurement: "percent",
-        charging: false,
-      },
-      status: this.status,
-      connection: {
-        hostname: this.contextConfiguration.hostname,
-        port: this.contextConfiguration.port,
-        type: this.contextConfiguration.type,
-      },
-      core: {
-        hostname: this.connection.hostname,
-        port: this.connection.port,
-        type: this.connection.type,
-      },
-      parts: this.modules,
-    };
-  };
-
-  public refreshStatus = async (): Promise<void> => {
+  public getProcessesStatus = async (): Promise<void> => {
     const response = await this.axios.get("/robot/status");
     console.log(response);
     const data = response.data as ICoreProcess[];
@@ -122,28 +122,37 @@ export class Core {
     });
   };
 
-  public startProcesses = async (): Promise<boolean> => {
-    await this.refreshStatus();
+  public startProcesses = async (timeout?: number): Promise<boolean> => {
+    await this.getProcessesStatus();
     const res = (
       await Promise.all(
-        this.modules.map((module) => this.startRobotProcess(module.id))
+        this.modules.map((module) => this.startRobotProcess(module.id, timeout))
       )
     ).reduce((acc, val) => acc && val, true);
-    await this.refreshStatus();
+    await this.getProcessesStatus();
     return res;
   };
 
-  public startRobotProcess = async (id: string): Promise<boolean> => {
+  public startRobotProcess = async (
+    id: string,
+    timeout?: number
+  ): Promise<boolean> => {
     try {
       const module = this.modules.find((m) => m.id === id);
       if (!module) throw new Error("Module not found");
       if (module?.process?.active) return true;
       if (module?.process?.active === false) return true;
 
-      const response = await this.axios.post("/start", {
-        name: module.name,
-        processId: module.id,
-      });
+      const response = await this.axios.post(
+        "/start",
+        {
+          name: module.name,
+          processId: module.id,
+        },
+        {
+          timeout,
+        }
+      );
       if (response.status === 200) return true;
     } catch (e) {
       console.error(e);
@@ -153,7 +162,7 @@ export class Core {
   };
 
   public stopProcesses = async (): Promise<boolean> => {
-    await this.refreshStatus();
+    await this.getProcessesStatus();
     return (
       await Promise.all(
         this.modules.map((module) => this.stopRobotProcess(module.id))
@@ -161,6 +170,7 @@ export class Core {
     ).reduce((acc, val) => acc && val, true);
   };
 
+  // increase timeout and add it in opt param
   public stopRobotProcess = async (id: string): Promise<boolean> => {
     try {
       const module = this.modules.find((m) => m.id === id);

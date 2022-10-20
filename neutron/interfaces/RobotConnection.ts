@@ -4,10 +4,10 @@ interface IRobotConnectionConfiguration {
     type: string;
     batteryInfo: IBatteryInfo;
     status: RobotStatus;
-    connection: IRobotConnectionInfo;
+    context: IRobotConnectionInfo;
     core: IRobotConnectionInfo;
   
-    parts: IRobotModule[];
+    modules: IRobotModule[];
   }
   
   interface IRobotConnectionInfo {
