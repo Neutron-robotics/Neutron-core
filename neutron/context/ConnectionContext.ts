@@ -2,7 +2,7 @@ import { IFrameExecutor, IFrameResult } from "../interfaces/frames";
 import { LiteEventHandler } from "../utils/LiteEvent";
 
 interface IConnectionContextConfiguration {
-  host: string;
+  hostname: string;
   port: number;
 }
 
@@ -30,7 +30,7 @@ abstract class ConnectionContext implements IConnectionContext {
 
   constructor(type: string, config: IConnectionContextConfiguration) {
     this.type = type;
-    this.hostname = config.host;
+    this.hostname = config.hostname;
     this.port = config.port;
     this.loopHandlers = new Map<string, LiteEventHandler<void>>();
   }
@@ -94,4 +94,4 @@ abstract class ConnectionContext implements IConnectionContext {
   protected abstract stopLoop(cancellationToken: string): void;
 }
 
-export { ConnectionContext, IConnectionContext };
+export { ConnectionContext, IConnectionContext, IConnectionContextConfiguration };

@@ -17,7 +17,7 @@ import {
 import { LiteEvent, LiteEventHandler } from "../utils/LiteEvent";
 
 interface IRosContextConfiguration {
-  host: string;
+  hostname: string;
   port: number;
 }
 

@@ -1,9 +1,10 @@
-// // Context
-// export {
-//   makeConnectionContext,
-//   RosContext,
-//   IRobotConnectionContext,
-// } from "./context/RosContext.ts.bak";
+// Context
+export {
+  IConnectionContextConfiguration,
+  IConnectionContext,
+  ConnectionContext,
+} from "./context/ConnectionContext";
+export { makeConnectionContext } from "./context/makeContext";
 
 // Interfaces
 export {
@@ -21,6 +22,7 @@ export { TopicSettings } from "./interfaces/ros";
 export { Core, ICoreProcess, ICoreModule } from "./modules/Core";
 export { ICameraConfiguration, Camera } from "./modules/Camera";
 export { IRobotBaseConfiguration, RobotBase } from "./modules/RobotBase";
+export { makeModule } from "./modules/makeModule";
 
 // Utils
 export { inRange } from "./utils/math";

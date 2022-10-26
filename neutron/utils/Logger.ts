@@ -7,15 +7,22 @@ export interface ILoggerMessage {
   _id?: string;
   source?: string;
   content: string;
-  color: LogType;
+  type: LogType;
   time: Date;
 }
 
+// export enum LogType {
+//   DEBUG = "#4f5051",
+//   ERROR = "#d81a1a",
+//   INFO = "#387a30",
+//   WARNING = "#d17e32",
+// }
+
 export enum LogType {
-  DEBUG = "#4f5051",
-  ERROR = "#d81a1a",
-  INFO = "#387a30",
-  WARNING = "#d17e32",
+  DEBUG = "DEBUG",
+  ERROR = "ERROR",
+  INFO = "INFO",
+  WARNING = "WARNING",
 }
 
 export class Logger {
@@ -30,28 +37,22 @@ export class Logger {
     return this.onLog.expose();
   }
 
-  public log(message: string, color: LogType) {
+  public log(message: string, type: LogType) {
     if (!isBlank(this.source)) {
       this.onLog.trigger({
-        color,
+        type,
         content: message,
         source: this.source,
         time: new Date(),
       });
-      console.log(
-        `%c[${moment().format("LTS")}][${this.source}] ${message}`,
-        `color: ${color}; font-style: normal; font-size: 12px`
-      );
+      console.log(`%c[${moment().format("LTS")}][${this.source}] ${message}`);
     } else {
       this.onLog.trigger({
-        color,
+        type,
         content: message,
         time: new Date(),
       });
-      console.log(
-        `%c[${moment().format("LTS")}] ${message}`,
-        `color: ${color}; font-style: normal; font-size: 12px`
-      );
+      console.log(`%c[${moment().format("LTS")}] ${message}`);
     }
   }
 

@@ -1,16 +1,17 @@
 import { IConnectionContext } from "../context/ConnectionContext";
 import { IFrame, IFrameResult } from "../interfaces/frames";
 import { IMovementMatrix } from "../interfaces/robotbase";
+import { IRobotModule } from "../interfaces/RobotConnection";
 import { inRange } from "../utils/math";
 
 export interface IRobotBaseConfiguration {
-  id: string;
-  name: string;
   directionnalSpeed: number;
   rotationSpeed: number;
 }
 
-export class RobotBase {
+export class RobotBase implements IRobotModule {
+  public readonly type = "robotbase";
+
   private context: IConnectionContext;
 
   private frames: { [key: string]: IFrame };
@@ -24,23 +25,25 @@ export class RobotBase {
   public speed: number;
 
   constructor(
+    id: string,
+    name: string,
     configuration: IRobotBaseConfiguration,
     context: IConnectionContext,
     frames: IFrame[]
   ) {
+    this.id = id;
+    this.name = name;
     this.frames = frames.reduce((acc, frame) => {
       acc[frame.id] = frame;
       return acc;
     }, {} as { [key: string]: IFrame });
     this.context = context;
-    this.name = configuration.name;
     this.configuration = configuration;
     if (
       !inRange(configuration.directionnalSpeed, 0, 1) ||
       !inRange(configuration.rotationSpeed, 0, 1)
     )
       throw new Error("Invalid speed configuration: speed range is [0, 1]");
-    this.id = configuration.id;
     this.speed = 50;
   }
 

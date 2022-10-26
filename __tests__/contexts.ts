@@ -28,7 +28,7 @@ describe("Ros Contexts", () => {
 
   test("Instanciate", () => {
     const rosContext = new RosContext({
-      host: "localhost",
+      hostname: "localhost",
       port: 9090,
     });
     expect(rosContext).toBeDefined();
@@ -40,7 +40,7 @@ describe("Ros Contexts", () => {
 
   test("Connect", () => {
     const rosContext = new RosContext({
-      host: "localhost",
+      hostname: "localhost",
       port: 9090,
     });
     rosContext.connect();
@@ -56,7 +56,7 @@ describe("Ros Contexts", () => {
 
   test("Disconnect", () => {
     const rosContext = new RosContext({
-      host: "localhost",
+      hostname: "localhost",
       port: 9090,
     });
     rosContext.disconnect();
@@ -78,7 +78,7 @@ describe("Ros Contexts", () => {
       },
     };
     const rosContext = new RosContext({
-      host: "localhost",
+      hostname: "localhost",
       port: 9090,
     });
 
@@ -113,7 +113,7 @@ describe("Ros Contexts", () => {
       },
     };
     const rosContext = new RosContext({
-      host: "localhost",
+      hostname: "localhost",
       port: 9090,
     });
 
@@ -149,7 +149,7 @@ describe("Ros Contexts", () => {
       period: 3,
     };
     const rosContext = new RosContext({
-      host: "localhost",
+      hostname: "localhost",
       port: 9090,
     });
 
@@ -193,7 +193,7 @@ describe("Ros Contexts", () => {
       },
     };
     const rosContext = new RosContext({
-      host: "localhost",
+      hostname: "localhost",
       port: 9090,
     });
     const handler = jest.fn();
@@ -226,7 +226,7 @@ describe("Ros Contexts", () => {
       },
     };
     const rosContext = new RosContext({
-      host: "localhost",
+      hostname: "localhost",
       port: 9090,
     });
     const handler = jest.fn();
@@ -263,7 +263,7 @@ describe("Ros Contexts", () => {
       },
     };
     const rosContext = new RosContext({
-      host: "localhost",
+      hostname: "localhost",
       port: 9090,
     });
     rosContext.execute(frameExecutor);
@@ -285,7 +285,7 @@ describe("Ros Contexts", () => {
 
   test("Execute multiple frame", async () => {
     const rosContext = new RosContext({
-      host: "localhost",
+      hostname: "localhost",
       port: 9090,
     });
     const moveExecutor = moveFrame.build([0, 0, 0, 0, 0, 0]);

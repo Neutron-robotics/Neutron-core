@@ -23,15 +23,16 @@ export interface ICoreModule extends IRobotModule {
   process?: ICoreProcess;
 }
 
-export class Core {
+export class Core implements IRobotModule {
+  public type: string;
+
   private connection: IRobotConnectionInfo;
+
   private axios: AxiosInstance;
 
   public readonly id: string = v4();
 
   public name: string;
-
-  public type: string;
 
   public status: RobotStatus;
 
@@ -91,9 +92,9 @@ export class Core {
     if (!payload) throw new Error("No robot configuration found");
 
     this.name = payload.name;
-    this.type = payload.type;
     this.status = payload.status;
     this.battery = payload.battery;
+    this.type = payload.type;
     this.contextConfiguration = {
       hostname: this.connection.hostname,
       port: payload.connection.port,
@@ -141,7 +142,7 @@ export class Core {
       const module = this.modules.find((m) => m.id === id);
       if (!module) throw new Error("Module not found");
       if (module?.process?.active) return true;
-      if (module?.process?.active === false) return true;
+      if (module?.process?.active === false) return false; // need to reboot ?
 
       const response = await this.axios.post(
         "/start",

@@ -17,7 +17,7 @@ describe("frame factory", () => {
   test("should retreive a previously built package", () => {
     const frameFactory = new FrameFactory();
     frameFactory.buildFramePackage(framePackage);
-    const frames = frameFactory.getFramePackage(framePackage.name);
+    const frames = frameFactory.getFramePackage(framePackage.id);
     expect(frames).toBeDefined();
     expect(frames.length).toBe(1);
     expect(frames[0].id).toBe("trhtnh5nryt9n4yn4rn5rny");

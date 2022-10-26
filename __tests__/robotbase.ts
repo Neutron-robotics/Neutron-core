@@ -9,11 +9,11 @@ describe("robot base tests", () => {
 
   beforeEach(() => {
     (RosContext as any).mockClear();
-    const context = new RosContext({ host: "localhost", port: 9090 });
+    const context = new RosContext({ hostname: "localhost", port: 9090 });
     robotBase = new RobotBase(
+      "1",
+      "test",
       {
-        id: "1",
-        name: "test",
         directionnalSpeed: 1,
         rotationSpeed: 0.5,
       },
