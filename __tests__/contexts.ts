@@ -7,13 +7,41 @@ import {
 import { moveFrame } from "../neutron/frames/OsoyooBaseFrames/moveFrame";
 import { stopFrame } from "../neutron/frames/OsoyooBaseFrames/stopFrame";
 import { sleep } from "../neutron/utils/time";
+import { makeConnectionContext } from "../neutron/context/makeContext";
+import { RobotConnectionType } from "../neutron/interfaces/RobotConnection";
 
 jest.mock("roslib");
 
 describe("robot connection factory", () => {
-  test.todo("should create a connection context from a configuration");
+  test("should make a connection context from a configuration", () => {
+    const ctxConfiguration = {
+      hostname: "localhost",
+      port: 9090,
+      type: RobotConnectionType.ROSBRIDGE,
+    };
 
-  // test
+    const context = makeConnectionContext(
+      RobotConnectionType.ROSBRIDGE,
+      ctxConfiguration
+    );
+    expect(context).toBeDefined();
+    expect(context.type).toBe(RobotConnectionType.ROSBRIDGE);
+    expect(context.hostname).toBe("localhost");
+    expect(context.port).toBe(9090);
+    expect(context.isConnected).toBe(false);
+  });
+
+  test("should throw an error if the connection type is invalid", () => {
+    const ctxConfiguration = {
+      hostname: "localhost",
+      port: 9090,
+      type: RobotConnectionType.ROSBRIDGE,
+    };
+
+    expect(() =>
+      makeConnectionContext(RobotConnectionType.TCP, ctxConfiguration)
+    ).toThrowError("Invalid connection type");
+  });
 });
 
 describe("Ros Contexts", () => {
@@ -295,7 +323,7 @@ describe("Ros Contexts", () => {
     const stopExecutor = stopFrame.build({});
     const res2 = await rosContext.execute(stopExecutor);
     expect(res2.success).toBeTruthy();
-    await sleep(2000)
+    await sleep(2000);
 
     expect(Topic).toHaveBeenCalledTimes(3);
     expect(Topic).toHaveBeenCalledWith({

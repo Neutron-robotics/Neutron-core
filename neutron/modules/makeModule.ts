@@ -8,7 +8,7 @@ export interface IModuleConfiguration {
   id: string;
   name: string;
   type: string;
-  module: any;
+  moduleSpecifics: any;
   framePackage?: string;
 }
 
@@ -22,17 +22,15 @@ export const makeModule = (
   switch (type) {
     case "robotbase":
       return new RobotBase(
-        configuration.id,
         configuration.name,
-        configuration.module,
+        configuration.moduleSpecifics,
         context,
         frames
       );
     case "camera":
       return new Camera(
-        configuration.id,
         configuration.name,
-        configuration.module,
+        configuration.moduleSpecifics,
         context,
         frames
       );

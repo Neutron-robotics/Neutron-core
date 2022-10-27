@@ -1,4 +1,5 @@
 import { IFrameExecutor, IFrameResult } from "../interfaces/frames";
+import { RobotConnectionType } from "../interfaces/RobotConnection";
 import { LiteEventHandler } from "../utils/LiteEvent";
 
 interface IConnectionContextConfiguration {
@@ -7,6 +8,8 @@ interface IConnectionContextConfiguration {
 }
 
 interface IConnectionContext {
+  type: RobotConnectionType;
+
   connect(): Promise<boolean>;
   disconnect(): Promise<boolean>;
   isConnected: boolean;
@@ -22,13 +25,16 @@ interface IConnectionContext {
 }
 
 abstract class ConnectionContext implements IConnectionContext {
-  public type: string;
+  public type: RobotConnectionType;
 
   public hostname: string;
 
   public port: number;
 
-  constructor(type: string, config: IConnectionContextConfiguration) {
+  constructor(
+    type: RobotConnectionType,
+    config: IConnectionContextConfiguration
+  ) {
     this.type = type;
     this.hostname = config.hostname;
     this.port = config.port;
@@ -94,4 +100,8 @@ abstract class ConnectionContext implements IConnectionContext {
   protected abstract stopLoop(cancellationToken: string): void;
 }
 
-export { ConnectionContext, IConnectionContext, IConnectionContextConfiguration };
+export {
+  ConnectionContext,
+  IConnectionContext,
+  IConnectionContextConfiguration,
+};

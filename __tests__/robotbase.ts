@@ -11,7 +11,6 @@ describe("robot base tests", () => {
     (RosContext as any).mockClear();
     const context = new RosContext({ hostname: "localhost", port: 9090 });
     robotBase = new RobotBase(
-      "1",
       "test",
       {
         directionnalSpeed: 1,
@@ -24,7 +23,7 @@ describe("robot base tests", () => {
 
   test("Instanciate", () => {
     expect(robotBase).toBeDefined();
-    expect(robotBase.id).toBe("1");
+    expect(robotBase.id.length).toBeGreaterThan(0);
     expect(robotBase.name).toBe("test");
   });
 

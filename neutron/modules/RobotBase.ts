@@ -3,6 +3,7 @@ import { IFrame, IFrameResult } from "../interfaces/frames";
 import { IMovementMatrix } from "../interfaces/robotbase";
 import { IRobotModule } from "../interfaces/RobotConnection";
 import { inRange } from "../utils/math";
+import { v4 as uuid} from "uuid";
 
 export interface IRobotBaseConfiguration {
   directionnalSpeed: number;
@@ -25,13 +26,12 @@ export class RobotBase implements IRobotModule {
   public speed: number;
 
   constructor(
-    id: string,
     name: string,
     configuration: IRobotBaseConfiguration,
     context: IConnectionContext,
     frames: IFrame[]
   ) {
-    this.id = id;
+    this.id = uuid();
     this.name = name;
     this.frames = frames.reduce((acc, frame) => {
       acc[frame.id] = frame;

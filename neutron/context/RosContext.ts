@@ -15,6 +15,7 @@ import {
   IRosFrameExecutorPeriodic,
 } from "../interfaces/frames";
 import { LiteEvent, LiteEventHandler } from "../utils/LiteEvent";
+import { RobotConnectionType } from "../interfaces/RobotConnection";
 
 interface IRosContextConfiguration {
   hostname: string;
@@ -27,11 +28,11 @@ class RosContext extends ConnectionContext {
   private handlers: Map<string, LiteEventHandler<Message>[]>;
 
   public override get isConnected(): boolean {
-    return this.ros.isConnected;
+    return this.ros.isConnected ?? false;
   }
 
   constructor(config: IRosContextConfiguration) {
-    super("ros", config);
+    super(RobotConnectionType.ROSBRIDGE, config);
     this.ros = new Ros({});
     this.handlers = new Map<string, LiteEventHandler<Message>[]>();
   }
