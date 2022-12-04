@@ -1,19 +1,16 @@
 import { ServiceResponse } from "roslib";
 import { IConnectionContext } from "../context/ConnectionContext";
-import { IFrame } from "../interfaces/frames";
+import { IFrame, IFrameResult } from "../interfaces/frames";
 import { IRobotModule } from "../interfaces/RobotConnection";
-import { v4 as uuid} from "uuid";
+import { v4 as uuid } from "uuid";
+import { IRobotModuleBuilderArgs, RobotModule } from "./RobotModule";
 
 export interface ICameraConfiguration {
   ip: string;
 }
 
-export class Camera implements IRobotModule {
+export class Camera extends RobotModule {
   public readonly type = "camera";
-
-  public isConnected: boolean;
-
-  public id: string;
 
   public name: string;
 
@@ -21,27 +18,15 @@ export class Camera implements IRobotModule {
     return `http://${this.context.hostname}:8100`;
   }
 
-  public configuration: ICameraConfiguration;
+  public ip: string;
 
-  private context: IConnectionContext;
+  protected context: IConnectionContext;
 
-  private frames: { [key: string]: IFrame };
+  protected frames: Record<string, IFrame>;
 
-  constructor(
-    name: string,
-    configuration: ICameraConfiguration,
-    context: IConnectionContext,
-    frames: IFrame[]
-  ) {
-    this.id = uuid();
-    this.name = name;
-    this.isConnected = false;
-    this.configuration = configuration;
-    this.context = context;
-    this.frames = frames.reduce((acc, frame) => {
-      acc[frame.id] = frame;
-      return acc;
-    }, {} as { [key: string]: IFrame });
+  constructor(configuration: ICameraConfiguration & IRobotModuleBuilderArgs) {
+    super(configuration);
+    this.ip = configuration.ip;
   }
 
   public async connect(): Promise<boolean> {
@@ -58,5 +43,13 @@ export class Camera implements IRobotModule {
     const executor = frame.build({});
     const response = await this.context.execute(executor);
     return response.success;
+  }
+
+  public stop(): Promise<IFrameResult> {
+    return Promise.resolve({ success: true, result: {} });
+  }
+
+  public async destroy(): Promise<void> {
+    await this.disconnect();
   }
 }

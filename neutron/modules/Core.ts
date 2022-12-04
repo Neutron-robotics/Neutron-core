@@ -23,7 +23,7 @@ export interface ICoreModule extends IRobotModule {
   process?: ICoreProcess;
 }
 
-export class Core implements IRobotModule {
+export class Core implements Omit<IRobotModule, "framePackage"> {
   public type: string;
 
   private connection: IRobotConnectionInfo;

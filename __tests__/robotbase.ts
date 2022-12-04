@@ -10,15 +10,13 @@ describe("robot base tests", () => {
   beforeEach(() => {
     (RosContext as any).mockClear();
     const context = new RosContext({ hostname: "localhost", port: 9090 });
-    robotBase = new RobotBase(
-      "test",
-      {
-        directionnalSpeed: 1,
-        rotationSpeed: 0.5,
-      },
+    robotBase = new RobotBase({
+      directionnalSpeed: 1,
+      rotationSpeed: 0.5,
+      name: "test",
       context,
-      OsoyooBaseFrames.frames
-    );
+      framePackage: OsoyooBaseFrames.id as any,
+    });
   });
 
   test("Instanciate", () => {

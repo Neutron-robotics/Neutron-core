@@ -55,6 +55,7 @@ interface IRobotConnectionConfiguration {
     id: string;
     name: string;
     type: string;
+    framePackage: string;
   }
   
   export type {

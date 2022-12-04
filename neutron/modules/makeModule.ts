@@ -17,23 +17,17 @@ export const makeModule = (
   context: IConnectionContext,
   configuration: IModuleConfiguration
 ): IRobotModule => {
-  const frameFactory = new FrameFactory();
-  const frames = frameFactory.getFramePackage(configuration.framePackage);
+  const robotModuleBuilder = {
+    name: configuration.name,
+    context,
+    framePackage: configuration.framePackage,
+    ...configuration.moduleSpecifics,
+  };
   switch (type) {
     case "robotbase":
-      return new RobotBase(
-        configuration.name,
-        configuration.moduleSpecifics,
-        context,
-        frames
-      );
+      return new RobotBase(robotModuleBuilder);
     case "camera":
-      return new Camera(
-        configuration.name,
-        configuration.moduleSpecifics,
-        context,
-        frames
-      );
+      return new Camera(robotModuleBuilder);
     default:
       throw new Error("Invalid module type");
   }

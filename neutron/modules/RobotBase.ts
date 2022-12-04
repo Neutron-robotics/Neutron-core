@@ -1,23 +1,23 @@
 import { IConnectionContext } from "../context/ConnectionContext";
 import { IFrame, IFrameResult } from "../interfaces/frames";
 import { IMovementMatrix } from "../interfaces/robotbase";
-import { IRobotModule } from "../interfaces/RobotConnection";
 import { inRange } from "../utils/math";
-import { v4 as uuid} from "uuid";
+import { v4 as uuid } from "uuid";
+import { IRobotModuleBuilderArgs, RobotModule } from "./RobotModule";
 
 export interface IRobotBaseConfiguration {
   directionnalSpeed: number;
   rotationSpeed: number;
 }
 
-export class RobotBase implements IRobotModule {
+export class RobotBase extends RobotModule {
   public readonly type = "robotbase";
 
-  private context: IConnectionContext;
+  protected context: IConnectionContext;
 
-  private frames: { [key: string]: IFrame };
+  protected frames: Record<string, IFrame>
 
-  public id: string;
+  public id: Lowercase<string>;
 
   public name: string;
 
@@ -26,19 +26,13 @@ export class RobotBase implements IRobotModule {
   public speed: number;
 
   constructor(
-    name: string,
-    configuration: IRobotBaseConfiguration,
-    context: IConnectionContext,
-    frames: IFrame[]
+    configuration: IRobotBaseConfiguration & IRobotModuleBuilderArgs
   ) {
-    this.id = uuid();
-    this.name = name;
-    this.frames = frames.reduce((acc, frame) => {
-      acc[frame.id] = frame;
-      return acc;
-    }, {} as { [key: string]: IFrame });
-    this.context = context;
-    this.configuration = configuration;
+    super(configuration);
+    this.configuration = {
+      directionnalSpeed: configuration.directionnalSpeed,
+      rotationSpeed: configuration.rotationSpeed,
+    };
     if (
       !inRange(configuration.directionnalSpeed, 0, 1) ||
       !inRange(configuration.rotationSpeed, 0, 1)
@@ -77,6 +71,10 @@ export class RobotBase implements IRobotModule {
     const executor = frame.build({});
     const response = this.context.execute(executor);
     return response;
+  }
+
+  public override destroy(): Promise<void> {
+    return Promise.resolve();
   }
 
   public setSpeed(speed: number): void {
