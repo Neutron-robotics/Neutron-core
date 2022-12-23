@@ -14,7 +14,7 @@ const moveFrame: IFrame = {
     const configuration: IRosFrameExecutorConfig = {
       method: "send",
       methodType: "set_velocity",
-      format: "/myrobotics/velocity",
+      format: "myrobotics_protocol/msg/Velocity",
     };
 
     return makeFrameExecutor(configuration, body, {

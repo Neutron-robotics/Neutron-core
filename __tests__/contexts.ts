@@ -329,7 +329,7 @@ describe("Ros Contexts", () => {
     expect(Topic).toHaveBeenCalledWith({
       ros: (Ros as any).mock.instances[0],
       name: "set_velocity",
-      messageType: "/myrobotics/velocity",
+      messageType: "myrobotics_protocol/msg/Velocity",
       throttle_rate: 10,
       latch: false,
       queue_length: 1,

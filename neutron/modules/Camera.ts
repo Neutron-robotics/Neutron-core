@@ -20,6 +20,11 @@ export class Camera extends RobotModule {
 
   public ip: string;
 
+  //tmp, later to be replaced by a proper status
+  public get isConnected(): boolean {
+    return this.context.isConnected;
+  }
+
   protected context: IConnectionContext;
 
   protected frames: Record<string, IFrame>;

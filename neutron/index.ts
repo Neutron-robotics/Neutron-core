@@ -15,6 +15,7 @@ export {
   RobotStatus,
   IBatteryInfo,
   IRobotModule,
+  IRobotModuleDefinition
 } from "./interfaces/RobotConnection";
 export { TopicSettings } from "./interfaces/ros";
 

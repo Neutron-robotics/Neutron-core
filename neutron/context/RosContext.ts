@@ -92,7 +92,8 @@ class RosContext extends ConnectionContext {
       messageType: format,
     };
     const topicInstance: Topic<Message> = this.getTopic(topicSettings);
-    const message = new Message(payload.data);
+    const message = new Message(payload);
+    console.log("publish", message, "on topic", topicSettings)
     topicInstance.publish(message);
     topicInstance.unadvertise();
     return Promise.resolve({

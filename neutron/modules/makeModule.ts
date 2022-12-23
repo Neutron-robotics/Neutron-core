@@ -29,6 +29,6 @@ export const makeModule = (
     case "camera":
       return new Camera(robotModuleBuilder);
     default:
-      throw new Error("Invalid module type");
+      throw new Error("Invalid module type " + type);
   }
 };

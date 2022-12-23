@@ -5,6 +5,7 @@ import {
   IRobotConnectionConfiguration,
   IRobotConnectionInfo,
   IRobotModule,
+  IRobotModuleDefinition,
   RobotConnectionType,
   RobotStatus,
 } from "../interfaces/RobotConnection";
@@ -19,11 +20,11 @@ export interface ICoreProcess {
   id: string;
 }
 
-export interface ICoreModule extends IRobotModule {
+export interface ICoreModule extends IRobotModuleDefinition {
   process?: ICoreProcess;
 }
 
-export class Core implements Omit<IRobotModule, "framePackage"> {
+export class Core implements IRobotModule {
   public type: string;
 
   private connection: IRobotConnectionInfo;

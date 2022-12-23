@@ -37,7 +37,7 @@ export class RobotBase extends RobotModule {
       !inRange(configuration.directionnalSpeed, 0, 1) ||
       !inRange(configuration.rotationSpeed, 0, 1)
     )
-      throw new Error("Invalid speed configuration: speed range is [0, 1]");
+      throw new Error(`Invalid speed {${configuration.directionnalSpeed}, ${configuration.rotationSpeed}} configuration: speed range is [0, 1]`);
     this.speed = 50;
   }
 
@@ -61,6 +61,7 @@ export class RobotBase extends RobotModule {
       yaw: scaledMovement[5],
     };
     const executor = frame.build(framePayload);
+    console.log("executor", executor)
     const response = await this.context.execute(executor);
     return response;
   }
@@ -75,13 +76,5 @@ export class RobotBase extends RobotModule {
 
   public override destroy(): Promise<void> {
     return Promise.resolve();
-  }
-
-  public setSpeed(speed: number): void {
-    this.speed = speed;
-    const frame = this.frames["speed"];
-    if (!frame) throw new Error("No frame found for speed command");
-    const executor = frame.build({ speed });
-    this.context.execute(executor);
   }
 }

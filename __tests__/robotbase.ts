@@ -34,7 +34,7 @@ describe("robot base tests", () => {
     expect(mockcallExecute).toHaveBeenCalledWith({
       id: expect.anything(),
       methodType: "set_velocity",
-      format: "/myrobotics/velocity",
+      format: "myrobotics_protocol/msg/Velocity",
       method: "send",
       payload: {
         x: 50,

@@ -78,6 +78,7 @@ abstract class ConnectionContext implements IConnectionContext {
         result = await this.request(executor);
         break;
       case "send":
+        console.log("send ", executor)
         result = await this.send(executor);
         break;
       case "sendLoop":
