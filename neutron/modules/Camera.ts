@@ -1,8 +1,4 @@
-import { ServiceResponse } from "roslib";
-import { IConnectionContext } from "../context/ConnectionContext";
-import { IFrame, IFrameResult } from "../interfaces/frames";
-import { IRobotModule } from "../interfaces/RobotConnection";
-import { v4 as uuid } from "uuid";
+import { IFrameResult } from "../interfaces/frames";
 import { IRobotModuleBuilderArgs, RobotModule } from "./RobotModule";
 
 export interface ICameraConfiguration {
@@ -11,8 +7,6 @@ export interface ICameraConfiguration {
 
 export class Camera extends RobotModule {
   public readonly type = "camera";
-
-  public name: string;
 
   public get uri(): string {
     return `http://${this.context.hostname}:8100`;
@@ -24,10 +18,6 @@ export class Camera extends RobotModule {
   public get isConnected(): boolean {
     return this.context.isConnected;
   }
-
-  protected context: IConnectionContext;
-
-  protected frames: Record<string, IFrame>;
 
   constructor(configuration: ICameraConfiguration & IRobotModuleBuilderArgs) {
     super(configuration);

@@ -146,7 +146,7 @@ class RosContext extends ConnectionContext {
       topic: methodType,
       messageType: format,
     };
-    this.addHandler(methodType, handler);
+    this.addHandler(methodType, handler as any);
     const topicInstance = this.getTopic(topicSettings);
     topicInstance.subscribe((message: Message) => {
       this.triggerHandlers(methodType, message);
@@ -157,15 +157,15 @@ class RosContext extends ConnectionContext {
     executor: IRosFrameExecutor,
     handler?: LiteEventHandler<T>
   ): void {
-    const { methodType, payload } = executor;
-    const remainingHandlersCount = this.removeHandler(methodType, handler);
+    const { methodType, payload, format } = executor;
+    const remainingHandlersCount = this.removeHandler(methodType, handler as any);
     if (remainingHandlersCount === 0) {
       const topicSettings: TopicSettings = {
         topic: methodType,
-        messageType: payload.format,
+        messageType: format,
       };
       const topicInstance = this.getTopic(topicSettings);
-      topicInstance.unsubscribe(handler);
+      handler && topicInstance.unsubscribe(handler as any);
     }
   }
 
@@ -204,11 +204,11 @@ class RosContext extends ConnectionContext {
     if (!this.handlers.has(topic)) {
       this.handlers.set(topic, []);
     }
-    this.handlers.get(topic).push(handler);
+    this.handlers.get(topic)?.push(handler);
   }
 
   private triggerHandlers(topic: string, message: Message): void {
-    this.handlers.get(topic).forEach((handler) => {
+    this.handlers.get(topic)?.forEach((handler) => {
       handler(message);
     });
   }
@@ -218,18 +218,18 @@ class RosContext extends ConnectionContext {
     handler: LiteEventHandler<Message>
   ): number {
     if (!this.handlers.has(topic)) {
-      return;
+      return 0;
     }
     const handlers = this.handlers.get(topic);
-    const index = handlers.indexOf(handler);
-    if (index > -1) {
-      handlers.splice(index, 1);
+    const index = handlers?.indexOf(handler);
+    if (index !== undefined && index > -1) {
+      handlers?.splice(index, 1);
     }
-    if (handlers.length === 0) {
+    if (handlers?.length === 0) {
       this.handlers.delete(topic);
       return 0;
     }
-    return handlers.length;
+    return handlers?.length ?? 0;
   }
 
   protected override stopLoop(cancellationToken: string): void {

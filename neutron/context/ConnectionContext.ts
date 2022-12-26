@@ -55,7 +55,7 @@ abstract class ConnectionContext implements IConnectionContext {
 
   public abstract sendLoop(executor: IFrameExecutor): Promise<IFrameResult>;
 
-  public abstract on<T>(
+  public abstract on<T extends any>(
     executor: IFrameExecutor,
     handler: LiteEventHandler<T>
   ): void;
@@ -89,7 +89,7 @@ abstract class ConnectionContext implements IConnectionContext {
     }
     if (executor.next) {
       const nextExecutor = executor.next(result);
-      const nextResult = this.execute(nextExecutor);
+      const nextResult = await this.execute(nextExecutor);
       return {
         ...result,
         next: nextResult,

@@ -5,7 +5,7 @@ const framePackage = {
     {
       id: "trhtnh5nryt9n4yn4rn5rny",
       name: "Move",
-      build: (body) => {
+      build: (body: any) => {
         return {
           id: "move",
           methodType: "publishLoop",
@@ -25,7 +25,7 @@ const framePackageUndefinedCallback = {
       id: "trhtnh5nryt9n4yn4rn5rny",
       callBackFrames: ["setKeepAlive"],
       name: "Move",
-      build: (body) => {
+      build: (body: any) => {
         return {
           id: "move",
           methodType: "publishLoop",
@@ -45,7 +45,7 @@ const framePackageWrongMethodType = {
     {
       id: "trhtnh5nryt9n4yn4rn5rny",
       name: "Move",
-      build: (body) => {
+      build: (body: any) => {
         return {
           id: "move",
           methodType: "pubop",
