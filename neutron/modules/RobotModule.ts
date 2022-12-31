@@ -19,12 +19,12 @@ export abstract class RobotModule implements IRobotModule {
   protected frames: Record<string, IFrame>;
 
   public constructor(builder: IRobotModuleBuilderArgs) {
-    this.id = uuid();
+    this.id = uuid() as Lowercase<string>
     this.name = builder.name;
     this.context = builder.context;
     this.framePackage = builder.framePackage || "default";
     const frameFactory = new FrameFactory();
-    const frames = frameFactory.getFramePackage(builder.framePackage);
+    const frames = frameFactory.getFramePackage(builder.framePackage ?? "");
     this.frames = frames.reduce((acc, frame) => {
       acc[frame.id] = frame;
       return acc;

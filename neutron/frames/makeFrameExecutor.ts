@@ -33,7 +33,7 @@ export const makeFrameExecutor = (
   payload,
   next: opts?.chainWith
     ? (response: IFrameResult) => {
-        const nextFrameExecutor = opts.chainWith.build(response.result);
+        const nextFrameExecutor = opts.chainWith!.build(response.result);
         return nextFrameExecutor;
       }
     : undefined,

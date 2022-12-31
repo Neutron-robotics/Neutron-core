@@ -1,8 +1,6 @@
-import { IConnectionContext } from "../context/ConnectionContext";
-import { IFrame, IFrameResult } from "../interfaces/frames";
+import { IFrameResult } from "../interfaces/frames";
 import { IMovementMatrix } from "../interfaces/robotbase";
 import { inRange } from "../utils/math";
-import { v4 as uuid } from "uuid";
 import { IRobotModuleBuilderArgs, RobotModule } from "./RobotModule";
 
 export interface IRobotBaseConfiguration {
@@ -12,14 +10,6 @@ export interface IRobotBaseConfiguration {
 
 export class RobotBase extends RobotModule {
   public readonly type = "robotbase";
-
-  protected context: IConnectionContext;
-
-  protected frames: Record<string, IFrame>
-
-  public id: Lowercase<string>;
-
-  public name: string;
 
   public configuration: IRobotBaseConfiguration;
 

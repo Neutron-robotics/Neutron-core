@@ -1,10 +1,17 @@
 {
   "compilerOptions": {
     "module": "CommonJS",
-    "target": "es2015",
+    "target": "es6",
+    "lib": ["es6"],
     "declaration": true,
     "outDir": "./dist",
-    "esModuleInterop": true
+    "sourceMap": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "paths": {
+      "roslib": ["./src/types/roslib.d.ts"],
+    }
   },
-  "include": ["neutron/**/*"]
+  "include": ["neutron/**/*"],
+  "exclude": ["node_modules"]
 }

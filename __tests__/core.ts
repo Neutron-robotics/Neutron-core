@@ -110,7 +110,7 @@ describe("Robot core module", () => {
   test("Get connection status", async () => {
     (axios as any).create.mockImplementation(() => {
       return {
-        get: (uri) => {
+        get: (uri: string) => {
           if (uri === "/robot/configuration")
             return Promise.resolve({ data: connectionInfosMock });
           else if (uri === "/robot/status")
@@ -145,7 +145,7 @@ describe("Robot core module", () => {
   test("Get connection status multiple time", async () => {
     (axios as any).create.mockImplementation(() => {
       return {
-        get: (uri) => {
+        get: (uri: string) => {
           if (uri === "/robot/configuration")
             return Promise.resolve({ data: connectionInfosMock });
           else if (uri === "/robot/status")
@@ -184,7 +184,7 @@ describe("Robot core module", () => {
   test("Start a process while no module is set", async () => {
     (axios as any).create.mockImplementation(() => {
       return {
-        post: (uri) => {
+        post: (uri: string) => {
           if (uri === "/start")
             return Promise.resolve({ data: { success: true } });
           else throw new Error("Invalid URI");
@@ -207,14 +207,14 @@ describe("Robot core module", () => {
   test("Start a process successfuly", async () => {
     (axios as any).create.mockImplementation(() => {
       return {
-        get: (uri) => {
+        get: (uri: string) => {
           if (uri === "/robot/configuration")
             return Promise.resolve({ data: connectionInfosMock });
           else if (uri === "/robot/status")
             return Promise.resolve({ data: robotStatusMock });
           else throw new Error("Invalid URI");
         },
-        post: (uri) => {
+        post: (uri: string) => {
           if (uri === "/start")
             return Promise.resolve({ data: { success: true }, status: 200 });
           else throw new Error("Invalid URI");
@@ -238,14 +238,14 @@ describe("Robot core module", () => {
   test("Start a process that does not exist", async () => {
     (axios as any).create.mockImplementation(() => {
       return {
-        get: (uri) => {
+        get: (uri: string) => {
           if (uri === "/robot/configuration")
             return Promise.resolve({ data: connectionInfosMock });
           else if (uri === "/robot/status")
             return Promise.resolve({ data: robotStatusMock });
           else throw new Error("Invalid URI");
         },
-        post: (uri) => {
+        post: (uri: string) => {
           if (uri === "/start")
             return Promise.resolve({ data: { success: true }, status: 200 });
           else throw new Error("Invalid URI");
@@ -270,14 +270,14 @@ describe("Robot core module", () => {
     const start = jest.fn();
     (axios as any).create.mockImplementation(() => {
       return {
-        get: (uri) => {
+        get: (uri: string) => {
           if (uri === "/robot/configuration")
             return Promise.resolve({ data: connectionInfosMock });
           else if (uri === "/robot/status")
             return Promise.resolve({ data: [] });
           else throw new Error("Invalid URI");
         },
-        post: (uri) => {
+        post: (uri: string) => {
           if (uri === "/start") {
             start();
             return Promise.resolve({ data: { success: true }, status: 200 });
@@ -301,14 +301,14 @@ describe("Robot core module", () => {
   test("Stop a process", async () => {
     (axios as any).create.mockImplementation(() => {
       return {
-        get: (uri) => {
+        get: (uri: string) => {
           if (uri === "/robot/configuration")
             return Promise.resolve({ data: connectionInfosMock });
           else if (uri === "/robot/status")
             return Promise.resolve({ data: robotStatusMock });
           else throw new Error("Invalid URI");
         },
-        post: (uri) => {
+        post: (uri: string) => {
           if (uri === "/stop")
             return Promise.resolve({ data: { success: true }, status: 200 });
           else throw new Error("Invalid URI");
@@ -333,14 +333,14 @@ describe("Robot core module", () => {
   test("Stop a process that does not exist", async () => {
     (axios as any).create.mockImplementation(() => {
       return {
-        get: (uri) => {
+        get: (uri: string) => {
           if (uri === "/robot/configuration")
             return Promise.resolve({ data: connectionInfosMock });
           else if (uri === "/robot/status")
             return Promise.resolve({ data: robotStatusMock });
           else throw new Error("Invalid URI");
         },
-        post: (uri) => {
+        post: (uri: string) => {
           if (uri === "/stop")
             return Promise.resolve({ data: { success: true }, status: 200 });
           else throw new Error("Invalid URI");
@@ -366,14 +366,14 @@ describe("Robot core module", () => {
     const stop = jest.fn();
     (axios as any).create.mockImplementation(() => {
       return {
-        get: (uri) => {
+        get: (uri: string) => {
           if (uri === "/robot/configuration")
             return Promise.resolve({ data: connectionInfosMock });
           else if (uri === "/robot/status")
             return Promise.resolve({ data: robotStatusesForStopMock });
           else throw new Error("Invalid URI");
         },
-        post: (uri) => {
+        post: (uri: string) => {
           if (uri === "/stop") {
             stop();
             return Promise.resolve({ data: { success: true }, status: 200 });
