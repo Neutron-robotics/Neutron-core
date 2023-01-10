@@ -6,6 +6,8 @@ export {
 } from "./context/ConnectionContext";
 export { makeConnectionContext } from "./context/makeContext";
 
+export { RosContext } from "./context/RosContext";
+
 // Interfaces
 export {
   IRobotConnectionConfiguration,
@@ -15,7 +17,7 @@ export {
   RobotStatus,
   IBatteryInfo,
   IRobotModule,
-  IRobotModuleDefinition
+  IRobotModuleDefinition,
 } from "./interfaces/RobotConnection";
 export { TopicSettings } from "./interfaces/ros";
 

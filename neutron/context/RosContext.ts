@@ -44,7 +44,7 @@ class RosContext extends ConnectionContext {
         resolve(true);
       });
 
-      this.ros.on("error", (error) => {
+      this.ros.on("error", (error: any) => {
         console.log("Error connecting to websocket server: ", error);
         resolve(false);
       });
@@ -93,7 +93,7 @@ class RosContext extends ConnectionContext {
     };
     const topicInstance: Topic<Message> = this.getTopic(topicSettings);
     const message = new Message(payload);
-    console.log("publish", message, "on topic", topicSettings)
+    console.log("publish", message, "on topic", topicSettings);
     topicInstance.publish(message);
     topicInstance.unadvertise();
     return Promise.resolve({
@@ -158,7 +158,10 @@ class RosContext extends ConnectionContext {
     handler?: LiteEventHandler<T>
   ): void {
     const { methodType, payload, format } = executor;
-    const remainingHandlersCount = this.removeHandler(methodType, handler as any);
+    const remainingHandlersCount = this.removeHandler(
+      methodType,
+      handler as any
+    );
     if (remainingHandlersCount === 0) {
       const topicSettings: TopicSettings = {
         topic: methodType,

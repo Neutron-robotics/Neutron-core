@@ -35,12 +35,12 @@ export class RobotBase extends RobotModule {
     const frame = this.frames["move"];
     if (!frame) throw new Error("No frame found for move command");
     const scaledMovement = [
-      movement[0] * this.configuration.directionnalSpeed * speed,
-      movement[1] * this.configuration.directionnalSpeed * speed,
+      Math.round(movement[0] * this.configuration.directionnalSpeed * speed),
       0,
       0,
       0,
-      movement[5] * this.configuration.rotationSpeed * speed,
+      0,
+      Math.round(movement[5] * this.configuration.rotationSpeed * speed),
     ];
     const framePayload: IMovementMatrix = {
       x: scaledMovement[0],
