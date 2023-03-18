@@ -126,7 +126,7 @@ describe("Robot core module", () => {
       type: RobotConnectionType.HTTP,
     });
     await core.getConnectionInfo();
-    await core.getProcessesStatus();
+    await core.getRobotStatus();
     expect(core.modules).toBeDefined();
     expect(core.modules.length).toBe(4);
     expect(core.modules[1].name).toBe("Camera");
@@ -161,11 +161,11 @@ describe("Robot core module", () => {
       type: RobotConnectionType.HTTP,
     });
     await core.getConnectionInfo();
-    await core.getProcessesStatus();
+    await core.getRobotStatus();
     await core.getConnectionInfo();
-    await core.getProcessesStatus();
-    await core.getProcessesStatus();
-    await core.getProcessesStatus();
+    await core.getRobotStatus();
+    await core.getRobotStatus();
+    await core.getRobotStatus();
     expect(core.modules).toBeDefined();
     expect(core.modules.length).toBe(4);
     expect(core.modules[1].name).toBe("Camera");
@@ -274,7 +274,15 @@ describe("Robot core module", () => {
           if (uri === "/robot/configuration")
             return Promise.resolve({ data: connectionInfosMock });
           else if (uri === "/robot/status")
-            return Promise.resolve({ data: [] });
+            return Promise.resolve({
+              data: {
+                battery: -1,
+                cpu: 12.6,
+                memory: 76.3,
+                operationTime: -1,
+                modules: [],
+              },
+            });
           else throw new Error("Invalid URI");
         },
         post: (uri: string) => {
@@ -322,7 +330,7 @@ describe("Robot core module", () => {
       type: RobotConnectionType.HTTP,
     });
     await core.getConnectionInfo();
-    await core.getProcessesStatus();
+    await core.getRobotStatus();
     expect(core.modules.length).toBe(4);
     const res = await core.stopRobotProcess(
       "98932797-ea76-4ce1-b699-842ce54cedc6"
@@ -354,7 +362,7 @@ describe("Robot core module", () => {
       type: RobotConnectionType.HTTP,
     });
     await core.getConnectionInfo();
-    await core.getProcessesStatus();
+    await core.getRobotStatus();
     expect(core.modules.length).toBe(4);
     const res = await core.stopRobotProcess(
       "98932797-bbbb-4ce1-b699-842ce54cedc6"

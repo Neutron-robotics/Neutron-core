@@ -1,5 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 import { v4 } from "uuid";
+import IRobotStatusMessage from "../frames/CoreProtocol/robotStatusMessage";
+import { ICoreModule, IRobotStatus } from "../interfaces/core";
 import {
   getRobotConnectionTypeFromString,
   IRobotConnectionConfiguration,
@@ -9,20 +11,6 @@ import {
   RobotConnectionType,
   RobotStatus,
 } from "../interfaces/RobotConnection";
-
-export interface ICoreProcess {
-  cpu: number;
-  mem: number;
-  mem_usage: number;
-  active: boolean;
-  pid: number;
-  name: string;
-  id: string;
-}
-
-export interface ICoreModule extends IRobotModuleDefinition {
-  process?: ICoreProcess;
-}
 
 export class Core implements IRobotModule {
   public type: string;
@@ -110,28 +98,34 @@ export class Core implements IRobotModule {
     });
   };
 
-  public getProcessesStatus = async (): Promise<void> => {
+  public getRobotStatus = async (): Promise<IRobotStatus> => {
+    const start = Date.now();
     const response = await this.axios.get("/robot/status");
-    console.log(response);
-    const data = response.data as ICoreProcess[];
+    const finish = Date.now();
+    const data = response.data as IRobotStatusMessage;
 
     this.modules = this.modules.map((module: ICoreModule) => {
-      const process = data.find((p) => p.id === module.id);
+      const process = data.modules.find((p) => p.id === module.id);
       return {
         ...module,
         process: process,
       };
     });
+    return {
+      ...data,
+      time: finish - start,
+      modules: this.modules,
+    };
   };
 
   public startProcesses = async (timeout?: number): Promise<boolean> => {
-    await this.getProcessesStatus();
+    await this.getRobotStatus();
     const res = (
       await Promise.all(
         this.modules.map((module) => this.startRobotProcess(module.id, timeout))
       )
     ).reduce((acc, val) => acc && val, true);
-    await this.getProcessesStatus();
+    await this.getRobotStatus();
     return res;
   };
 
@@ -164,7 +158,7 @@ export class Core implements IRobotModule {
   };
 
   public stopProcesses = async (): Promise<boolean> => {
-    await this.getProcessesStatus();
+    await this.getRobotStatus();
     return (
       await Promise.all(
         this.modules.map((module) => this.stopRobotProcess(module.id))

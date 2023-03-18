@@ -22,7 +22,8 @@ export {
 export { TopicSettings } from "./interfaces/ros";
 
 // Modules
-export { Core, ICoreProcess, ICoreModule } from "./modules/Core";
+export { Core } from "./modules/Core";
+export { ICoreProcess, ICoreModule, IRobotStatus } from "./interfaces/core";
 export { ICameraConfiguration, Camera } from "./modules/Camera";
 export { IRobotBaseConfiguration, RobotBase } from "./modules/RobotBase";
 export { makeModule } from "./modules/makeModule";
