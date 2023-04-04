@@ -65,6 +65,7 @@ class RosContext extends ConnectionContext {
   public request(executor: IRosFrameExecutor): Promise<IFrameResult> {
     return new Promise((resolve, reject) => {
       const onSuccess = (result: ServiceResponse) => {
+        console.log("Resolved!", result)
         resolve({
           success: true,
           result: result,
@@ -80,7 +81,8 @@ class RosContext extends ConnectionContext {
         name: methodType,
         serviceType: format,
       });
-      const serviceRequest = new ServiceRequest(payload.data);
+      console.log("request with ",methodType, format, payload);
+      const serviceRequest = new ServiceRequest(payload);
       service.callService(serviceRequest, onSuccess, onError);
     });
   }

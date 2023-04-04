@@ -9,6 +9,7 @@ export default class FrameFactory {
       const packagesDefault = [
         require("./NeutronCameraFrames").default,
         require("./OsoyooBaseFrames").default,
+        require("./WebRTCFrames").default,
       ];
       packagesDefault.forEach((framePackage) => {
         this.buildFramePackage(framePackage);

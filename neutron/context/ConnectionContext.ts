@@ -78,11 +78,18 @@ abstract class ConnectionContext implements IConnectionContext {
         result = await this.request(executor);
         break;
       case "send":
-        console.log("send ", executor)
         result = await this.send(executor);
         break;
       case "sendLoop":
         result = await this.sendLoop(executor);
+        break;
+      case "on":
+        if (!executor.payload.callback)
+          return Promise.reject(
+            "executor must contains a callback for a subscription"
+          );
+        this.on(executor, executor.payload.callback);
+        result = { success: true, result: null };
         break;
       default:
         return Promise.reject("Unknown executor type");

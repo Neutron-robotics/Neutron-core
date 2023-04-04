@@ -212,7 +212,7 @@ describe("Ros Contexts", () => {
   test("Subscribe to an event", () => {
     const frameExecutor: IRosFrameExecutor = {
       id: "abcd",
-      method: "subscribe",
+      method: "on",
       format: "/std_types/Float64Array",
       methodType: "/move_something",
       payload: {
@@ -242,10 +242,41 @@ describe("Ros Contexts", () => {
     });
   });
 
+  test("subscribe to an event using a frame", () => {
+    const handler = jest.fn();
+    const frameExecutor: IRosFrameExecutor = {
+      id: "abcd",
+      method: "on",
+      format: "/std_types/Float64Array",
+      methodType: "/move_something",
+      payload: {
+        callback: (payload: any) => {
+          handler({
+            x: payload.value1,
+            y: payload.value2,
+          });
+        },
+      },
+    };
+    const rosContext = new RosContext({
+      hostname: "localhost",
+      port: 9090,
+    });
+    rosContext.execute(frameExecutor);
+
+    const mockTopicInstance = (Topic as any).mock.instances[0];
+    const mocksubscribeInstance =
+      mockTopicInstance.subscribe as unknown as jest.Mock<any, any>;
+
+    expect(Topic).toHaveBeenCalledTimes(1);
+    expect(mocksubscribeInstance).toHaveBeenCalledTimes(1);
+    expect(mocksubscribeInstance).toHaveBeenCalledWith(expect.any(Function));
+  });
+
   test("subscribe and unsubscribe", () => {
     const frameExecutor: IRosFrameExecutor = {
       id: "abcd",
-      method: "subscribe",
+      method: "on",
       format: "/std_types/Float64Array",
       methodType: "/move_something",
       payload: {

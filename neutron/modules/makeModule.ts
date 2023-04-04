@@ -3,6 +3,7 @@ import FrameFactory from "../frames/FrameFactory";
 import { IRobotModule } from "../interfaces/RobotConnection";
 import { Camera } from "./Camera";
 import { RobotBase } from "./RobotBase";
+import { WebRTC } from "./WebRTC";
 
 export interface IModuleConfiguration {
   id: string;
@@ -28,6 +29,8 @@ export const makeModule = (
       return new RobotBase(robotModuleBuilder);
     case "camera":
       return new Camera(robotModuleBuilder);
+    case "webrtc":
+      return new WebRTC(robotModuleBuilder);
     default:
       throw new Error("Invalid module type " + type);
   }

@@ -3,7 +3,7 @@ import { IConnectionContext } from "../context/ConnectionContext";
 import { IFrame, IFrameExecutor, IFrameResult } from "../interfaces/frames";
 
 interface IFrameExecutorConfig {
-  method: string;
+  method: 'on' | 'send' | 'request' | 'sendLoop';
   methodType: string;
 }
 
