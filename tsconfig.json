@@ -2,14 +2,14 @@
   "compilerOptions": {
     "module": "CommonJS",
     "target": "es6",
-    "lib": ["es6"],
+    "lib": ["es2021"],
     "declaration": true,
     "outDir": "./dist",
     "sourceMap": true,
     "strict": true,
     "esModuleInterop": true,
     "paths": {
-      "roslib": ["./src/types/roslib.d.ts"],
+      "roslib": ["./src/types/roslib.d.ts"]
     }
   },
   "include": ["neutron/**/*"],
