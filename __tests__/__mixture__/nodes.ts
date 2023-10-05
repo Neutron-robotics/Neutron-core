@@ -1,6 +1,4 @@
-import NeutronNodeGraph from "./core/node/NeutronGraphNode";
-
-const osoyooNodes = [
+const complexNodes = [
   {
     id: "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583",
     type: "publisherNode",
@@ -106,7 +104,7 @@ const osoyooNodes = [
   },
 ];
 
-const osoyooEdges = [
+const complexEdges = [
   {
     source: "325bab26-7d75-442e-85f2-4dd328d4f146",
     sourceHandle: "top",
@@ -193,7 +191,7 @@ const osoyooEdges = [
   },
 ];
 
-const nodes = [
+const easyNodes = [
   {
     id: "69a5f4a5-6e08-4d00-88c0-77aa4929de4f",
     type: "subscriberNode",
@@ -237,7 +235,7 @@ const nodes = [
   },
 ];
 
-const edges = [
+const easyEdges = [
   {
     source: "69a5f4a5-6e08-4d00-88c0-77aa4929de4f",
     sourceHandle: "image",
@@ -268,8 +266,4 @@ const edges = [
   },
 ];
 
-// const nodegraph = makeNodeGraph(osoyooNodes, osoyooEdges);
-
-const graph = new NeutronNodeGraph(osoyooNodes, osoyooEdges);
-
-console.log("finished");
+export { complexEdges, complexNodes, easyNodes, easyEdges };
