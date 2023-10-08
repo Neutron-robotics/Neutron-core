@@ -61,7 +61,8 @@ export class NeutronOutputHandle implements INeutronOutputHandle {
     if (!value) return;
 
     for (const target of this.targets) {
-      target.value = value;
+      if (target.value?.data && value.isSkipped) {
+      } else target.value = value;
     }
   }
 }

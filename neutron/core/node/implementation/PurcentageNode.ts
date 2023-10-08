@@ -1,18 +1,13 @@
+import { getRandomNumber } from "../../../utils/random";
+import { sleep } from "../../../utils/time";
 import { INodeBuilder } from "../NeutronGraphNode";
 import BaseNode from "./BaseNode";
-
-export interface IPurcentageNodeInput {
-  value: number;
-}
 
 export interface IPurcentageNodeOutput {
   result: number;
 }
 
-class PurcentageNode extends BaseNode<
-  IPurcentageNodeInput,
-  IPurcentageNodeOutput
-> {
+class PurcentageNode extends BaseNode<number, IPurcentageNodeOutput> {
   public readonly type = "publisherNode";
 
   private min: number;
@@ -24,17 +19,32 @@ class PurcentageNode extends BaseNode<
     this.max = 100;
   }
 
-  protected process = (input: any) => {
-    const result = input;
+  protected process = async (value: number) => {
+    if (value < this.min || value > this.max) {
+      throw new Error("The value must be included in range.");
+    }
 
-    return Promise.resolve({});
+    const delay = getRandomNumber(1000, 5000);
+    await sleep(delay);
+
+    const range = this.max - this.min;
+    const purcentage = ((value - this.min) / range) * 100;
+
+    return Promise.resolve({
+      nodeOutput: {
+        data: purcentage,
+        isSkipped: false,
+      },
+    });
   };
 
-  protected formatInput = () => {
-    const input = {
-      value: this.inputHandles["value"].value?.data,
-    };
-    return input;
+  protected formatInput = (): number => {
+    const value = this.inputHandles["nodeInput"].value?.data;
+
+    if (typeof value !== "number")
+      throw new Error("the input of the node must be a number");
+
+    return value;
   };
 }
 

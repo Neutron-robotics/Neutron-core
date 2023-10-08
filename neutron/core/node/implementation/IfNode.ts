@@ -1,3 +1,5 @@
+import { getRandomNumber } from "../../../utils/random";
+import { sleep } from "../../../utils/time";
 import { INodeBuilder } from "../NeutronGraphNode";
 import BaseNode from "./BaseNode";
 
@@ -18,17 +20,20 @@ class IfNode extends BaseNode<
   constructor(builder: INodeBuilder) {
     super(builder);
   }
-  protected process = (input: IfNodeInput) => {
+  protected process = async (input: IfNodeInput) => {
+    const delay = getRandomNumber(1000, 5000);
+    await sleep(delay);
+
     if (input)
       return Promise.resolve({
-        result: {
+        nodeOutput: {
           isSkipped: false,
-          data: input.value,
+          data: input,
         },
       });
     else
       return Promise.resolve({
-        result: {
+        nodeOutput: {
           isSkipped: true,
           data: undefined,
         },
@@ -36,9 +41,7 @@ class IfNode extends BaseNode<
   };
 
   protected formatInput = () => {
-    const input = {
-      value: this.inputHandles["value"].value,
-    };
+    const input = this.inputHandles["nodeInput"]?.value?.data;
     return input;
   };
 }

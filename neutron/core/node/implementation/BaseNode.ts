@@ -6,7 +6,11 @@ import {
   NeutronInputHandle,
   NeutronOutputHandle,
 } from "../NeutronHandle";
-import { INeutronNode, INeutronNodeInputParams } from "../NeutronNode";
+import {
+  IExecutionStageEvent,
+  INeutronNode,
+  NodeExecutionStage,
+} from "../NeutronNode";
 
 abstract class BaseNode<TInput, TOutput>
   implements INeutronNode<TInput, TOutput>
@@ -17,17 +21,14 @@ abstract class BaseNode<TInput, TOutput>
   public inputHandles: Record<string, NeutronInputHandle<any>>;
   public outputHandles: Record<string, NeutronOutputHandle>;
 
-  public errorTriggered: ILiteEvent<string>;
-
-  protected hasProcessed: boolean;
+  public executionStage: ILiteEvent<IExecutionStageEvent>;
 
   constructor(builder: INodeBuilder) {
     this.id = builder.id;
     this.position = builder.position;
     this.inputHandles = {};
     this.outputHandles = {};
-    this.hasProcessed = false;
-    this.errorTriggered = new LiteEvent<string>();
+    this.executionStage = new LiteEvent<IExecutionStageEvent>();
   }
 
   protected abstract process: (
@@ -38,6 +39,11 @@ abstract class BaseNode<TInput, TOutput>
 
   public async processNode(): Promise<void> {
     let input = null;
+
+    this.executionStage.trigger({
+      nodeId: this.id,
+      event: NodeExecutionStage.BeforeProcess,
+    });
 
     const inputHandles = Object.entries(this.inputHandles);
     if (
@@ -50,20 +56,37 @@ abstract class BaseNode<TInput, TOutput>
           data: undefined,
         });
       }
+      this.executionStage.trigger({
+        nodeId: this.id,
+        event: NodeExecutionStage.Skipped,
+      });
+      return;
     }
 
     try {
       input = this.formatInput();
     } catch (err: any) {
-      this.errorTriggered.trigger(err);
+      console.error(`${this.id} Error happens while formatting input`, err);
+      this.executionStage.trigger({
+        nodeId: this.id,
+        event: NodeExecutionStage.Error,
+      });
       return;
     }
 
+    this.executionStage.trigger({
+      nodeId: this.id,
+      event: NodeExecutionStage.Processing,
+    });
     const output = await this.process(input);
 
     for (const [key, handle] of Object.entries(this.outputHandles)) {
       handle.setValue(output[key]);
     }
+    this.executionStage.trigger({
+      nodeId: this.id,
+      event: NodeExecutionStage.Processed,
+    });
   }
 }
 

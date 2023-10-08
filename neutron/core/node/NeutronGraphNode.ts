@@ -4,22 +4,30 @@ import {
   NeutronInputHandle,
   NeutronOutputHandle,
 } from "./NeutronHandle";
-import { INeutronNode, NeutronNodeDB } from "./NeutronNode";
+import {
+  IExecutionStageEvent,
+  INeutronNode,
+  NeutronNodeDB,
+  NodeExecutionStage,
+} from "./NeutronNode";
 import NodeFactory from "./implementation/nodeFactory";
 
 export interface INeutronGraphNode {
   inputNode: INeutronNode<any, any>;
   nodes: INeutronNode<any, any>[];
-  findNode: (
-    inputNode: INeutronNode<any, any>,
-    target: string
-  ) => INeutronNode<any, any> | undefined;
+  getNode: <T extends INeutronNode<any, any>>(id: string) => T | undefined;
 }
 
 export interface INodeBuilder {
   id: string;
   type: string;
   position: XYPosition;
+}
+
+interface IGraphTopologicalSort {
+  incomingHandles: Record<string, Set<string>>;
+  queue: INeutronNode<any, any>[];
+  processed: string[];
 }
 
 class NeutronNodeGraph implements INeutronGraphNode {
@@ -30,9 +38,22 @@ class NeutronNodeGraph implements INeutronGraphNode {
     this.inputNode = {} as any;
     this.nodes = [];
     this.buildGraph(nodes, edges);
+    this.inputNode.executionStage.on((e) => {
+      switch (e.event) {
+        case NodeExecutionStage.Processed:
+          this.handleInputNodeProcessed();
+          break;
+        default:
+          break;
+      }
+    });
   }
 
-  public findNode<T, T2>(
+  public getNode<T extends INeutronNode<any, any>>(id: string): T | undefined {
+    return this.nodes.find((node) => node.id === id) as T | undefined;
+  }
+
+  private findNodeInGraph<T, T2>(
     inputNode: INeutronNode<T, T2>,
     targetId: string
   ): INeutronNode<T, T2> | undefined {
@@ -40,21 +61,114 @@ class NeutronNodeGraph implements INeutronGraphNode {
       for (const target of handle.targets) {
         if (target.node.id === targetId) return target.node;
         else {
-          const node = this.findNode(target.node, targetId);
+          const node = this.findNodeInGraph(target.node, targetId);
           if (node) return node;
         }
       }
     }
   }
 
-  private async handleNodeProcessed(node: INeutronNode<any, any>) {
-    const nodeOrder = this.topologicalSort();
-    let counter = 0;
+  private handleInputNodeProcessed = () => {
+    console.log("Input node processed");
+    // const sort = this.getTopologicalSort();
+    const incomingHandles: Record<string, Set<string>> = {};
+    const queue: INeutronNode<any, any>[] = [];
+    const processed: string[] = [];
 
-    while (nodeOrder.length !== 0 && counter < nodeOrder.length) {
-      await nodeOrder[counter].processNode();
-      counter++;
-    }
+    const processNodeBatch = () => {
+      console.log("Process Batch");
+      while (queue.length > 0) {
+        const nodeToProcess = queue.shift();
+        nodeToProcess?.processNode();
+      }
+    };
+
+    const handleNodeProcedeed = (e: IExecutionStageEvent) => {
+      if (
+        e.event !== NodeExecutionStage.Processed &&
+        e.event !== NodeExecutionStage.Skipped
+      )
+        return;
+
+      processed.push(e.nodeId);
+
+      const processedNode = this.nodes.find((n) => n.id === e.nodeId);
+      console.log(
+        `[${processedNode?.id}][${
+          (processedNode as any).constructor.name
+        }] - Processed`
+      );
+      if (!processedNode) throw new Error("Processed node do not exist");
+
+      // Resolve input property for each node that are connected with
+      // the processed node. If the node has all input completed,
+      // it is added to the queue
+      Object.entries(processedNode.outputHandles).forEach(([key, handle]) => {
+        handle.targets.forEach((inputHandle) => {
+          incomingHandles[inputHandle.node.id].delete(inputHandle.propertyName);
+          if (incomingHandles[inputHandle.node.id].size === 0) {
+            queue.push(inputHandle.node);
+            console.log(
+              `[${processedNode?.id}][${
+                (processedNode as any).constructor.name
+              }] - Add ${inputHandle.node.id} (${
+                (inputHandle.node as any).constructor.name
+              }) to the next batch`
+            );
+          }
+        });
+      });
+
+      processNodeBatch();
+    };
+
+    this.nodes.forEach((node) => {
+      incomingHandles[node.id] = new Set();
+      node.executionStage.on(handleNodeProcedeed);
+    });
+
+    this.nodes.forEach((node) => {
+      Object.values(node.inputHandles).forEach((handle) => {
+        incomingHandles[node.id].add(handle.propertyName);
+      });
+    });
+
+    handleNodeProcedeed({
+      nodeId: this.inputNode.id,
+      event: NodeExecutionStage.Processed,
+    });
+  };
+
+  private getTopologicalSort(): IGraphTopologicalSort {
+    // Create a map to store incoming edges for each node.
+    const incomingHandles: Record<string, Set<string>> = {};
+    const queue: INeutronNode<any, any>[] = [];
+    const processed: string[] = [];
+
+    // Initialize incoming edges map.
+    this.nodes.forEach((node) => {
+      incomingHandles[node.id] = new Set();
+    });
+
+    // Count incoming edges for each node.
+    this.nodes.forEach((node) => {
+      Object.values(node.inputHandles).forEach((handle) => {
+        incomingHandles[node.id].add(handle.propertyName);
+      });
+    });
+
+    // Add nodes with no incoming edges to the queue.
+    this.nodes.forEach((node) => {
+      if (incomingHandles[node.id].size === 0) {
+        queue.push(node);
+      }
+    });
+
+    return {
+      incomingHandles,
+      queue,
+      processed,
+    };
   }
 
   private topologicalSort(): INeutronNode<any, any>[] {
@@ -137,6 +251,8 @@ class NeutronNodeGraph implements INeutronGraphNode {
       throw new Error(`Type ${nodeBuilder.type} is not implemented`);
     }
 
+    this.nodes.push(node);
+
     const outputEdges = edges.filter((e) => e.source === node.id);
     for (const edge of outputEdges) {
       const targets = nodes.filter((e) => e.id === edge.target);
@@ -152,7 +268,7 @@ class NeutronNodeGraph implements INeutronGraphNode {
         };
 
         const targetNode =
-          this.findNode(inputNode ?? node, nodeBuilder.id) ??
+          this.findNodeInGraph(inputNode ?? node, nodeBuilder.id) ??
           this.makeNode(nodeBuilder, nodes, edges, inputNode ?? node);
 
         if (!node.outputHandles[edge.sourceHandle]) {

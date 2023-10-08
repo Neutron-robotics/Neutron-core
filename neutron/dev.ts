@@ -1,4 +1,5 @@
 import NeutronNodeGraph from "./core/node/NeutronGraphNode";
+import BaseControllerNode from "./core/node/implementation/BaseControllerNode";
 
 const osoyooNodes = [
   {
@@ -111,19 +112,19 @@ const osoyooEdges = [
     source: "325bab26-7d75-442e-85f2-4dd328d4f146",
     sourceHandle: "top",
     target: "3059327c-ca55-4c21-9486-ed2e3e46cd85",
-    targetHandle: "input-7d1502ee-a7af-4504-998d-997fcef0ced0",
+    targetHandle: "nodeInput",
     id: "reactflow__edge-325bab26-7d75-442e-85f2-4dd328d4f146top-3059327c-ca55-4c21-9486-ed2e3e46cd85input-7d1502ee-a7af-4504-998d-997fcef0ced0",
   },
   {
     source: "3059327c-ca55-4c21-9486-ed2e3e46cd85",
-    sourceHandle: "output-true-7d1502ee-a7af-4504-998d-997fcef0ced0",
+    sourceHandle: "nodeOutput",
     target: "d2b4e180-479e-4e54-a80a-8d1fa8111142",
-    targetHandle: "source",
+    targetHandle: "nodeInput",
     id: "reactflow__edge-3059327c-ca55-4c21-9486-ed2e3e46cd85output-true-7d1502ee-a7af-4504-998d-997fcef0ced0-d2b4e180-479e-4e54-a80a-8d1fa8111142source",
   },
   {
     source: "d2b4e180-479e-4e54-a80a-8d1fa8111142",
-    sourceHandle: "result",
+    sourceHandle: "nodeOutput",
     target: "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583",
     targetHandle: "x",
     id: "reactflow__edge-d2b4e180-479e-4e54-a80a-8d1fa8111142result-aaf1b1c6-bf43-4bcf-bf4b-e354e9316583x",
@@ -132,19 +133,19 @@ const osoyooEdges = [
     source: "325bab26-7d75-442e-85f2-4dd328d4f146",
     sourceHandle: "bottom",
     target: "35978d35-82bd-450c-8629-0b5874067305",
-    targetHandle: "input-03f07255-fa22-465c-9ffa-58518e66042b",
+    targetHandle: "nodeInput",
     id: "reactflow__edge-325bab26-7d75-442e-85f2-4dd328d4f146bottom-35978d35-82bd-450c-8629-0b5874067305input-03f07255-fa22-465c-9ffa-58518e66042b",
   },
   {
     source: "35978d35-82bd-450c-8629-0b5874067305",
-    sourceHandle: "output-true-03f07255-fa22-465c-9ffa-58518e66042b",
+    sourceHandle: "nodeOutput",
     target: "26476e1f-3a8d-4ed7-b990-dbb2ed2bf106",
-    targetHandle: "source",
+    targetHandle: "nodeInput",
     id: "reactflow__edge-35978d35-82bd-450c-8629-0b5874067305output-true-03f07255-fa22-465c-9ffa-58518e66042b-26476e1f-3a8d-4ed7-b990-dbb2ed2bf106source",
   },
   {
     source: "26476e1f-3a8d-4ed7-b990-dbb2ed2bf106",
-    sourceHandle: "result",
+    sourceHandle: "nodeOutput",
     target: "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583",
     targetHandle: "x",
     id: "reactflow__edge-26476e1f-3a8d-4ed7-b990-dbb2ed2bf106result-aaf1b1c6-bf43-4bcf-bf4b-e354e9316583x",
@@ -153,40 +154,40 @@ const osoyooEdges = [
     source: "325bab26-7d75-442e-85f2-4dd328d4f146",
     sourceHandle: "left",
     target: "0335493c-576c-4451-b0a2-579750784c1b",
-    targetHandle: "input-246cd8a9-a495-4121-bb00-9cd04dd44708",
+    targetHandle: "nodeInput",
     id: "reactflow__edge-325bab26-7d75-442e-85f2-4dd328d4f146left-0335493c-576c-4451-b0a2-579750784c1binput-246cd8a9-a495-4121-bb00-9cd04dd44708",
   },
   {
     source: "325bab26-7d75-442e-85f2-4dd328d4f146",
     sourceHandle: "right",
     target: "38e4b8d4-6e1a-4e4c-ada9-702518eefef2",
-    targetHandle: "input-ff9835a2-2bad-46f6-894a-fd318efb792f",
+    targetHandle: "nodeInput",
     id: "reactflow__edge-325bab26-7d75-442e-85f2-4dd328d4f146right-38e4b8d4-6e1a-4e4c-ada9-702518eefef2input-ff9835a2-2bad-46f6-894a-fd318efb792f",
   },
   {
     source: "0335493c-576c-4451-b0a2-579750784c1b",
-    sourceHandle: "output-true-246cd8a9-a495-4121-bb00-9cd04dd44708",
+    sourceHandle: "nodeOutput",
     target: "9da160ba-b461-4a92-859f-78ed78f28abd",
-    targetHandle: "source",
+    targetHandle: "nodeInput",
     id: "reactflow__edge-0335493c-576c-4451-b0a2-579750784c1boutput-true-246cd8a9-a495-4121-bb00-9cd04dd44708-9da160ba-b461-4a92-859f-78ed78f28abdsource",
   },
   {
     source: "38e4b8d4-6e1a-4e4c-ada9-702518eefef2",
-    sourceHandle: "output-true-ff9835a2-2bad-46f6-894a-fd318efb792f",
+    sourceHandle: "nodeOutput",
     target: "8eeba159-8a27-46f7-9a69-c5590e19ec1b",
-    targetHandle: "source",
+    targetHandle: "nodeInput",
     id: "reactflow__edge-38e4b8d4-6e1a-4e4c-ada9-702518eefef2output-true-ff9835a2-2bad-46f6-894a-fd318efb792f-8eeba159-8a27-46f7-9a69-c5590e19ec1bsource",
   },
   {
     source: "9da160ba-b461-4a92-859f-78ed78f28abd",
-    sourceHandle: "result",
+    sourceHandle: "nodeOutput",
     target: "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583",
     targetHandle: "yaw",
     id: "reactflow__edge-9da160ba-b461-4a92-859f-78ed78f28abdresult-aaf1b1c6-bf43-4bcf-bf4b-e354e9316583yaw",
   },
   {
     source: "8eeba159-8a27-46f7-9a69-c5590e19ec1b",
-    sourceHandle: "result",
+    sourceHandle: "nodeOutput",
     target: "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583",
     targetHandle: "yaw",
     id: "reactflow__edge-8eeba159-8a27-46f7-9a69-c5590e19ec1bresult-aaf1b1c6-bf43-4bcf-bf4b-e354e9316583yaw",
@@ -271,5 +272,16 @@ const edges = [
 // const nodegraph = makeNodeGraph(osoyooNodes, osoyooEdges);
 
 const graph = new NeutronNodeGraph(osoyooNodes, osoyooEdges);
+
+const controlNode = graph.getNode<BaseControllerNode>(
+  "325bab26-7d75-442e-85f2-4dd328d4f146"
+);
+
+if (!controlNode) throw Error("");
+
+controlNode.sendInput({
+  top: 10,
+  speed: 20,
+});
 
 console.log("finished");

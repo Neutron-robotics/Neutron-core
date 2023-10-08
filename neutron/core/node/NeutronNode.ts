@@ -1,3 +1,4 @@
+import { ILiteEvent } from "../../utils/LiteEvent";
 import XYPosition from "../utils/XYPosition";
 import { INeutronInputHandle, INeutronOutputHandle } from "./NeutronHandle";
 
@@ -7,6 +8,7 @@ export interface INeutronNode<TInput, TOutput> {
   position: XYPosition;
   inputHandles: Record<string, INeutronInputHandle<TInput>>;
   outputHandles: Record<string, INeutronOutputHandle>;
+  executionStage: ILiteEvent<IExecutionStageEvent>;
   processNode: () => Promise<void>;
 }
 
@@ -21,4 +23,17 @@ export interface NeutronNodeDB {
   width?: number;
   height?: number;
   isInput?: boolean;
+}
+
+export interface IExecutionStageEvent {
+  event: NodeExecutionStage;
+  nodeId: string;
+}
+
+export enum NodeExecutionStage {
+  BeforeProcess,
+  Processing,
+  Error,
+  Processed,
+  Skipped,
 }
