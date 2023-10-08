@@ -28,6 +28,7 @@ export interface NeutronNodeDB {
 export interface IExecutionStageEvent {
   event: NodeExecutionStage;
   nodeId: string;
+  data?: any;
 }
 
 export enum NodeExecutionStage {

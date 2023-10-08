@@ -24,9 +24,6 @@ class PurcentageNode extends BaseNode<number, IPurcentageNodeOutput> {
       throw new Error("The value must be included in range.");
     }
 
-    const delay = getRandomNumber(1000, 5000);
-    await sleep(delay);
-
     const range = this.max - this.min;
     const purcentage = ((value - this.min) / range) * 100;
 

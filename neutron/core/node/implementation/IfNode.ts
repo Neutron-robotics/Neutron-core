@@ -21,9 +21,6 @@ class IfNode extends BaseNode<
     super(builder);
   }
   protected process = async (input: IfNodeInput) => {
-    const delay = getRandomNumber(1000, 5000);
-    await sleep(delay);
-
     if (input)
       return Promise.resolve({
         nodeOutput: {
