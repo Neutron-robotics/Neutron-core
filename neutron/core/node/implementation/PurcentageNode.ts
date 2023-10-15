@@ -8,7 +8,7 @@ export interface IPurcentageNodeOutput {
 }
 
 class PurcentageNode extends BaseNode<number, IPurcentageNodeOutput> {
-  public readonly type = "publisherNode";
+  public readonly type = "purcentageNode";
 
   private min: number;
   private max: number;

@@ -271,17 +271,32 @@ const edges = [
 
 // const nodegraph = makeNodeGraph(osoyooNodes, osoyooEdges);
 
-const graph = new NeutronNodeGraph(osoyooNodes, osoyooEdges);
+async function main() {
+  const graph = new NeutronNodeGraph(osoyooNodes, osoyooEdges);
 
-const controlNode = graph.getNode<BaseControllerNode>(
-  "325bab26-7d75-442e-85f2-4dd328d4f146"
-);
+  const controlNode = graph.getNode<BaseControllerNode>(
+    "325bab26-7d75-442e-85f2-4dd328d4f146"
+  );
 
-if (!controlNode) throw Error("");
+  if (!controlNode) throw Error("");
 
-controlNode.sendInput({
-  top: 10,
-  speed: 20,
-});
+  controlNode.AfterProcessingEvent.on((e) => {
+    console.timeEnd("node")
+    console.log("yo");
+  });
 
-console.log("finished");
+  console.time("node")
+  controlNode.sendInput({
+    top: 10,
+    left: 15,
+    speed: 20,
+  });
+}
+
+main()
+  .then(() => {
+    console.log("Main function and async operations completed");
+  })
+  .catch((error) => {
+    console.error("Error:", error);
+  });

@@ -8,8 +8,8 @@ import {
 } from "../NeutronHandle";
 import {
   IExecutionStageEvent,
+  IExecutionStageProcessingEvent,
   INeutronNode,
-  NodeExecutionStage,
 } from "../NeutronNode";
 
 abstract class BaseNode<TInput, TOutput>
@@ -21,14 +21,30 @@ abstract class BaseNode<TInput, TOutput>
   public inputHandles: Record<string, NeutronInputHandle<any>>;
   public outputHandles: Record<string, NeutronOutputHandle>;
 
-  public executionStage: ILiteEvent<IExecutionStageEvent>;
+  // public executionStage: ILiteEvent<IExecutionStageEvent>;
+
+  public BeforeProcessingEvent: ILiteEvent<
+    IExecutionStageProcessingEvent<TInput>
+  >;
+  public AfterProcessingEvent: ILiteEvent<
+    IExecutionStageProcessingEvent<TOutput>
+  >;
+  public ProcessingErrorEvent: ILiteEvent<IExecutionStageEvent>;
+  public SkippedNodeEvent: ILiteEvent<IExecutionStageEvent>;
 
   constructor(builder: INodeBuilder) {
     this.id = builder.id;
     this.position = builder.position;
     this.inputHandles = {};
     this.outputHandles = {};
-    this.executionStage = new LiteEvent<IExecutionStageEvent>();
+    this.BeforeProcessingEvent = new LiteEvent<
+      IExecutionStageProcessingEvent<Partial<TInput>>
+    >();
+    this.AfterProcessingEvent = new LiteEvent<
+      IExecutionStageProcessingEvent<Partial<TOutput>>
+    >();
+    this.ProcessingErrorEvent = new LiteEvent<IExecutionStageEvent>();
+    this.SkippedNodeEvent = new LiteEvent<IExecutionStageEvent>();
   }
 
   protected abstract process: (
@@ -39,11 +55,6 @@ abstract class BaseNode<TInput, TOutput>
 
   public async processNode(): Promise<void> {
     let input = null;
-
-    this.executionStage.trigger({
-      nodeId: this.id,
-      event: NodeExecutionStage.BeforeProcess,
-    });
 
     const inputHandles = Object.entries(this.inputHandles);
     if (
@@ -56,9 +67,8 @@ abstract class BaseNode<TInput, TOutput>
           data: undefined,
         });
       }
-      this.executionStage.trigger({
+      this.SkippedNodeEvent.trigger({
         nodeId: this.id,
-        event: NodeExecutionStage.Skipped,
       });
       return;
     }
@@ -67,25 +77,29 @@ abstract class BaseNode<TInput, TOutput>
       input = this.formatInput();
     } catch (err: any) {
       console.error(`${this.id} Error happens while formatting input`, err);
-      this.executionStage.trigger({
+      this.ProcessingErrorEvent.trigger({
         nodeId: this.id,
-        event: NodeExecutionStage.Error,
       });
       return;
     }
 
-    this.executionStage.trigger({
+    this.BeforeProcessingEvent.trigger({
       nodeId: this.id,
-      event: NodeExecutionStage.Processing,
+      data: input,
     });
     const output = await this.process(input);
 
     for (const [key, handle] of Object.entries(this.outputHandles)) {
       handle.setValue(output[key]);
     }
-    this.executionStage.trigger({
+
+    const outputObject = Object.entries(output).reduce(
+      (acc, [key, cur]) => ({ ...acc, [key]: cur.data }),
+      {}
+    ) as Partial<TOutput>;
+    this.AfterProcessingEvent.trigger({
       nodeId: this.id,
-      event: NodeExecutionStage.Processed,
+      data: outputObject,
     });
   }
 }

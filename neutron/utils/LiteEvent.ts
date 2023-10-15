@@ -3,8 +3,9 @@ export type LiteEventHandler<T> = (data: T) => void | Promise<void>;
 export interface ILiteEvent<T> {
   on(handler: LiteEventHandler<T>): void;
   off(handler: LiteEventHandler<T>): void;
+  offAll(): void;
   once(handler: LiteEventHandler<T>): void;
-  trigger(data: T): void;
+  trigger(data: T): Promise<void>;
 }
 
 export class LiteEvent<T> implements ILiteEvent<T> {
@@ -16,6 +17,10 @@ export class LiteEvent<T> implements ILiteEvent<T> {
 
   public off(handler: LiteEventHandler<T>): void {
     this.handlers = this.handlers.filter((h) => h !== handler);
+  }
+
+  public offAll() {
+    this.handlers = [];
   }
 
   public once(handler: LiteEventHandler<T>): void {

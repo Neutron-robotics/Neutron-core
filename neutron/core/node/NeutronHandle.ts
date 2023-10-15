@@ -16,6 +16,7 @@ export interface INeutronInputHandle<TData> extends INeutronHandle {
 export interface INeutronOutputHandle extends INeutronHandle {
   type: "output";
   targets: INeutronInputHandle<any>[];
+  cleanValues: () => void;
 }
 
 export interface NeutronEdgeDB {
@@ -63,6 +64,12 @@ export class NeutronOutputHandle implements INeutronOutputHandle {
     for (const target of this.targets) {
       if (target.value?.data && value.isSkipped) {
       } else target.value = value;
+    }
+  }
+
+  public cleanValues() {
+    for (const target of this.targets) {
+      target.value = undefined;
     }
   }
 }

@@ -8,7 +8,12 @@ export interface INeutronNode<TInput, TOutput> {
   position: XYPosition;
   inputHandles: Record<string, INeutronInputHandle<TInput>>;
   outputHandles: Record<string, INeutronOutputHandle>;
-  executionStage: ILiteEvent<IExecutionStageEvent>;
+  BeforeProcessingEvent: ILiteEvent<IExecutionStageProcessingEvent<TInput>>;
+  AfterProcessingEvent: ILiteEvent<
+    IExecutionStageProcessingEvent<Partial<TOutput>>
+  >;
+  ProcessingErrorEvent: ILiteEvent<IExecutionStageEvent>;
+  SkippedNodeEvent: ILiteEvent<IExecutionStageEvent>;
   processNode: () => Promise<void>;
 }
 
@@ -26,9 +31,12 @@ export interface NeutronNodeDB {
 }
 
 export interface IExecutionStageEvent {
-  event: NodeExecutionStage;
   nodeId: string;
-  data?: any;
+}
+
+export interface IExecutionStageProcessingEvent<T>
+  extends IExecutionStageEvent {
+  data: Partial<T>;
 }
 
 export enum NodeExecutionStage {

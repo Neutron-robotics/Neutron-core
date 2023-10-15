@@ -1,3 +1,5 @@
+import { ILiteEvent, LiteEvent } from "../../../dist";
+import NeutronGraphError from "../errors/NeutronGraphError";
 import XYPosition from "../utils/XYPosition";
 import {
   NeutronEdgeDB,
@@ -6,6 +8,7 @@ import {
 } from "./NeutronHandle";
 import {
   IExecutionStageEvent,
+  IExecutionStageProcessingEvent,
   INeutronNode,
   NeutronNodeDB,
   NodeExecutionStage,
@@ -24,28 +27,38 @@ export interface INodeBuilder {
   position: XYPosition;
 }
 
-interface IGraphTopologicalSort {
-  incomingHandles: Record<string, Set<string>>;
-  queue: INeutronNode<any, any>[];
-  processed: string[];
-}
-
 class NeutronNodeGraph implements INeutronGraphNode {
   public inputNode: INeutronNode<any, any>;
   public nodes: INeutronNode<any, any>[];
 
+  private _nodeDb: NeutronNodeDB[];
+  private _edgesDb: NeutronEdgeDB[];
+  private _cleanupFn: (() => void)[];
+  private _processingAction: ILiteEvent<boolean>;
+
   constructor(nodes: NeutronNodeDB[], edges: NeutronEdgeDB[]) {
+    this._nodeDb = nodes;
+    this._edgesDb = edges;
     this.inputNode = {} as any;
     this.nodes = [];
     this.buildGraph(nodes, edges);
-    this.inputNode.executionStage.on((e) => {
-      switch (e.event) {
-        case NodeExecutionStage.Processed:
-          this.handleInputNodeProcessed();
-          break;
-        default:
-          break;
-      }
+    this.inputNode.AfterProcessingEvent.on(this.handleInputNodeProcessed);
+    this._cleanupFn = [];
+    this._processingAction = new LiteEvent<boolean>();
+    this._processingAction.on((value) => {
+      if (!value) this.cleanGraph();
+    });
+  }
+
+  public waitToProcess(): Promise<void> {
+    return new Promise((res) => {
+      const processed = (e: boolean) => {
+        if (!e) {
+          this._processingAction.off(processed);
+          res();
+        }
+      };
+      this._processingAction.on(processed);
     });
   }
 
@@ -71,25 +84,31 @@ class NeutronNodeGraph implements INeutronGraphNode {
   private handleInputNodeProcessed = () => {
     console.log("Input node processed");
     // const sort = this.getTopologicalSort();
-    const incomingHandles: Record<string, Set<string>> = {};
+    const incomingHandles: Record<string, Record<string, number>> = {};
     const queue: INeutronNode<any, any>[] = [];
     const processed: string[] = [];
+    const processing: Set<string> = new Set<string>();
 
     const processNodeBatch = () => {
       console.log("Process Batch");
+
+      if (queue.length === 0 && processing.size === 0) {
+        console.log("End processing graph ?");
+        this._processingAction.trigger(false);
+      }
+
       while (queue.length > 0) {
         const nodeToProcess = queue.shift();
-        nodeToProcess?.processNode();
+        if (!nodeToProcess) return;
+
+        processing.add(nodeToProcess.id);
+        nodeToProcess.processNode();
       }
     };
 
-    const handleNodeProcedeed = (e: IExecutionStageEvent) => {
-      if (
-        e.event !== NodeExecutionStage.Processed &&
-        e.event !== NodeExecutionStage.Skipped
-      )
-        return;
-
+    const handleNodeProcedeed = (
+      e: IExecutionStageEvent | IExecutionStageProcessingEvent<any>
+    ) => {
       processed.push(e.nodeId);
 
       const processedNode = this.nodes.find((n) => n.id === e.nodeId);
@@ -99,14 +118,20 @@ class NeutronNodeGraph implements INeutronGraphNode {
         }] - Processed`
       );
       if (!processedNode) throw new Error("Processed node do not exist");
-
+      processing.delete(processedNode.id);
       // Resolve input property for each node that are connected with
       // the processed node. If the node has all input completed,
       // it is added to the queue
       Object.entries(processedNode.outputHandles).forEach(([key, handle]) => {
         handle.targets.forEach((inputHandle) => {
-          incomingHandles[inputHandle.node.id].delete(inputHandle.propertyName);
-          if (incomingHandles[inputHandle.node.id].size === 0) {
+          // incomingHandles[inputHandle.node.id].delete(inputHandle.propertyName);
+          incomingHandles[inputHandle.node.id][inputHandle.propertyName]--;
+          if (
+            Object.values(incomingHandles[inputHandle.node.id]).every(
+              (e) => e === 0
+            ) &&
+            !processing.has(inputHandle.node.id)
+          ) {
             queue.push(inputHandle.node);
             console.log(
               `[${processedNode?.id}][${
@@ -123,112 +148,35 @@ class NeutronNodeGraph implements INeutronGraphNode {
     };
 
     this.nodes.forEach((node) => {
-      incomingHandles[node.id] = new Set();
-      node.executionStage.on(handleNodeProcedeed);
-    });
-
-    this.nodes.forEach((node) => {
+      incomingHandles[node.id] = {};
       Object.values(node.inputHandles).forEach((handle) => {
-        incomingHandles[node.id].add(handle.propertyName);
+        const inputNb = this._edgesDb.filter(
+          (e) => e.target === node.id && e.targetHandle === handle.propertyName
+        ).length;
+
+        incomingHandles[node.id][handle.propertyName] = inputNb;
       });
+
+      if (node.id !== this.inputNode.id) {
+        node.AfterProcessingEvent.on(handleNodeProcedeed);
+        node.SkippedNodeEvent.on(handleNodeProcedeed);
+        this._cleanupFn.push(() => {
+          node.AfterProcessingEvent.off(handleNodeProcedeed);
+          node.SkippedNodeEvent.off(handleNodeProcedeed);
+        });
+      }
     });
 
+    this._processingAction.trigger(true);
     handleNodeProcedeed({
       nodeId: this.inputNode.id,
-      event: NodeExecutionStage.Processed,
     });
   };
 
-  private getTopologicalSort(): IGraphTopologicalSort {
-    // Create a map to store incoming edges for each node.
-    const incomingHandles: Record<string, Set<string>> = {};
-    const queue: INeutronNode<any, any>[] = [];
-    const processed: string[] = [];
-
-    // Initialize incoming edges map.
-    this.nodes.forEach((node) => {
-      incomingHandles[node.id] = new Set();
-    });
-
-    // Count incoming edges for each node.
-    this.nodes.forEach((node) => {
-      Object.values(node.inputHandles).forEach((handle) => {
-        incomingHandles[node.id].add(handle.propertyName);
-      });
-    });
-
-    // Add nodes with no incoming edges to the queue.
-    this.nodes.forEach((node) => {
-      if (incomingHandles[node.id].size === 0) {
-        queue.push(node);
-      }
-    });
-
-    return {
-      incomingHandles,
-      queue,
-      processed,
-    };
-  }
-
-  private topologicalSort(): INeutronNode<any, any>[] {
-    // Create a map to store incoming edges for each node.
-    const incomingEdges: Record<string, number> = {};
-
-    // Create a queue to store nodes with no incoming edges.
-    const queue: INeutronNode<any, any>[] = [];
-
-    // Initialize incoming edges map.
-    this.nodes.forEach((node) => {
-      incomingEdges[node.id] = 0;
-    });
-
-    // Count incoming edges for each node.
-    this.nodes.forEach((node) => {
-      incomingEdges[node.id] = Object.entries(node.inputHandles).length;
-    });
-
-    // Add nodes with no incoming edges to the queue.
-    this.nodes.forEach((node) => {
-      if (incomingEdges[node.id] === 0) {
-        queue.push(node);
-      }
-    });
-
-    const sortedNodes: INeutronNode<any, any>[] = [];
-    // Perform topological sorting.
-    while (queue.length > 0) {
-      const currentNode = queue.shift()!;
-      sortedNodes.push(currentNode);
-
-      // Update incoming edges for adjacent nodes.
-      this.nodes.forEach((node) => {
-        Object.entries(node.inputHandles).forEach(([key, handle]) => {
-          if (node.inputHandles[key].node.id === currentNode.id) {
-            incomingEdges[node.id]--;
-            if (incomingEdges[node.id] === 0) {
-              queue.push(this.getNodeById(node.id));
-            }
-          }
-        });
-      });
-    }
-
-    // Check for cycles (if not all nodes are included).
-    if (sortedNodes.length !== this.nodes.length) {
-      throw new Error("The graph contains cycles.");
-    }
-
-    return sortedNodes;
-  }
-
-  private getNodeById(id: string): INeutronNode<any, any> {
-    return this.nodes.find((node) => node.id === id)!;
-  }
-
   private buildGraph(nodes: NeutronNodeDB[], edges: NeutronEdgeDB[]) {
     const inputNode = nodes.find((e) => e.isInput);
-    if (!inputNode) throw new Error("No input node");
+    if (!inputNode)
+      throw new NeutronGraphError("No input node has been provided");
 
     const nodeBuilder = {
       id: inputNode.id,
@@ -244,21 +192,31 @@ class NeutronNodeGraph implements INeutronGraphNode {
     nodeBuilder: INodeBuilder,
     nodes: NeutronNodeDB[],
     edges: NeutronEdgeDB[],
+    visited: Set<string> = new Set(),
     inputNode?: INeutronNode<any, any>
   ): INeutronNode<any, any> {
     const node = NodeFactory.createNode(nodeBuilder);
     if (!node) {
-      throw new Error(`Type ${nodeBuilder.type} is not implemented`);
+      throw new NeutronGraphError(
+        `Type ${nodeBuilder.type} is not implemented`
+      );
     }
 
+    if (visited.has(node.id))
+      throw new NeutronGraphError(
+        "A cycle has been detected while building the graph"
+      );
+
     this.nodes.push(node);
+    visited.add(node.id);
 
     const outputEdges = edges.filter((e) => e.source === node.id);
     for (const edge of outputEdges) {
       const targets = nodes.filter((e) => e.id === edge.target);
       if (!targets.length)
-        throw new Error(
-          `The node ${edge.target} defined by edge ${edge.id} could not be found while building graph`
+        throw new NeutronGraphError(
+          `The node ${edge.target} defined by edge ${edge.id} could not be found while building graph`,
+          node.id
         );
       for (const target of targets) {
         const nodeBuilder = {
@@ -269,7 +227,7 @@ class NeutronNodeGraph implements INeutronGraphNode {
 
         const targetNode =
           this.findNodeInGraph(inputNode ?? node, nodeBuilder.id) ??
-          this.makeNode(nodeBuilder, nodes, edges, inputNode ?? node);
+          this.makeNode(nodeBuilder, nodes, edges, visited, inputNode ?? node);
 
         if (!node.outputHandles[edge.sourceHandle]) {
           node.outputHandles[edge.sourceHandle] = new NeutronOutputHandle(
@@ -290,6 +248,15 @@ class NeutronNodeGraph implements INeutronGraphNode {
     }
 
     return node;
+  }
+
+  private cleanGraph() {
+    this.nodes.forEach((node) => {
+      this._cleanupFn.forEach((e) => e());
+      Object.values(node.outputHandles).forEach((handle) => {
+        handle.cleanValues();
+      });
+    });
   }
 }
 

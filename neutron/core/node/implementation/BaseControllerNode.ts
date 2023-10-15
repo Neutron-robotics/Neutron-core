@@ -18,10 +18,10 @@ class BaseControllerNode extends BaseNode<void, IBaseControllerInput> {
     super(builder);
   }
 
-  public sendInput = (input: Partial<IBaseControllerInput>) => {
+  public sendInput(input: Partial<IBaseControllerInput>): void {
     this.value = input;
     super.processNode();
-  };
+  }
 
   protected process = () => {
     const output = Object.entries(this.value ?? {}).reduce(

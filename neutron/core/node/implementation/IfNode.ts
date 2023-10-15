@@ -11,10 +11,7 @@ interface IfNodeOutput {
   value: any;
 }
 
-class IfNode extends BaseNode<
-  IfNodeInput,
-  NonNullable<IfNodeOutput> | undefined
-> {
+class IfNode extends BaseNode<IfNodeInput, IfNodeOutput> {
   public readonly type = "ifNode";
 
   constructor(builder: INodeBuilder) {
