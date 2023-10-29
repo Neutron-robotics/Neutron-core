@@ -14,7 +14,7 @@ interface IfNodeOutput {
 class IfNode extends BaseNode<IfNodeInput, IfNodeOutput> {
   public readonly type = "ifNode";
 
-  constructor(builder: INodeBuilder) {
+  constructor(builder: INodeBuilder<void>) {
     super(builder);
   }
   protected process = async (input: IfNodeInput) => {

@@ -1,28 +1,33 @@
 import { INodeBuilder } from "../NeutronGraphNode";
-import { INeutronNode } from "../NeutronNode";
+import { INeutronNode, NeutronNodeDB } from "../NeutronNode";
 import BaseControllerNode from "./BaseControllerNode";
 import IfNode from "./IfNode";
-import PublisherNode from "./PublisherNode";
+import PublisherNode, { IPublisherNodeBuilderSpecifics } from "./PublisherNode";
 import PurcentageNode from "./PurcentageNode";
-import SubscriberNode from "./SubscriberNode";
+import SubscriberNode, { ISubscriberNodeSpecific } from "./SubscriberNode";
 
 class NodeFactory {
   static nodeFactory: Record<
     string,
-    (builder: INodeBuilder) => INeutronNode<any, any>
+    (builder: INodeBuilder<any>) => INeutronNode<any, any>
   > = {
-    ["ifNode"]: (builder: INodeBuilder) => new IfNode(builder),
-    ["publisherNode"]: (builder: INodeBuilder) => new PublisherNode(builder),
-    ["purcentageNode"]: (builder: INodeBuilder) => new PurcentageNode(builder),
-    ["subscriberNode"]: (builder: INodeBuilder) => new SubscriberNode(builder),
-    ["baseControllerNode"]: (builder: INodeBuilder) =>
+    ["ifNode"]: (builder: INodeBuilder<void>) => new IfNode(builder),
+    ["publisherNode"]: (
+      builder: INodeBuilder<IPublisherNodeBuilderSpecifics>
+    ) => new PublisherNode(builder),
+    ["purcentageNode"]: (builder: INodeBuilder<void>) =>
+      new PurcentageNode(builder),
+    ["subscriberNode"]: (builder: INodeBuilder<ISubscriberNodeSpecific>) =>
+      new SubscriberNode(builder),
+    ["baseControllerNode"]: (builder: INodeBuilder<void>) =>
       new BaseControllerNode(builder),
   };
 
-  static createNode(builder: INodeBuilder): INeutronNode<any, any> | null {
-    const factory = NodeFactory.nodeFactory[builder.type];
+  static createNode(nodeDb: NeutronNodeDB): INeutronNode<any, any> | null {
+    const factory = NodeFactory.nodeFactory[nodeDb.type];
+
     if (factory) {
-      return factory(builder);
+      return factory(nodeDb);
     }
     return null;
   }

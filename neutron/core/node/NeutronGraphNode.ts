@@ -1,4 +1,7 @@
-import { ILiteEvent, LiteEvent } from "../../../dist";
+import { IConnectionContext } from "../../context/ConnectionContext";
+import { RosContext } from "../../context/RosContext";
+import { IRos2System } from "../../models/ros2/ros2";
+import { ILiteEvent, LiteEvent } from "../../utils/LiteEvent";
 import NeutronGraphError from "../errors/NeutronGraphError";
 import XYPosition from "../utils/XYPosition";
 import {
@@ -11,26 +14,30 @@ import {
   IExecutionStageProcessingEvent,
   INeutronNode,
   NeutronNodeDB,
-  NodeExecutionStage,
 } from "./NeutronNode";
+import { IRosNode } from "./implementation/BaseNode";
 import NodeFactory from "./implementation/nodeFactory";
+import { isRosNode } from "./isRosNode";
 
 export interface INeutronGraphNode {
   inputNode: INeutronNode<any, any>;
   nodes: INeutronNode<any, any>[];
   getNode: <T extends INeutronNode<any, any>>(id: string) => T | undefined;
+  useRos(context: RosContext, rosSystem: IRos2System): void;
 }
 
-export interface INodeBuilder {
+export interface INodeBuilder<T> {
   id: string;
   type: string;
   position: XYPosition;
+  specifics?: T;
 }
 
 class NeutronNodeGraph implements INeutronGraphNode {
   public inputNode: INeutronNode<any, any>;
   public nodes: INeutronNode<any, any>[];
 
+  private context: RosContext | undefined;
   private _nodeDb: NeutronNodeDB[];
   private _edgesDb: NeutronEdgeDB[];
   private _cleanupFn: (() => void)[];
@@ -50,6 +57,13 @@ class NeutronNodeGraph implements INeutronGraphNode {
     });
   }
 
+  public useRos(context: RosContext, rosSystem: IRos2System): void {
+    this.context = context;
+    this.getRosNodes().forEach((node) => {
+      node.useRos(context, rosSystem);
+    });
+  }
+
   public waitToProcess(): Promise<void> {
     return new Promise((res) => {
       const processed = (e: boolean) => {
@@ -64,6 +78,11 @@ class NeutronNodeGraph implements INeutronGraphNode {
 
   public getNode<T extends INeutronNode<any, any>>(id: string): T | undefined {
     return this.nodes.find((node) => node.id === id) as T | undefined;
+  }
+
+  public getRosNodes() {
+    return this.nodes.filter((e) => isRosNode(e)) as (INeutronNode<any, any> &
+      IRosNode)[];
   }
 
   private findNodeInGraph<T, T2>(
@@ -178,18 +197,13 @@ class NeutronNodeGraph implements INeutronGraphNode {
     if (!inputNode)
       throw new NeutronGraphError("No input node has been provided");
 
-    const nodeBuilder = {
-      id: inputNode.id,
-      type: inputNode.type,
-      position: inputNode.position,
-    };
-    const inputNeutronNode = this.makeNode(nodeBuilder, nodes, edges);
+    const inputNeutronNode = this.makeNode(inputNode, nodes, edges);
     inputNeutronNode.inputHandles;
     this.inputNode = inputNeutronNode;
   }
 
   private makeNode(
-    nodeBuilder: INodeBuilder,
+    nodeBuilder: NeutronNodeDB,
     nodes: NeutronNodeDB[],
     edges: NeutronEdgeDB[],
     visited: Set<string> = new Set(),
@@ -219,15 +233,9 @@ class NeutronNodeGraph implements INeutronGraphNode {
           node.id
         );
       for (const target of targets) {
-        const nodeBuilder = {
-          id: target.id,
-          type: target.type,
-          position: target.position,
-        };
-
         const targetNode =
-          this.findNodeInGraph(inputNode ?? node, nodeBuilder.id) ??
-          this.makeNode(nodeBuilder, nodes, edges, visited, inputNode ?? node);
+          this.findNodeInGraph(inputNode ?? node, target.id) ??
+          this.makeNode(target, nodes, edges, visited, inputNode ?? node);
 
         if (!node.outputHandles[edge.sourceHandle]) {
           node.outputHandles[edge.sourceHandle] = new NeutronOutputHandle(
@@ -259,10 +267,5 @@ class NeutronNodeGraph implements INeutronGraphNode {
     });
   }
 }
-
-// Tests idea:
-//
-// - should throw if no input node
-// - Should define a max loop threshold, and throw in case of infinite loop
 
 export default NeutronNodeGraph;

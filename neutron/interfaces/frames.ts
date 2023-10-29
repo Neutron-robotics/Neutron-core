@@ -14,9 +14,7 @@ interface IFramePackage {
 }
 
 interface IFrameExecutor {
-  id: string;
   methodType: string;
-  method: 'on' | 'send' | 'request' | 'sendLoop';
   payload: any;
   next?: (response: IFrameResult) => IFrameExecutor;
   loopCancellationToken?: string;

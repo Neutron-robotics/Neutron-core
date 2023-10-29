@@ -28,6 +28,7 @@ export interface NeutronNodeDB {
   width?: number;
   height?: number;
   isInput?: boolean;
+  specifics?: any;
 }
 
 export interface IExecutionStageEvent {

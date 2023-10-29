@@ -28,7 +28,6 @@ export const makeFrameExecutor = (
     loopCancellationToken?: string;
   }
 ): IFrameExecutor => ({
-  id: v4(),
   ...config,
   payload,
   next: opts?.chainWith

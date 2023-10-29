@@ -21,7 +21,7 @@ interface IConnectionContext {
   sendLoop(frame: IFrameExecutor): Promise<IFrameResult>;
   on<T>(executor: IFrameExecutor, handler: LiteEventHandler<T>): void;
   off<T>(executor: IFrameExecutor, handler: LiteEventHandler<T>): void;
-  execute(executor: IFrameExecutor): Promise<IFrameResult>;
+  // execute(executor: IFrameExecutor): Promise<IFrameResult>;
 }
 
 abstract class ConnectionContext implements IConnectionContext {
@@ -66,44 +66,6 @@ abstract class ConnectionContext implements IConnectionContext {
   ): void;
 
   public abstract removeAllListeners(): void;
-
-  public async execute(executor: IFrameExecutor): Promise<IFrameResult> {
-    let result = null;
-
-    if (executor.loopCancellationToken)
-      this.stopLoop(executor.loopCancellationToken);
-
-    switch (executor.method) {
-      case "request":
-        result = await this.request(executor);
-        break;
-      case "send":
-        result = await this.send(executor);
-        break;
-      case "sendLoop":
-        result = await this.sendLoop(executor);
-        break;
-      case "on":
-        if (!executor.payload.callback)
-          return Promise.reject(
-            "executor must contains a callback for a subscription"
-          );
-        this.on(executor, executor.payload.callback);
-        result = { success: true, result: null };
-        break;
-      default:
-        return Promise.reject("Unknown executor type");
-    }
-    if (executor.next) {
-      const nextExecutor = executor.next(result);
-      const nextResult = await this.execute(nextExecutor);
-      return {
-        ...result,
-        next: nextResult,
-      };
-    }
-    return result;
-  }
 
   protected abstract stopLoop(cancellationToken: string): void;
 }

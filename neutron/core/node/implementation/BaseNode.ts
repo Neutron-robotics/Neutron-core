@@ -1,3 +1,6 @@
+import { ConnectionContext } from "../../../context/ConnectionContext";
+import { RosContext } from "../../../context/RosContext";
+import { IRos2System } from "../../../models/ros2/ros2";
 import { ILiteEvent, LiteEvent } from "../../../utils/LiteEvent";
 import XYPosition from "../../utils/XYPosition";
 import { INodeBuilder } from "../NeutronGraphNode";
@@ -11,6 +14,11 @@ import {
   IExecutionStageProcessingEvent,
   INeutronNode,
 } from "../NeutronNode";
+
+export interface IRosNode {
+  useRos: (context: RosContext, system: IRos2System) => void;
+  isConnected: boolean;
+}
 
 abstract class BaseNode<TInput, TOutput>
   implements INeutronNode<TInput, TOutput>
@@ -32,7 +40,7 @@ abstract class BaseNode<TInput, TOutput>
   public ProcessingErrorEvent: ILiteEvent<IExecutionStageEvent>;
   public SkippedNodeEvent: ILiteEvent<IExecutionStageEvent>;
 
-  constructor(builder: INodeBuilder) {
+  constructor(builder: INodeBuilder<any>) {
     this.id = builder.id;
     this.position = builder.position;
     this.inputHandles = {};

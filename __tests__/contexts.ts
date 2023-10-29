@@ -4,8 +4,6 @@ import {
   IRosFrameExecutor,
   IRosFrameExecutorPeriodic,
 } from "../neutron/interfaces/frames";
-import { moveFrame } from "../neutron/frames/OsoyooBaseFrames/moveFrame";
-import { stopFrame } from "../neutron/frames/OsoyooBaseFrames/stopFrame";
 import { sleep } from "../neutron/utils/time";
 import { makeConnectionContext } from "../neutron/context/makeContext";
 import { RobotConnectionType } from "../neutron/interfaces/RobotConnection";
@@ -96,8 +94,6 @@ describe("Ros Contexts", () => {
 
   test("Request", () => {
     const frameExecutor: IRosFrameExecutor = {
-      id: "abcd",
-      method: "request",
       format: "/std_types/Float64Array",
       methodType: "/move_something",
       payload: {
@@ -131,8 +127,6 @@ describe("Ros Contexts", () => {
 
   test("Send", () => {
     const frameExecutor: IRosFrameExecutor = {
-      id: "abcd",
-      method: "send",
       format: "/std_types/Float64Array",
       methodType: "/move_something",
       payload: {
@@ -166,8 +160,6 @@ describe("Ros Contexts", () => {
 
   test("SendLoop", async () => {
     const frameExecutor: IRosFrameExecutorPeriodic = {
-      id: "abcd",
-      method: "sendLoop",
       format: "/std_types/Float64Array",
       methodType: "/move_something",
       payload: {
@@ -211,8 +203,6 @@ describe("Ros Contexts", () => {
 
   test("Subscribe to an event", () => {
     const frameExecutor: IRosFrameExecutor = {
-      id: "abcd",
-      method: "on",
       format: "/std_types/Float64Array",
       methodType: "/move_something",
       payload: {
@@ -242,41 +232,8 @@ describe("Ros Contexts", () => {
     });
   });
 
-  test("subscribe to an event using a frame", () => {
-    const handler = jest.fn();
-    const frameExecutor: IRosFrameExecutor = {
-      id: "abcd",
-      method: "on",
-      format: "/std_types/Float64Array",
-      methodType: "/move_something",
-      payload: {
-        callback: (payload: any) => {
-          handler({
-            x: payload.value1,
-            y: payload.value2,
-          });
-        },
-      },
-    };
-    const rosContext = new RosContext({
-      hostname: "localhost",
-      port: 9090,
-    });
-    rosContext.execute(frameExecutor);
-
-    const mockTopicInstance = (Topic as any).mock.instances[0];
-    const mocksubscribeInstance =
-      mockTopicInstance.subscribe as unknown as jest.Mock<any, any>;
-
-    expect(Topic).toHaveBeenCalledTimes(1);
-    expect(mocksubscribeInstance).toHaveBeenCalledTimes(1);
-    expect(mocksubscribeInstance).toHaveBeenCalledWith(expect.any(Function));
-  });
-
   test("subscribe and unsubscribe", () => {
     const frameExecutor: IRosFrameExecutor = {
-      id: "abcd",
-      method: "on",
       format: "/std_types/Float64Array",
       methodType: "/move_something",
       payload: {
@@ -308,77 +265,5 @@ describe("Ros Contexts", () => {
     const mockTopicInstance2 = (Topic as any).mock.instances[1];
     const mockunsubscribeInstance = mockTopicInstance2.unsubscribe;
     expect(mockunsubscribeInstance).toHaveBeenCalledTimes(1);
-  });
-
-  test("Execute a request", () => {
-    const frameExecutor: IRosFrameExecutor = {
-      id: "abcd",
-      method: "request",
-      format: "/std_types/Float64Array",
-      methodType: "/move_something",
-      payload: {
-        x: 0,
-        y: 0,
-      },
-    };
-    const rosContext = new RosContext({
-      hostname: "localhost",
-      port: 9090,
-    });
-    rosContext.execute(frameExecutor);
-    const mockServiceInstance = (Service as any).mock.instances[0];
-    const mockcallServiceInstance = mockServiceInstance.callService;
-    expect(Service).toHaveBeenCalledTimes(1);
-    expect(mockcallServiceInstance).toHaveBeenCalledTimes(1);
-    expect(mockcallServiceInstance).toHaveBeenCalledWith(
-      new Message({ x: 0, y: 0 }),
-      expect.any(Function),
-      expect.any(Function)
-    );
-    expect(Service).toHaveBeenCalledWith({
-      ros: (Ros as any).mock.instances[0],
-      name: "/move_something",
-      serviceType: "/std_types/Float64Array",
-    });
-  });
-
-  test("Execute multiple frame", async () => {
-    const rosContext = new RosContext({
-      hostname: "localhost",
-      port: 9090,
-    });
-    const moveExecutor = moveFrame.build([0, 0, 0, 0, 0, 0]);
-    const res = await rosContext.execute(moveExecutor);
-    expect(res.success).toBeTruthy();
-    await sleep(2000);
-    const stopExecutor = stopFrame.build({});
-    const res2 = await rosContext.execute(stopExecutor);
-    expect(res2.success).toBeTruthy();
-    await sleep(2000);
-
-    expect(Topic).toHaveBeenCalledTimes(3);
-    expect(Topic).toHaveBeenCalledWith({
-      ros: (Ros as any).mock.instances[0],
-      name: "set_velocity",
-      messageType: "myrobotics_protocol/msg/Velocity",
-      throttle_rate: 10,
-      latch: false,
-      queue_length: 1,
-      queue_size: 10,
-    });
-    expect(Topic).toHaveBeenCalledWith({
-      ros: (Ros as any).mock.instances[0],
-      name: "keep_alive",
-      messageType: "std_msgs/String",
-      throttle_rate: 10,
-      latch: false,
-      queue_length: 1,
-      queue_size: 10,
-    });
-    const mockpublishInstance = (Topic as any).mock.instances[0].publish;
-    expect(mockpublishInstance).toHaveBeenCalledTimes(1);
-    const mockpublishInstance2 = (Topic as any).mock.instances[1].publish;
-    expect(mockpublishInstance2.mock.calls.length).toBeGreaterThan(4);
-    expect(mockpublishInstance2.mock.calls.length).toBeLessThan(8);
   });
 });

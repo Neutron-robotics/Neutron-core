@@ -31,9 +31,7 @@ describe("frames", () => {
     const frames = frameFactory.buildFramePackage(framePackage as any);
     const frameExecutor = frames[0].build({ x: 1, y: 2 });
     expect(frameExecutor).toBeDefined();
-    expect(frameExecutor.id).toBe("move");
     expect(frameExecutor.methodType).toBe("publishLoop");
-    expect(frameExecutor.method).toBe("set_velocity");
     expect(frameExecutor.payload).toEqual({ x: 1, y: 2 });
   });
 });

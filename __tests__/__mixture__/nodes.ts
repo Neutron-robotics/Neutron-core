@@ -8,6 +8,9 @@ const complexNodes = [
     },
     title: "test pub",
     isInput: false,
+    specifics: {
+      topicId: "qiehiehi",
+    },
   },
   {
     id: "325bab26-7d75-442e-85f2-4dd328d4f146",

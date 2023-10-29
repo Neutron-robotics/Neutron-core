@@ -13,7 +13,7 @@ class PurcentageNode extends BaseNode<number, IPurcentageNodeOutput> {
   private min: number;
   private max: number;
 
-  constructor(builder: INodeBuilder) {
+  constructor(builder: INodeBuilder<void>) {
     super(builder);
     this.min = 0;
     this.max = 100;

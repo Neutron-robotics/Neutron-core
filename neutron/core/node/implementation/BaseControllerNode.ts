@@ -14,7 +14,7 @@ class BaseControllerNode extends BaseNode<void, IBaseControllerInput> {
 
   private value: Partial<IBaseControllerInput> | undefined;
 
-  constructor(builder: INodeBuilder) {
+  constructor(builder: INodeBuilder<void>) {
     super(builder);
   }
 

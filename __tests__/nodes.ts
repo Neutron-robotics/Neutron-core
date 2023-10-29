@@ -13,7 +13,13 @@ import {
 } from "./__mixture__/nodes";
 import NeutronGraphError from "../neutron/core/errors/NeutronGraphError";
 import _ from "lodash";
-import { ILiteEvent } from "../dist";
+import { ILiteEvent } from "../neutron/utils/LiteEvent";
+import { makeConnectionContext } from "../neutron/context/makeContext";
+import { RobotConnectionType } from "../neutron/interfaces/RobotConnection";
+import { mockRosSystem } from "./__mixture__/rosSystem";
+import { RosContext } from "../neutron/context/RosContext";
+
+jest.mock("../neutron/context/makeContext");
 
 describe("Nodes graph builder", () => {
   it("build basic nodegraph successfuly", () => {
@@ -290,4 +296,130 @@ describe("Nodegraph execution", () => {
       nodeId: "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583",
     });
   }, 100000);
+});
+
+describe("Nodegraph execution with connection context", () => {
+  beforeEach(() => {
+    (makeConnectionContext as any).mockClear();
+  });
+
+  it("Build nodegraph with context", async () => {
+    const graph = new NeutronNodeGraph(complexNodes, complexEdges);
+    const robotConnectionInfos = {
+      hostname: "localhost",
+      port: 69420,
+      type: RobotConnectionType.ROSBRIDGE,
+    };
+    (makeConnectionContext as any).mockReturnValue({});
+
+    const connectionContext = makeConnectionContext(
+      robotConnectionInfos.type,
+      robotConnectionInfos
+    ) as RosContext;
+
+    graph.useRos(connectionContext, mockRosSystem);
+
+    const node = graph.getNode<PublisherNode<any>>(
+      "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583"
+    );
+    expect(node?.isConnected).toBe(false);
+    expect(
+      graph.nodes.filter((e) => (e as any).context !== undefined).length
+    ).toBe(1);
+  });
+
+  it("Run a node with context", () => {
+    (makeConnectionContext as any).mockReturnValue({
+      send: jest.fn(),
+      isConnected: jest.fn().mockReturnValue(true),
+    });
+    const graph = new NeutronNodeGraph(complexNodes, complexEdges);
+    const robotConnectionInfos = {
+      hostname: "localhost",
+      port: 69420,
+      type: RobotConnectionType.ROSBRIDGE,
+    };
+    const connectionContext = makeConnectionContext(
+      robotConnectionInfos.type,
+      robotConnectionInfos
+    ) as RosContext;
+
+    (connectionContext as any).send.mockImplementation(() =>
+      Promise.resolve(true)
+    );
+
+    graph.useRos(connectionContext, mockRosSystem);
+
+    const node = graph.getNode<PublisherNode<any>>(
+      "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583"
+    );
+    (node as any).process({ x: 3, y: 1 });
+    expect((connectionContext as any).send).toHaveBeenCalledTimes(1);
+    expect((connectionContext as any).send).toHaveBeenCalledWith({
+      methodType: "test topic",
+      format: "std/position",
+      payload: { x: 3, y: 1 },
+    });
+  });
+
+  it("Run a graph with context", async () => {
+    const graph = new NeutronNodeGraph(complexNodes, complexEdges);
+    (makeConnectionContext as any).mockReturnValue({
+      send: jest.fn(),
+      isConnected: jest.fn().mockReturnValue(true),
+    });
+    const robotConnectionInfos = {
+      hostname: "localhost",
+      port: 69420,
+      type: RobotConnectionType.ROSBRIDGE,
+    };
+    const connectionContext = makeConnectionContext(
+      robotConnectionInfos.type,
+      robotConnectionInfos
+    ) as RosContext;
+
+    const publisherNodeCallback = jest.fn();
+
+    (connectionContext as any).send.mockImplementation(() =>
+      Promise.resolve(true)
+    );
+
+    graph.useRos(connectionContext, mockRosSystem);
+
+    const controllerNode = graph.getNode<BaseControllerNode>(
+      "325bab26-7d75-442e-85f2-4dd328d4f146"
+    );
+    const publisherNode = graph.getNode<PublisherNode<any>>(
+      "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583"
+    );
+
+    publisherNode?.BeforeProcessingEvent.on(publisherNodeCallback);
+    const waitForGraphToProcess = new Promise((res) => {
+      publisherNode?.AfterProcessingEvent.once(() => res({}));
+    });
+
+    controllerNode?.sendInput({
+      top: 20,
+      left: 15,
+    });
+
+    await waitForGraphToProcess;
+
+    expect(publisherNodeCallback).toHaveBeenCalledWith({
+      data: {
+        x: 20,
+        yaw: 15,
+      },
+      nodeId: "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583",
+    });
+    expect((connectionContext as any).send).toHaveBeenCalledTimes(1);
+    expect((connectionContext as any).send).toHaveBeenCalledWith({
+      methodType: "test topic",
+      format: "std/position",
+      payload: {
+        x: 20,
+        yaw: 15,
+      },
+    });
+  });
 });
