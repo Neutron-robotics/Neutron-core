@@ -1,7 +1,10 @@
+import { RosContext } from "./context/RosContext";
 import NeutronNodeGraph from "./core/node/NeutronGraphNode";
 import BaseControllerNode from "./core/node/implementation/BaseControllerNode";
+import { IRos2System } from "./models/ros2/ros2";
+import { sleep } from "./utils/time";
 
-const osoyooNodes = [
+const complexNodes = [
   {
     id: "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583",
     type: "publisherNode",
@@ -11,6 +14,9 @@ const osoyooNodes = [
     },
     title: "test pub",
     isInput: false,
+    specifics: {
+      topicId: "qiehiehi",
+    },
   },
   {
     id: "325bab26-7d75-442e-85f2-4dd328d4f146",
@@ -107,7 +113,7 @@ const osoyooNodes = [
   },
 ];
 
-const osoyooEdges = [
+const complexEdges = [
   {
     source: "325bab26-7d75-442e-85f2-4dd328d4f146",
     sourceHandle: "top",
@@ -194,103 +200,85 @@ const osoyooEdges = [
   },
 ];
 
-const nodes = [
-  {
-    id: "69a5f4a5-6e08-4d00-88c0-77aa4929de4f",
-    type: "subscriberNode",
-    position: {
-      x: -80.60000000000002,
-      y: 318,
+const mockRosSystem: IRos2System = {
+  _id: "randomId",
+  name: "test system",
+  topics: [
+    {
+      _id: "qiehiehi",
+      name: "test_topic",
+      messageType: {
+        _id: "dddidi",
+        name: "myrobotics_protocol/msg/Velocity",
+        fields: [
+          {
+            fieldname: "x",
+            fieldtype: "number",
+          },
+          {
+            fieldname: "y",
+            fieldtype: "number",
+          },
+          {
+            fieldname: "z",
+            fieldtype: "number",
+          },
+          {
+            fieldname: "pitch",
+            fieldtype: "number",
+          },
+          {
+            fieldname: "roll",
+            fieldtype: "number",
+          },
+          {
+            fieldname: "yaw",
+            fieldtype: "number",
+          },
+        ],
+      },
     },
-    width: 81,
-    height: 116,
-    isInput: true,
-  },
-  {
-    id: "288a3812-e455-4a34-9f8d-a54aa7f83bd5",
-    type: "andNode",
-    position: {
-      x: 113.39999999999998,
-      y: 376,
-    },
-    width: 80,
-    height: 60,
-  },
-  {
-    id: "1c720c53-429f-4323-8088-2bc1fa9cf35a",
-    type: "purcentageNode",
-    position: {
-      x: 268.4,
-      y: 370,
-    },
-    width: 160,
-    height: 70,
-  },
-  {
-    id: "ce3ca636-01a5-4c53-8236-66e86bca141d",
-    type: "pickNode",
-    position: {
-      x: 499.4,
-      y: 372,
-    },
-    width: 120,
-    height: 70,
-  },
-];
-
-const edges = [
-  {
-    source: "69a5f4a5-6e08-4d00-88c0-77aa4929de4f",
-    sourceHandle: "image",
-    target: "288a3812-e455-4a34-9f8d-a54aa7f83bd5",
-    targetHandle: "input-1-d5c8948e-b770-4fad-a4a6-ea0345f485ff",
-    id: "reactflow__edge-69a5f4a5-6e08-4d00-88c0-77aa4929de4fimage-288a3812-e455-4a34-9f8d-a54aa7f83bd5input-1-d5c8948e-b770-4fad-a4a6-ea0345f485ff",
-  },
-  {
-    source: "69a5f4a5-6e08-4d00-88c0-77aa4929de4f",
-    sourceHandle: "resolution",
-    target: "288a3812-e455-4a34-9f8d-a54aa7f83bd5",
-    targetHandle: "input-2-d5c8948e-b770-4fad-a4a6-ea0345f485ff",
-    id: "reactflow__edge-69a5f4a5-6e08-4d00-88c0-77aa4929de4fresolution-288a3812-e455-4a34-9f8d-a54aa7f83bd5input-2-d5c8948e-b770-4fad-a4a6-ea0345f485ff",
-  },
-  {
-    source: "288a3812-e455-4a34-9f8d-a54aa7f83bd5",
-    sourceHandle: "output-d5c8948e-b770-4fad-a4a6-ea0345f485ff",
-    target: "1c720c53-429f-4323-8088-2bc1fa9cf35a",
-    targetHandle: "input-8dc2f078-3c9f-4418-81cd-33362421894c",
-    id: "reactflow__edge-288a3812-e455-4a34-9f8d-a54aa7f83bd5output-d5c8948e-b770-4fad-a4a6-ea0345f485ff-1c720c53-429f-4323-8088-2bc1fa9cf35ainput-8dc2f078-3c9f-4418-81cd-33362421894c",
-  },
-  {
-    source: "1c720c53-429f-4323-8088-2bc1fa9cf35a",
-    sourceHandle: "output-8dc2f078-3c9f-4418-81cd-33362421894c",
-    target: "ce3ca636-01a5-4c53-8236-66e86bca141d",
-    targetHandle: "input-4e1a839a-7a13-44d3-baf2-ea258f77bdda",
-    id: "reactflow__edge-1c720c53-429f-4323-8088-2bc1fa9cf35aoutput-8dc2f078-3c9f-4418-81cd-33362421894c-ce3ca636-01a5-4c53-8236-66e86bca141dinput-4e1a839a-7a13-44d3-baf2-ea258f77bdda",
-  },
-];
-
-// const nodegraph = makeNodeGraph(osoyooNodes, osoyooEdges);
+  ],
+  publishers: [],
+  subscribers: [],
+  actions: [],
+  services: [],
+  robotId: "sooososos",
+};
 
 async function main() {
-  const graph = new NeutronNodeGraph(osoyooNodes, osoyooEdges);
+  const graph = new NeutronNodeGraph(complexNodes, complexEdges);
 
   const controlNode = graph.getNode<BaseControllerNode>(
     "325bab26-7d75-442e-85f2-4dd328d4f146"
   );
 
+  const context = new RosContext({
+    hostname: "localhost",
+    port: 3030,
+    clientId: "neutron",
+  });
+  const res = await context.connect();
+  graph.useRos(context, mockRosSystem);
+
   if (!controlNode) throw Error("");
 
   controlNode.AfterProcessingEvent.on((e) => {
-    console.timeEnd("node")
+    console.timeEnd("node");
     console.log("yo");
   });
 
-  console.time("node")
-  controlNode.sendInput({
-    top: 10,
-    left: 15,
-    speed: 20,
-  });
+  console.time("node");
+
+  while (1) {
+    controlNode.sendInput({
+      top: 10,
+      left: 15,
+      speed: 20,
+    });
+    await graph.waitToProcess();
+    await sleep(1000);
+  }
 }
 
 main()

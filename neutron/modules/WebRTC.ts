@@ -23,22 +23,22 @@ export class WebRTC extends RobotModule {
     const frame = this.frames["negociate"];
     if (!frame) throw new Error("No frame found for stop command");
     const executor = frame.build({
-      sdp, type
+      sdp,
+      type,
     });
-    const response = await this.context.execute(executor);
-    this.remoteDescriptors = {
-      sdp: response.result.sdp,
-      type: response.result.type,
-    };
-    return response.success;
+    // const response = await this.context.execute(executor);
+    // this.remoteDescriptors = {
+    //   sdp: response.result.sdp,
+    //   type: response.result.type,
+    // };
+    return Promise.resolve(true);
   }
 
   public async disconnect(): Promise<boolean> {
     const frame = this.frames["stop_camera"];
     if (!frame) throw new Error("No frame found for stop command");
     const executor = frame.build({});
-    const response = await this.context.execute(executor);
-    return response.success;
+    return Promise.resolve(true);
   }
 
   public stop(): Promise<IFrameResult> {

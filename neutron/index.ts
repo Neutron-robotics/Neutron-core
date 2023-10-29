@@ -47,11 +47,8 @@ export { TopicSettings } from "./interfaces/ros";
 // Modules
 export { Core } from "./modules/Core";
 export { ICoreProcess, ICoreModule, IRobotStatus } from "./interfaces/core";
-export { ICameraConfiguration, Camera } from "./modules/Camera";
 export { CameraInfoUpdate, Resolution } from "./interfaces/camera";
-export { IRobotBaseConfiguration, RobotBase } from "./modules/RobotBase";
 export { WebRTC } from "./modules/WebRTC";
-export { makeModule } from "./modules/makeModule";
 
 // Utils
 export { inRange } from "./utils/math";

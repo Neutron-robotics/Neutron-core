@@ -17,15 +17,18 @@ import {
 import { LiteEvent, LiteEventHandler } from "../utils/LiteEvent";
 import { RobotConnectionType } from "../interfaces/RobotConnection";
 
-interface IRosContextConfiguration {
+export interface IRosContextConfiguration {
   hostname: string;
   port: number;
+  clientId: string;
 }
 
 class RosContext extends ConnectionContext {
   private ros: Ros;
 
   private handlers: Map<string, LiteEventHandler<Message>[]>;
+
+  private clientId: string;
 
   public override get isConnected(): boolean {
     return this.ros.isConnected ?? false;
@@ -35,6 +38,7 @@ class RosContext extends ConnectionContext {
     super(RobotConnectionType.ROSBRIDGE, config);
     this.ros = new Ros({});
     this.handlers = new Map<string, LiteEventHandler<Message>[]>();
+    this.clientId = config.clientId;
   }
 
   public override connect(): Promise<boolean> {
@@ -53,7 +57,9 @@ class RosContext extends ConnectionContext {
         console.log("Connection to websocket server closed.");
       });
 
-      this.ros.connect(`ws://${this.hostname}:${this.port}`);
+      this.ros.connect(
+        `ws://${this.hostname}:${this.port}/connection/${this.clientId}`
+      );
     });
   }
 
@@ -65,7 +71,7 @@ class RosContext extends ConnectionContext {
   public request(executor: IRosFrameExecutor): Promise<IFrameResult> {
     return new Promise((resolve, reject) => {
       const onSuccess = (result: ServiceResponse) => {
-        console.log("Resolved!", result)
+        console.log("Resolved!", result);
         resolve({
           success: true,
           result: result,
@@ -81,7 +87,7 @@ class RosContext extends ConnectionContext {
         name: methodType,
         serviceType: format,
       });
-      console.log("request with ",methodType, format, payload);
+      console.log("request with ", methodType, format, payload);
       const serviceRequest = new ServiceRequest(payload);
       service.callService(serviceRequest, onSuccess, onError);
     });
@@ -151,6 +157,7 @@ class RosContext extends ConnectionContext {
     this.addHandler(methodType, handler as any);
     const topicInstance = this.getTopic(topicSettings);
     topicInstance.subscribe((message: Message) => {
+      console.log("Ros message received", message);
       this.triggerHandlers(methodType, message);
     });
   }

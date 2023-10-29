@@ -56,6 +56,7 @@ describe("Ros Contexts", () => {
     const rosContext = new RosContext({
       hostname: "localhost",
       port: 9090,
+      clientId: "toto",
     });
     expect(rosContext).toBeDefined();
     expect(rosContext.isConnected).toBeFalsy();
@@ -68,6 +69,7 @@ describe("Ros Contexts", () => {
     const rosContext = new RosContext({
       hostname: "localhost",
       port: 9090,
+      clientId: "toto",
     });
     rosContext.connect();
 
@@ -75,8 +77,12 @@ describe("Ros Contexts", () => {
     const mockRosConnectInstance = mockRosInstance.connect;
     const mockRosOnInstance = mockRosInstance.on;
     expect(mockRosOnInstance).toHaveBeenCalledTimes(3);
-    expect(mockRosConnectInstance.mock.calls[0][0]).toBe("ws://localhost:9090");
-    expect(mockRosConnectInstance).toHaveBeenCalledWith("ws://localhost:9090");
+    expect(mockRosConnectInstance.mock.calls[0][0]).toBe(
+      "ws://localhost:9090/connection/toto"
+    );
+    expect(mockRosConnectInstance).toHaveBeenCalledWith(
+      "ws://localhost:9090/connection/toto"
+    );
     expect(mockRosConnectInstance).toHaveBeenCalled();
   });
 
@@ -84,6 +90,7 @@ describe("Ros Contexts", () => {
     const rosContext = new RosContext({
       hostname: "localhost",
       port: 9090,
+      clientId: "toto",
     });
     rosContext.disconnect();
 
@@ -104,6 +111,7 @@ describe("Ros Contexts", () => {
     const rosContext = new RosContext({
       hostname: "localhost",
       port: 9090,
+      clientId: "toto",
     });
 
     rosContext.request(frameExecutor);
@@ -137,6 +145,7 @@ describe("Ros Contexts", () => {
     const rosContext = new RosContext({
       hostname: "localhost",
       port: 9090,
+      clientId: "toto",
     });
 
     rosContext.send(frameExecutor);
@@ -171,6 +180,7 @@ describe("Ros Contexts", () => {
     const rosContext = new RosContext({
       hostname: "localhost",
       port: 9090,
+      clientId: "toto",
     });
 
     const res = await rosContext.sendLoop(frameExecutor);
@@ -213,6 +223,7 @@ describe("Ros Contexts", () => {
     const rosContext = new RosContext({
       hostname: "localhost",
       port: 9090,
+      clientId: "toto",
     });
     const handler = jest.fn();
     rosContext.on(frameExecutor, handler);
@@ -244,6 +255,7 @@ describe("Ros Contexts", () => {
     const rosContext = new RosContext({
       hostname: "localhost",
       port: 9090,
+      clientId: "toto",
     });
     const handler = jest.fn();
     rosContext.on(frameExecutor, handler);
