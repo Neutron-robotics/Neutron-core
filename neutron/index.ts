@@ -31,6 +31,12 @@ export { makeConnectionContext } from "./context/makeContext";
 
 export { RosContext } from "./context/RosContext";
 
+// Graphs
+
+export {
+  NeutronGraphType
+} from './core/node/NeutronGraphNode'
+
 // Interfaces
 export {
   IRobotConnectionConfiguration,

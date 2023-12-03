@@ -30,8 +30,10 @@ export interface INodeBuilder<T> {
   id: string;
   type: string;
   position: XYPosition;
-  specifics?: T;
+  specifics: T;
 }
+
+export type NeutronGraphType = "Flow" | "Connector" | "Component"
 
 class NeutronNodeGraph implements INeutronGraphNode {
   public inputNode: INeutronNode<any, any>;

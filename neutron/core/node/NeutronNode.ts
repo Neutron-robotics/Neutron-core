@@ -21,14 +21,20 @@ export interface INeutronNodeInputParams<T> {
   data: T;
 }
 
+export interface NeutronNodeData {
+  color: string;
+  name: string;
+  inputHandles: number;
+  outputHandles: number;
+  specifics: any;
+}
+
 export interface NeutronNodeDB {
   id: string;
-  type: string;
   position: XYPosition;
   width?: number;
   height?: number;
-  isInput?: boolean;
-  specifics?: any;
+  data: NeutronNodeData;
 }
 
 export interface IExecutionStageEvent {

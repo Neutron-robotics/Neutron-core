@@ -20,6 +20,10 @@ export interface IRosNode {
   isConnected: boolean;
 }
 
+export interface NodeMessage {
+  payload: any
+}
+
 abstract class BaseNode<TInput, TOutput>
   implements INeutronNode<TInput, TOutput>
 {
@@ -28,8 +32,6 @@ abstract class BaseNode<TInput, TOutput>
   public position: XYPosition;
   public inputHandles: Record<string, NeutronInputHandle<any>>;
   public outputHandles: Record<string, NeutronOutputHandle>;
-
-  // public executionStage: ILiteEvent<IExecutionStageEvent>;
 
   public BeforeProcessingEvent: ILiteEvent<
     IExecutionStageProcessingEvent<TInput>
