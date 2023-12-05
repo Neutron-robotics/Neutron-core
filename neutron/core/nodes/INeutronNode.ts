@@ -15,6 +15,14 @@ export type NeutronPrimitiveType =
   | "env"
   | "msg";
 
+export interface IRepeatInterval {
+  delay: number;
+}
+
+export interface IRepeatCron {
+  expression: string;
+}
+
 export interface INeutronNode {
   id: string;
   type: string;
@@ -50,4 +58,28 @@ export interface NodeMessage {
 export interface OutputNodeMessage {
   payload: any;
   outputHandles?: string[];
+}
+
+export interface NeutronEdgeDB {
+  source: string;
+  sourceHandle: string;
+  target: string;
+  targetHandle: string;
+  id: string;
+}
+
+export interface NeutronNodeData {
+  color: string;
+  name: string;
+  inputHandles: number;
+  outputHandles: number;
+  specifics: any;
+}
+
+export interface NeutronNodeDB {
+  id: string;
+  position: XYPosition;
+  width?: number;
+  height?: number;
+  data: NeutronNodeData;
 }

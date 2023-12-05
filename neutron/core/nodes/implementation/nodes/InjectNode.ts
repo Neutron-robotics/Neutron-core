@@ -1,10 +1,11 @@
+import BaseNode from "../../BaseNode";
 import {
+  INodeBuilder,
   IRepeatCron,
   IRepeatInterval,
   NeutronPrimitiveType,
-} from "../../../node/implementation/types";
-import BaseNode from "../../BaseNode";
-import { INodeBuilder, NodeMessage } from "../../INeutronNode";
+  NodeMessage,
+} from "../../INeutronNode";
 
 interface InjectedField<T> {
   value: T;

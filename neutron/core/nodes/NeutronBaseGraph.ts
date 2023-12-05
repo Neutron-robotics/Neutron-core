@@ -1,9 +1,6 @@
 import { ILiteEvent, LiteEvent } from "../../utils/LiteEvent";
-import NeutronGraphError from "../errors/NeutronGraphError";
-import { NeutronEdgeDB } from "../node/NeutronHandle";
-import { NeutronNodeDB } from "../node/NeutronNode";
 import BaseNode from "./BaseNode";
-import { INeutronNode } from "./INeutronNode";
+import { NeutronEdgeDB, NeutronNodeDB } from "./INeutronNode";
 import NodeFactory from "./NodeFactory";
 
 abstract class NeutronBaseGraph {

@@ -1,7 +1,6 @@
 import NeutronGraphError from "../errors/NeutronGraphError";
-import { NeutronNodeDB } from "../node/NeutronNode";
 import BaseNode from "./BaseNode";
-import { INeutronNode, INodeBuilder } from "./INeutronNode";
+import { INodeBuilder, NeutronNodeDB } from "./INeutronNode";
 import ChangeNode from "./implementation/nodes/ChangeNode";
 import DebugNode from "./implementation/nodes/DebugNode";
 import DelayNode from "./implementation/nodes/DelayNode";

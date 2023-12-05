@@ -1,8 +1,6 @@
 import NeutronGraphError from "../../../errors/NeutronGraphError";
-import { NeutronEdgeDB } from "../../../node/NeutronHandle";
-import { NeutronNodeDB } from "../../../node/NeutronNode";
 import BaseNode from "../../BaseNode";
-import { NodeMessage } from "../../INeutronNode";
+import { NeutronEdgeDB, NeutronNodeDB, NodeMessage } from "../../INeutronNode";
 import NeutronBaseGraph from "../../NeutronBaseGraph";
 import NodeFactory, { inputNodesSet } from "../../NodeFactory";
 

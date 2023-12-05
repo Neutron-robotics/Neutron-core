@@ -1,7 +1,9 @@
 import BaseNode from "../../BaseNode";
 import { INodeBuilder, NodeMessage } from "../../INeutronNode";
 
-export interface FunctionNodeSpecifics {}
+export interface FunctionNodeSpecifics {
+  code: string;
+}
 
 class FunctionNode extends BaseNode {
   public isInput: boolean = false;
@@ -14,7 +16,9 @@ class FunctionNode extends BaseNode {
   }
 
   protected process = async (message: NodeMessage) => {
-    return message;
+    const func = new Function("msg", this.specifics.code);
+    const result = func(message);
+    return result;
   };
 
   protected verifyInput = (_: NodeMessage) => {};

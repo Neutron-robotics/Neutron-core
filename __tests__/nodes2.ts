@@ -1,9 +1,9 @@
 import NeutronGraphError from "../neutron/core/errors/NeutronGraphError";
-import { NodeMessage } from "../neutron/core/node2/INeutronNode";
-import NodeFactory from "../neutron/core/node2/NodeFactory";
-import ConnectorGraph from "../neutron/core/node2/implementation/graphs/ConnectorGraph";
-import FlowGraph from "../neutron/core/node2/implementation/graphs/FlowGraph";
-import DebugNode from "../neutron/core/node2/implementation/nodes/DebugNode";
+import { NodeMessage } from "../neutron/core/nodes/INeutronNode";
+import NodeFactory from "../neutron/core/nodes/NodeFactory";
+import ConnectorGraph from "../neutron/core/nodes/implementation/graphs/ConnectorGraph";
+import FlowGraph from "../neutron/core/nodes/implementation/graphs/FlowGraph";
+import DebugNode from "../neutron/core/nodes/implementation/nodes/DebugNode";
 import { graphTemplate } from "./__mixture__/connectorGraphMock";
 import { flowGraphMock } from "./__mixture__/flowGraphMock";
 jest.mock("../neutron/context/makeContext");
@@ -131,8 +131,126 @@ describe("Neutron Nodes", () => {
     data: { ...mockNodeDb.data, name: type, specifics },
   });
 
-  it.todo("Change Node");
-  it.todo("Debug Node");
+  it("Change Node define a field", async () => {
+    const specifics = {
+      fields: [
+        {
+          id: "",
+          mode: "define",
+          inputField: "toto",
+          targetField: "foo",
+        },
+      ],
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("change", specifics));
+    const message: NodeMessage = {
+      payload: {
+        toto: 1,
+      },
+    };
+    const response = await node.processNode(message);
+    expect(response?.payload.foo).toBe(1);
+    expect(response?.payload.toto).toBe(1);
+  });
+
+  it("Change Node remove a field", async () => {
+    const specifics = {
+      fields: [
+        {
+          id: "",
+          mode: "remove",
+          inputField: "toto",
+        },
+      ],
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("change", specifics));
+    const message: NodeMessage = {
+      payload: {
+        toto: 1,
+      },
+    };
+    const response = await node.processNode(message);
+    expect(response?.payload.toto).not.toBeDefined();
+  });
+
+  it("Change Node move a field", async () => {
+    const specifics = {
+      fields: [
+        {
+          id: "",
+          mode: "move",
+          inputField: "toto",
+          targetField: "foo",
+        },
+      ],
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("change", specifics));
+    const message: NodeMessage = {
+      payload: {
+        toto: 1,
+      },
+    };
+    const response = await node.processNode(message);
+    expect(response?.payload.foo).toBe(1);
+    expect(response?.payload.toto).not.toBeDefined();
+  });
+
+  it("Debug node", async () => {
+    const node = NodeFactory.createNode(
+      makeNodeBuilder("debug", {})
+    ) as DebugNode;
+    const message: NodeMessage = {
+      payload: {
+        toto: 1,
+        tata: 2,
+        name: "My name",
+      },
+    };
+    const debugEvent = jest.fn();
+
+    node.DebugEvent.on(debugEvent);
+    await node.processNode(message);
+
+    expect(debugEvent).toHaveBeenCalledTimes(1);
+    expect(debugEvent).toHaveBeenCalledWith({
+      log: '{"toto":1,"tata":2,"name":"My name"}',
+    });
+  });
+
+  it("Inject Node", async () => {
+    const specifics = {
+      inject: true,
+      repeat: "no",
+      properties: [
+        {
+          type: "string",
+          name: "firstName",
+          id: "",
+          value: "Hugo",
+        },
+        {
+          type: "number",
+          name: "age",
+          id: "",
+          value: 25,
+        },
+      ],
+    };
+    const node = NodeFactory.createNode(makeNodeBuilder("inject", specifics));
+    const message: NodeMessage = {
+      payload: {},
+    };
+
+    const response = await node.processNode(message);
+    expect(response?.payload).toStrictEqual({
+      firstName: "Hugo",
+      age: 25,
+    });
+  });
+
   it("Delay Node - Fixed Delay", async () => {
     const specifics = {
       mode: "fixed",
@@ -142,16 +260,12 @@ describe("Neutron Nodes", () => {
 
     const node = NodeFactory.createNode(makeNodeBuilder("delay", specifics));
 
-    // Mock NodeMessage
     const message: NodeMessage = { payload: "Test Message" };
 
-    // Spy on setTimeout
     const setTimeoutSpy = jest.spyOn(global, "setTimeout");
 
-    // Test the process method
     await node.processNode(message);
 
-    // Assert that setTimeout was called with the correct delay
     expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 500);
   });
 
@@ -164,25 +278,41 @@ describe("Neutron Nodes", () => {
 
     const node = NodeFactory.createNode(makeNodeBuilder("delay", specifics));
 
-    // Mock NodeMessage
     const message: NodeMessage = { payload: "Test Message" };
 
-    // Spy on setTimeout
     const setTimeoutSpy = jest.spyOn(global, "setTimeout");
 
-    // Test the process method
     await node.processNode(message);
 
-    // Get the delay value passed to setTimeout
     const setTimeoutDelay = setTimeoutSpy.mock.calls[0][1];
 
-    // Assert that setTimeout was called with a delay within the specified range
     expect(setTimeoutDelay).toBeGreaterThanOrEqual(100);
     expect(setTimeoutDelay).toBeLessThanOrEqual(500);
   });
 
-  it.todo("Function Node");
-  it.todo("Inject Node");
+  it("Function Node", async () => {
+    const specifics = {
+      code: `
+      const multiplier = msg.payload.fields[0].value * msg.payload.fields[0].value;
+      msg.payload.multiplier = multiplier;
+      return msg;
+      `,
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("function", specifics));
+
+    const message: NodeMessage = {
+      payload: {
+        fields: [{ value: 5 }],
+      },
+    };
+
+    const res = await node.processNode(message);
+    expect(res?.payload).toStrictEqual({
+      fields: [{ value: 5 }],
+      multiplier: 25,
+    });
+  });
 
   it("Switch Node 2C 2OK", async () => {
     const specifics = {
