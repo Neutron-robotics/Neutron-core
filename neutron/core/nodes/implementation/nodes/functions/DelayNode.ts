@@ -1,5 +1,5 @@
-import BaseNode from "../../BaseNode";
-import { INodeBuilder, NodeMessage } from "../../INeutronNode";
+import BaseNode from "../../../BaseNode";
+import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
 
 interface IRandomDelayInterval {
   min: number;

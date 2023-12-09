@@ -1,11 +1,11 @@
-import NeutronNodeComputeError from "../../../errors/NeutronNodeError";
-import BaseNode from "../../BaseNode";
+import NeutronNodeComputeError from "../../../../errors/NeutronNodeError";
+import BaseNode from "../../../BaseNode";
 import {
   INodeBuilder,
   NeutronPrimitiveType,
   NodeMessage,
   OutputNodeMessage,
-} from "../../INeutronNode";
+} from "../../../INeutronNode";
 
 const comparisonOperators = ["==", "!=", "<", "<=", ">", ">="] as const;
 type ComparisonOperator = (typeof comparisonOperators)[number];

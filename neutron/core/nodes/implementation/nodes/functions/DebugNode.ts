@@ -1,10 +1,10 @@
-import { ILiteEvent, LiteEvent } from "../../../../utils/LiteEvent";
-import BaseNode from "../../BaseNode";
+import { ILiteEvent, LiteEvent } from "../../../../../utils/LiteEvent";
+import BaseNode from "../../../BaseNode";
 import {
   INodeBuilder,
   NodeMessage,
   OutputNodeMessage,
-} from "../../INeutronNode";
+} from "../../../INeutronNode";
 
 export interface IDebugEvent {
   log: string;

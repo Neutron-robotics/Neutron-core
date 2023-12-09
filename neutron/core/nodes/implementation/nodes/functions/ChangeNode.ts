@@ -1,6 +1,6 @@
-import NeutronNodeComputeError from "../../../errors/NeutronNodeError";
-import BaseNode from "../../BaseNode";
-import { INodeBuilder, NodeMessage } from "../../INeutronNode";
+import NeutronNodeComputeError from "../../../../errors/NeutronNodeError";
+import BaseNode from "../../../BaseNode";
+import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
 
 interface ChangeField {
   id: string;

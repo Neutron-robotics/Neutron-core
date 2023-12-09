@@ -3,7 +3,8 @@ import { NodeMessage } from "../neutron/core/nodes/INeutronNode";
 import NodeFactory from "../neutron/core/nodes/NodeFactory";
 import ConnectorGraph from "../neutron/core/nodes/implementation/graphs/ConnectorGraph";
 import FlowGraph from "../neutron/core/nodes/implementation/graphs/FlowGraph";
-import DebugNode from "../neutron/core/nodes/implementation/nodes/DebugNode";
+import DebugNode from "../neutron/core/nodes/implementation/nodes/functions/DebugNode";
+import ErrorNode from "../neutron/core/nodes/implementation/nodes/functions/ErrorNode";
 import { graphTemplate } from "./__mixture__/connectorGraphMock";
 import { flowGraphMock } from "./__mixture__/flowGraphMock";
 jest.mock("../neutron/context/makeContext");
@@ -220,6 +221,36 @@ describe("Neutron Nodes", () => {
     });
   });
 
+  it("Error node", async () => {
+    const errorSpecifics = {
+      output: "property",
+      propertyName: "toto",
+      closeAuto: true,
+    };
+
+    const node = NodeFactory.createNode(
+      makeNodeBuilder("error", errorSpecifics)
+    ) as ErrorNode;
+
+    const message: NodeMessage = {
+      payload: {
+        toto: "this is indeed an error",
+        tata: 2,
+        name: "My name",
+      },
+    };
+    const errorEvent = jest.fn();
+
+    node.ErrorEvent.on(errorEvent);
+    await node.processNode(message);
+
+    expect(errorEvent).toHaveBeenCalledTimes(1);
+    expect(errorEvent).toHaveBeenCalledWith({
+      log: "this is indeed an error",
+      closeAuto: true,
+    });
+  });
+
   it("Inject Node", async () => {
     const specifics = {
       inject: true,
@@ -405,5 +436,242 @@ describe("Neutron Nodes", () => {
     const nodeOutput = await node.processNode(message);
     expect(nodeOutput).toBeDefined();
     expect(nodeOutput?.outputHandles).toStrictEqual([]);
+  });
+
+  it("Filter node block", async () => {
+    const specifics = {
+      propertyName: "count",
+      mode: "block",
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("filter", specifics));
+    const nodeNext = NodeFactory.createNode(makeNodeBuilder("debug", {}));
+    node.nextNodes["output-0"] = [nodeNext];
+    const message: NodeMessage = {
+      payload: {
+        name: "hugo",
+        count: 4,
+      },
+    };
+
+    const res1 = await node.processNode(message);
+    expect(res1?.payload).toStrictEqual(message.payload);
+    expect(res1?.outputHandles).toStrictEqual(["output-0"]);
+
+    const res2 = await node.processNode(message);
+    expect(res2?.payload).toStrictEqual(message.payload);
+    expect(res2?.outputHandles).toStrictEqual([]);
+
+    const messageNotSoDifferent: NodeMessage = {
+      payload: {
+        name: "hugo P",
+        count: 4,
+      },
+    };
+
+    const res3 = await node.processNode(messageNotSoDifferent);
+    expect(res3?.payload).toStrictEqual(messageNotSoDifferent.payload);
+    expect(res3?.outputHandles).toStrictEqual([]);
+
+    const messageDifferent: NodeMessage = {
+      payload: {
+        name: "hugo P",
+        count: 444,
+      },
+    };
+    const res4 = await node.processNode(messageDifferent);
+    expect(res4?.payload).toStrictEqual(messageDifferent.payload);
+    expect(res4?.outputHandles).toStrictEqual(["output-0"]);
+  });
+
+  it("Filter block until greater", async () => {
+    const specifics = {
+      propertyName: "count",
+      mode: "blockUnlessGreater",
+      value: {
+        type: "latestValid",
+        value: 50,
+      },
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("filter", specifics));
+    const nodeNext = NodeFactory.createNode(makeNodeBuilder("debug", {}));
+    node.nextNodes["output-0"] = [nodeNext];
+    const message: NodeMessage = {
+      payload: {
+        name: "hugo",
+        count: 4,
+      },
+    };
+
+    const res1 = await node.processNode(message);
+    expect(res1?.payload).toStrictEqual(message.payload);
+    expect(res1?.outputHandles).toStrictEqual(["output-0"]);
+
+    const res2 = await node.processNode(message);
+    expect(res2?.payload).toStrictEqual(message.payload);
+    expect(res2?.outputHandles).toStrictEqual([]);
+
+    const messageGreaterButStillInvalid: NodeMessage = {
+      payload: {
+        name: "hugo P",
+        count: 40,
+      },
+    };
+    const res3 = await node.processNode(messageGreaterButStillInvalid);
+    expect(res3?.payload).toStrictEqual(messageGreaterButStillInvalid.payload);
+    expect(res3?.outputHandles).toStrictEqual([]);
+
+    const messageGreater: NodeMessage = {
+      payload: {
+        name: "hugo P",
+        count: 444,
+      },
+    };
+    const res4 = await node.processNode(messageGreater);
+    expect(res4?.payload).toStrictEqual(messageGreater.payload);
+    expect(res4?.outputHandles).toStrictEqual(["output-0"]);
+  });
+
+  it("Filter block until lower", async () => {
+    const specifics = {
+      propertyName: "count",
+      mode: "blockUnlessLower",
+      value: {
+        type: "latest",
+        value: -10,
+      },
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("filter", specifics));
+    const nodeNext = NodeFactory.createNode(makeNodeBuilder("debug", {}));
+    node.nextNodes["output-0"] = [nodeNext];
+    const message: NodeMessage = {
+      payload: {
+        name: "hugo",
+        count: 4,
+      },
+    };
+
+    const res1 = await node.processNode(message);
+    expect(res1?.payload).toStrictEqual(message.payload);
+    expect(res1?.outputHandles).toStrictEqual(["output-0"]);
+
+    const res2 = await node.processNode(message);
+    expect(res2?.payload).toStrictEqual(message.payload);
+    expect(res2?.outputHandles).toStrictEqual([]);
+
+    const messageLowerButStillInvalid: NodeMessage = {
+      payload: {
+        name: "hugo P",
+        count: 0,
+      },
+    };
+    const res3 = await node.processNode(messageLowerButStillInvalid);
+    expect(res3?.payload).toStrictEqual(messageLowerButStillInvalid.payload);
+    expect(res3?.outputHandles).toStrictEqual([]);
+
+    const messageEvenLowerButStillInvalid: NodeMessage = {
+      payload: {
+        name: "hugo P",
+        count: -9,
+      },
+    };
+    const res4 = await node.processNode(messageEvenLowerButStillInvalid);
+    expect(res4?.payload).toStrictEqual(
+      messageEvenLowerButStillInvalid.payload
+    );
+    expect(res4?.outputHandles).toStrictEqual([]);
+
+    const messageLowerAndValid: NodeMessage = {
+      payload: {
+        name: "hugo P",
+        count: -21,
+      },
+    };
+    const res5 = await node.processNode(messageLowerAndValid);
+    expect(res5?.payload).toStrictEqual(messageLowerAndValid.payload);
+    expect(res5?.outputHandles).toStrictEqual(["output-0"]);
+  });
+
+  it("Scale node scale", async () => {
+    const specifics = {
+      propertyName: "value",
+      mode: "scale",
+      inputScale: {
+        from: 0,
+        to: 10,
+      },
+      outputScale: {
+        from: 0,
+        to: 100,
+      },
+      round: false,
+    };
+
+    const message: NodeMessage = {
+      payload: {
+        name: "Hugo",
+        value: 5,
+      },
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("range", specifics));
+    const res = await node.processNode(message);
+
+    expect(res?.payload.value).toBe(50);
+    expect(res?.payload.name).toBe("Hugo");
+  });
+
+  it("Scale node scale with limits", async () => {
+    const specifics = {
+      propertyName: "value",
+      mode: "scaleAndLimit",
+      inputScale: {
+        from: 12,
+        to: 10,
+      },
+      outputScale: {
+        from: 0,
+        to: 100,
+      },
+      round: false,
+    };
+
+    const message: NodeMessage = {
+      payload: {
+        name: "Hugo",
+        value: 5,
+      },
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("range", specifics));
+    const res = await node.processNode(message);
+
+    expect(res?.payload.value).toBe(100);
+    expect(res?.payload.name).toBe("Hugo");
+  });
+
+  it("Template node", async () => {
+    const specifics = {
+      propertyName: "sentence",
+      template: "Salut {{name}}, tu as {{age}}, c'est bien ca ?",
+    };
+
+    const message: NodeMessage = {
+      payload: {
+        name: "Hugo",
+        age: 5,
+        value: "toto",
+      },
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("template", specifics));
+    const res = await node.processNode(message);
+
+    expect(res?.payload.name).toBe("Hugo");
+    expect(res?.payload.value).toBe("toto");
+    expect(res?.payload.age).toBe(5);
+    expect(res?.payload.sentence).toBe("Salut Hugo, tu as 5, c'est bien ca ?");
   });
 });
