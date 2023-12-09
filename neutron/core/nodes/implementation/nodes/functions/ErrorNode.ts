@@ -16,7 +16,7 @@ interface ErrorNodeSpecifics {
 }
 
 class ErrorNode extends BaseNode {
-  public isInput: boolean = true;
+  public isInput: boolean = false;
   public readonly type = "error";
   public ErrorEvent: ILiteEvent<IErrorEvent>;
   public specifics: ErrorNodeSpecifics;

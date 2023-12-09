@@ -13,7 +13,7 @@ interface DelayNodeSpecifics {
 }
 
 class DelayNode extends BaseNode {
-  public isInput: boolean = true;
+  public isInput: boolean = false;
   public readonly type = "delay";
   private readonly specifics: DelayNodeSpecifics;
 
@@ -40,9 +40,7 @@ class DelayNode extends BaseNode {
     return message;
   };
 
-  protected verifyInput = (message: NodeMessage) => {
-    
-  };
+  protected verifyInput = (message: NodeMessage) => {};
 
   private calculateDelayInMillis(): number {
     const { delay, unit } = this.specifics;

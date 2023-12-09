@@ -18,7 +18,7 @@ interface FilterNodeSpecifics {
 }
 
 class FilterNode extends BaseNode {
-  public isInput: boolean = true;
+  public isInput: boolean = false;
   public readonly type = "filter";
   private readonly specifics: FilterNodeSpecifics;
   private previousValue: any = null;

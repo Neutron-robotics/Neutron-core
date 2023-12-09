@@ -1,6 +1,7 @@
 import NeutronGraphError from "../errors/NeutronGraphError";
 import BaseNode from "./BaseNode";
 import { INodeBuilder, NeutronNodeDB } from "./INeutronNode";
+import { BaseControllerNode, MJPEGCameraNode } from "./implementation/nodes/controllers";
 import ChangeNode from "./implementation/nodes/functions/ChangeNode";
 import DebugNode from "./implementation/nodes/functions/DebugNode";
 import DelayNode from "./implementation/nodes/functions/DelayNode";
@@ -27,6 +28,8 @@ class NodeFactory {
       filter: (builder: INodeBuilder<any>) => new FilterNode(builder),
       range: (builder: INodeBuilder<any>) => new RangeNode(builder),
       template: (builder: INodeBuilder<any>) => new TemplateNode(builder),
+      mjpegcamera: (builder: INodeBuilder<any>) => new MJPEGCameraNode(builder),
+      basecontroller: (builder: INodeBuilder<any>) => new BaseControllerNode(builder),
     };
 
   static createNode(nodeDb: NeutronNodeDB): BaseNode {
