@@ -31,7 +31,7 @@ class ConnectorGraph extends NeutronBaseGraph {
       .filter(([handle, nodes]) => output?.outputHandles?.includes(handle))
       .reduce<BaseNode[]>((acc, [handle, nodes]) => [...acc, ...nodes], []);
 
-    const nextNodesPromises = nextNodes.map((nextNode) => this.run(nextNode));
+    const nextNodesPromises = nextNodes.map((nextNode) => this.run(nextNode, output));
     await Promise.all(nextNodesPromises);
   }
 

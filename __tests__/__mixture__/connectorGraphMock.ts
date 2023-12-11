@@ -37,7 +37,7 @@ const graphTemplate = {
     },
     {
       source: "2e8704ee-7e4c-4a4d-85f5-aed87b27ef40",
-      sourceHandle: "output-0",
+      sourceHandle: "output-1",
       target: "f63a4e90-ecb2-44c9-ac39-d9c8d2bca971",
       targetHandle: "input-0",
       id: "reactflow__edge-2e8704ee-7e4c-4a4d-85f5-aed87b27ef40output-0-f63a4e90-ecb2-44c9-ac39-d9c8d2bca971input-0",
@@ -173,7 +173,7 @@ const graphTemplate = {
         outputHandles: 1,
         icon: "function.svg",
         specifics: {
-          code: "", // was missing ?!
+          code: "return {...msg}",
         },
       },
       width: 150,
@@ -199,7 +199,22 @@ const graphTemplate = {
         outputHandles: 1,
         icon: "switch.svg",
         specifics: {
-          code: "", // was missing ?!
+          propertyName: "from",
+          switchFields: [
+            {
+              type: "string",
+              value: "Yoleboss",
+              operator: "==",
+              id: "6161ee3c-c5fb-4356-8628-142f0894ccda",
+            },
+            {
+              type: "string",
+              value: "lemondade",
+              operator: "==",
+              id: "d994d670-df5e-4a14-a7e4-d0c023b2b780",
+            },
+          ],
+          switchMode: "continue",
         },
       },
       width: 150,
@@ -224,9 +239,7 @@ const graphTemplate = {
         inputHandles: 1,
         outputHandles: 0,
         icon: "info.svg",
-        specifics: {
-          code: "", // was missing ?!
-        },
+        specifics: {},
       },
       width: 150,
       height: 40,
@@ -250,9 +263,7 @@ const graphTemplate = {
         inputHandles: 1,
         outputHandles: 0,
         icon: "info.svg",
-        specifics: {
-          code: "", // was missing ?!
-        },
+        specifics: {},
       },
       width: 150,
       height: 40,

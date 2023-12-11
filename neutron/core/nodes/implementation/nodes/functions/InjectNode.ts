@@ -42,7 +42,7 @@ class InjectNode extends BaseNode {
       payload: injectedProperties,
     };
   };
-
+  
   protected verifyInput = (_: NodeMessage) => {};
 }
 

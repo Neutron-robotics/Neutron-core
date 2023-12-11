@@ -74,7 +74,7 @@ class SwitchNode extends BaseNode {
           );
       }
       if (evaluation) handleNames.push(handleName);
-      if (switchMode === "stop" && !evaluation) shouldForward = false;
+      if (switchMode === "stop" && evaluation) shouldForward = false;
     });
 
     return {

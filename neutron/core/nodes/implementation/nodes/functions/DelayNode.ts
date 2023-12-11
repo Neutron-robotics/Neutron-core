@@ -37,7 +37,9 @@ class DelayNode extends BaseNode {
 
     // Continue processing the message or perform any other desired action
     console.log("Message processed after delay:", message.payload);
-    return message;
+    return {
+      payload: message.payload
+    };
   };
 
   protected verifyInput = (message: NodeMessage) => {};

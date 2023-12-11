@@ -1,7 +1,10 @@
 import NeutronGraphError from "../errors/NeutronGraphError";
 import BaseNode from "./BaseNode";
 import { INodeBuilder, NeutronNodeDB } from "./INeutronNode";
-import { BaseControllerNode, MJPEGCameraNode } from "./implementation/nodes/controllers";
+import {
+  BaseControllerNode,
+  MJPEGCameraNode,
+} from "./implementation/nodes/controllers";
 import ChangeNode from "./implementation/nodes/functions/ChangeNode";
 import DebugNode from "./implementation/nodes/functions/DebugNode";
 import DelayNode from "./implementation/nodes/functions/DelayNode";
@@ -29,7 +32,8 @@ class NodeFactory {
       range: (builder: INodeBuilder<any>) => new RangeNode(builder),
       template: (builder: INodeBuilder<any>) => new TemplateNode(builder),
       mjpegcamera: (builder: INodeBuilder<any>) => new MJPEGCameraNode(builder),
-      basecontroller: (builder: INodeBuilder<any>) => new BaseControllerNode(builder),
+      basecontroller: (builder: INodeBuilder<any>) =>
+        new BaseControllerNode(builder),
     };
 
   static createNode(nodeDb: NeutronNodeDB): BaseNode {
@@ -45,7 +49,9 @@ class NodeFactory {
     if (factory) {
       return factory(builder);
     }
-    throw new NeutronGraphError("Failed to build the graph, unknown node ");
+    throw new NeutronGraphError(
+      `Failed to build the graph, unknown node ${builder.type}`
+    );
   }
 }
 

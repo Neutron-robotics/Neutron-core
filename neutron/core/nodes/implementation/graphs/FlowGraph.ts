@@ -1,4 +1,5 @@
 import NeutronGraphError from "../../../errors/NeutronGraphError";
+import NeutronNodeComputeError from "../../../errors/NeutronNodeError";
 import BaseNode from "../../BaseNode";
 import { NeutronEdgeDB, NeutronNodeDB, NodeMessage } from "../../INeutronNode";
 import NeutronBaseGraph from "../../NeutronBaseGraph";
@@ -20,7 +21,7 @@ class FlowGraph extends NeutronBaseGraph {
     );
   }
 
-  public async runInputNodes(
+  public async runAllNodes(
     message?: Record<string, NodeMessage>
   ): Promise<void> {
     await Promise.all(
@@ -30,6 +31,22 @@ class FlowGraph extends NeutronBaseGraph {
     );
   }
 
+  public async runInputNode(
+    nodeId: string,
+    message?: NodeMessage
+  ): Promise<void> {
+    const node = this.nodes.find((e) => e.id === nodeId);
+    if (!node)
+      throw new NeutronNodeComputeError(
+        `Could not find node ${nodeId} in graph`
+      );
+
+    if (!node.isInput)
+      throw new NeutronNodeComputeError(`Node ${nodeId} is not an input`);
+
+    return await this.run(node, message);
+  }
+
   public async run(node: BaseNode, message?: NodeMessage): Promise<void> {
     const output = await node.processNode(message ?? { payload: {} });
 
@@ -37,7 +54,9 @@ class FlowGraph extends NeutronBaseGraph {
       .filter(([handle, nodes]) => output?.outputHandles?.includes(handle))
       .reduce<BaseNode[]>((acc, [handle, nodes]) => [...acc, ...nodes], []);
 
-    const nextNodesPromises = nextNodes.map((nextNode) => this.run(nextNode));
+    const nextNodesPromises = nextNodes.map((nextNode) =>
+      this.run(nextNode, output)
+    );
     await Promise.all(nextNodesPromises);
   }
 

@@ -1,4 +1,4 @@
-import { IRos2Action } from "../../../../../../dist";
+import { IRos2Action } from "../../../../../models/ros2/ros2";
 import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
 import RosNode from "./RosNode";
 

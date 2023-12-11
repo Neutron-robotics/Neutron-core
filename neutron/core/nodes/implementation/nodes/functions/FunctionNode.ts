@@ -1,5 +1,5 @@
 import BaseNode from "../../../BaseNode";
-import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
+import { INodeBuilder, NodeMessage, OutputNodeMessage } from "../../../INeutronNode";
 
 export interface FunctionNodeSpecifics {
   code: string;
@@ -15,10 +15,10 @@ class FunctionNode extends BaseNode {
     this.specifics = builder.specifics;
   }
 
-  protected process = async (message: NodeMessage) => {
+  protected process = async (message: NodeMessage): Promise<OutputNodeMessage> => {
     const func = new Function("msg", this.specifics.code);
     const result = func(message);
-    return result;
+    return result
   };
 
   protected verifyInput = (_: NodeMessage) => {};

@@ -34,6 +34,7 @@ export { RosContext } from "./context/RosContext";
 // Graphs
 
 export { FlowGraph, ConnectorGraph } from "./core/nodes/implementation/graphs";
+export { NeutronGraphType } from "./core/nodes/NeutronBaseGraph";
 
 // Interfaces
 export {

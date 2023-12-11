@@ -5,6 +5,7 @@ import ConnectorGraph from "../neutron/core/nodes/implementation/graphs/Connecto
 import FlowGraph from "../neutron/core/nodes/implementation/graphs/FlowGraph";
 import DebugNode from "../neutron/core/nodes/implementation/nodes/functions/DebugNode";
 import ErrorNode from "../neutron/core/nodes/implementation/nodes/functions/ErrorNode";
+import InjectNode from "../neutron/core/nodes/implementation/nodes/functions/InjectNode";
 import { graphTemplate } from "./__mixture__/connectorGraphMock";
 import { flowGraphMock } from "./__mixture__/flowGraphMock";
 jest.mock("../neutron/context/makeContext");
@@ -25,7 +26,7 @@ describe("Nodes graph builder", () => {
       "2e8704ee-7e4c-4a4d-85f5-aed87b27ef40"
     );
     expect(switchNode).toBeDefined();
-    expect(Object.entries(switchNode?.nextNodes ?? []).length).toBe(1);
+    expect(Object.entries(switchNode?.nextNodes ?? []).length).toBe(2);
 
     const lastDebugNode = graph.getNodeById(
       "663463fb-5dab-4a37-8521-c24dc73db9cc"
@@ -51,9 +52,40 @@ describe("Nodes graph builder", () => {
     );
   });
 
-  it.todo("Fails to build the graph because it is cyclic");
+  it("Fails to build the graph because it is cyclic", async () => {
+    let error: any = null;
+    const cyclicEdges = [...edgesDb];
+    cyclicEdges[5].target = "396748fb-c7f3-4d07-a649-49cce5fc03bd";
 
-  it.todo("Failed to build the graph because of a unknown node type");
+    try {
+      const graph = new ConnectorGraph(nodesDb, cyclicEdges);
+    } catch (err) {
+      error = err;
+    }
+
+    expect(error).toBeInstanceOf(NeutronGraphError);
+    expect(error.message).toBe(
+      "A cycle has been detected while building the graph"
+    );
+  });
+
+  it("Failed to build the graph because of a unknown node type", async () => {
+    const unknownNodes = nodesDb.map((node) => ({ ...node }));
+
+    unknownNodes[0].data.name = "ThisNodeDoesNotExist";
+    let error: any = null;
+
+    try {
+      const graph = new ConnectorGraph(unknownNodes, edgesDb);
+    } catch (err) {
+      error = err;
+    }
+
+    expect(error).toBeInstanceOf(NeutronGraphError);
+    expect(error.message).toBe(
+      "Failed to build the graph, unknown node ThisNodeDoesNotExist"
+    );
+  });
 });
 
 describe("Nodes graph execution", () => {
@@ -63,7 +95,9 @@ describe("Nodes graph execution", () => {
   it("Trigger a controller node", async () => {
     const graph = new ConnectorGraph(nodesDb, edgesDb);
     const mockNodeProcessEvent = jest.fn();
-    const mockLastDebugNodeAfterEvent = jest.fn();
+    const mockLastDebugNode0AfterEvent = jest.fn();
+    const mockLastDebugNode1AfterEvent = jest.fn();
+    const mockLastDebugNode2AfterEvent = jest.fn();
 
     graph.NodeProcessEvent.on((event) => {
       mockNodeProcessEvent(event);
@@ -75,17 +109,27 @@ describe("Nodes graph execution", () => {
       },
     };
 
-    const controllerNode = graph.getNodeById<DebugNode>(
+    const debugNode0 = graph.getNodeById<DebugNode>(
+      "a560d355-ba9b-43d1-bdd2-8235a45dfb52"
+    );
+    debugNode0?.AfterProcessingEvent.on(mockLastDebugNode0AfterEvent);
+
+    const debugNode1 = graph.getNodeById<DebugNode>(
       "663463fb-5dab-4a37-8521-c24dc73db9cc"
     );
-    controllerNode?.AfterProcessingEvent.on((handler) => {
-      mockLastDebugNodeAfterEvent(handler);
-    });
+    debugNode1?.AfterProcessingEvent.on(mockLastDebugNode1AfterEvent);
+
+    const debugNode2 = graph.getNodeById<DebugNode>(
+      "f63a4e90-ecb2-44c9-ac39-d9c8d2bca971"
+    );
+    debugNode2?.AfterProcessingEvent.on(mockLastDebugNode2AfterEvent);
 
     await graph.runInputNode(message);
 
-    expect(mockLastDebugNodeAfterEvent).toHaveBeenCalled();
-    expect(mockNodeProcessEvent).toHaveBeenCalledTimes(7);
+    expect(mockLastDebugNode0AfterEvent).toHaveBeenCalled();
+    expect(mockLastDebugNode1AfterEvent).toHaveBeenCalled();
+    expect(mockLastDebugNode2AfterEvent).not.toHaveBeenCalled();
+    expect(mockNodeProcessEvent).toHaveBeenCalledTimes(6);
   });
 });
 
@@ -122,6 +166,51 @@ describe("Nodes Flow builder", () => {
     expect(functionNodeLooped).toBeDefined();
     expect(functionNodeLooped?.id).toBe(functionNode?.id);
   });
+
+  it("Failed to build the graph because of a unknown node type", async () => {
+    const unknownNodes = nodesDb.map((node) => ({ ...node }));
+
+    unknownNodes[0].data.name = "ThisNodeDoesNotExist";
+    let error: any = null;
+
+    try {
+      const graph = new FlowGraph(unknownNodes, edgesDb);
+    } catch (err) {
+      error = err;
+    }
+
+    expect(error).toBeInstanceOf(NeutronGraphError);
+    expect(error.message).toBe(
+      "Failed to build the graph, unknown node ThisNodeDoesNotExist"
+    );
+  });
+});
+
+describe("Neutron flow execution", () => {
+  const edgesDb = flowGraphMock.edges;
+  const nodesDb = flowGraphMock.nodes;
+  const mockNodeDb = nodesDb[0];
+
+  it("run flow graph", async () => {
+    const graph = new FlowGraph(nodesDb, edgesDb);
+
+    const onDelayNodeProcessed = jest.fn();
+    const delayNode = graph.getNodeById("f9998a91-ce0a-48e0-aa68-fdc028b46e3a");
+    delayNode?.AfterProcessingEvent.on(onDelayNodeProcessed);
+
+    const onDebugNodeProcessed = jest.fn();
+    const debugNode = graph.getNodeById<DebugNode>(
+      "e121382e-caed-4cec-b81c-24c3f3083cc9"
+    );
+    debugNode?.DebugEvent.on(onDebugNodeProcessed);
+
+    const res = await graph.runInputNode(
+      "ad411990-cbf6-49cb-a8ca-acb57917dab6"
+    );
+
+    expect(onDelayNodeProcessed).toHaveBeenCalledTimes(9);
+    expect(onDebugNodeProcessed).toHaveBeenCalledTimes(1);
+  }, 5000);
 });
 
 describe("Neutron Nodes", () => {
@@ -435,7 +524,7 @@ describe("Neutron Nodes", () => {
     };
     const nodeOutput = await node.processNode(message);
     expect(nodeOutput).toBeDefined();
-    expect(nodeOutput?.outputHandles).toStrictEqual([]);
+    expect(nodeOutput?.outputHandles).toStrictEqual(["output-1"]);
   });
 
   it("Filter node block", async () => {

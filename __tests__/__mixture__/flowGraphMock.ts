@@ -9,7 +9,7 @@ export const flowGraphMock = {
   edges: [
     {
       source: "19c60b31-d102-4eb8-b0e8-81c155011f18",
-      sourceHandle: "output-0",
+      sourceHandle: "output-1",
       target: "f9998a91-ce0a-48e0-aa68-fdc028b46e3a",
       targetHandle: "input-0",
       id: "reactflow__edge-19c60b31-d102-4eb8-b0e8-81c155011f18output-0-f9998a91-ce0a-48e0-aa68-fdc028b46e3ainput-0",
@@ -70,7 +70,7 @@ export const flowGraphMock = {
             {
               type: "number",
               name: "count",
-              value: "0",
+              value: 0,
               id: "2cc1c495-0ce1-41b3-936a-4a337cea45b0",
             },
           ],
@@ -102,7 +102,7 @@ export const flowGraphMock = {
         outputHandles: 1,
         icon: "function.svg",
         specifics: {
-          code: "// Write there your own Typescript function to execute custom code.\n// You can access the `req` object that contains this node input.\n// The output of this node will be empty by default, but it is possible\n// to define a customized output by returning an object\n\n\n\n(msg as any).sendMessage({\n    ...msg.payload,\n    count: msg.payload.count + 1\n})",
+          code: "return({\n    ...msg, payload: { ...msg.payload, \n    count: msg.payload.count + 1}\n})",
         },
       },
       selected: false,
@@ -128,22 +128,22 @@ export const flowGraphMock = {
         outputHandles: 1,
         icon: "switch.svg",
         specifics: {
-          propertyName: "",
+          propertyName: "count",
           switchFields: [
+            {
+              type: "string",
+              value: 10,
+              operator: "==",
+              id: "6161ee3c-c5fb-4356-8628-142f0894ccda",
+            },
             {
               type: "string",
               value: "10",
               operator: "<",
               id: "d994d670-df5e-4a14-a7e4-d0c023b2b780",
             },
-            {
-              type: "string",
-              value: "10",
-              operator: "==",
-              id: "6161ee3c-c5fb-4356-8628-142f0894ccda",
-            },
           ],
-          switchMode: "and",
+          switchMode: "stop",
         },
       },
       selected: false,
@@ -170,7 +170,7 @@ export const flowGraphMock = {
         icon: "delay.svg",
         specifics: {
           mode: "fixed",
-          delay: 5,
+          delay: 0.1,
           unit: "second",
         },
       },

@@ -3,6 +3,8 @@ import BaseNode from "./BaseNode";
 import { NeutronEdgeDB, NeutronNodeDB } from "./INeutronNode";
 import NodeFactory from "./NodeFactory";
 
+export type NeutronGraphType = "Flow" | "Connector" | "Component";
+
 abstract class NeutronBaseGraph {
   public NodeProcessEvent: ILiteEvent<string>;
   protected nodes: BaseNode[];
