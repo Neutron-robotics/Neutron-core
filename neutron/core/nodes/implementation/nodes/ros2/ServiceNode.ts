@@ -3,7 +3,7 @@ import NeutronNodeComputeError from "../../../../errors/NeutronNodeError";
 import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
 import RosNode from "./RosNode";
 
-interface ServiceNodeSpecifics {
+export interface ServiceNodeSpecifics {
   service: IRos2Service;
 }
 

@@ -1,12 +1,12 @@
 import BaseNode from "../../../BaseNode";
 import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
 
-interface IScale {
+export interface IScale {
   from: number;
   to: number;
 }
 
-interface RangeNodeSpecifics {
+export interface RangeNodeSpecifics {
   propertyName: string;
   mode: "scale" | "scaleAndLimit";
   inputScale: IScale;

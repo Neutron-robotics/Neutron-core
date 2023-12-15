@@ -1,7 +1,7 @@
 import BaseNode from "../../../BaseNode";
 import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
 
-interface TemplateNodeSpecifics {
+export interface TemplateNodeSpecifics {
   propertyName: string;
   template: string;
 }

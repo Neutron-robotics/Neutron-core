@@ -7,7 +7,7 @@ import {
   NodeMessage,
 } from "../../../INeutronNode";
 
-interface InjectedField<T> {
+export interface InjectedField<T> {
   value: T;
   type: NeutronPrimitiveType;
   name: string;
@@ -42,7 +42,7 @@ class InjectNode extends BaseNode {
       payload: injectedProperties,
     };
   };
-  
+
   protected verifyInput = (_: NodeMessage) => {};
 }
 

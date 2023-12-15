@@ -6,12 +6,12 @@ import {
   OutputNodeMessage,
 } from "../../../INeutronNode";
 
-interface IFilterNodeChange {
+export interface IFilterNodeChange {
   type: "latest" | "latestValid";
   value: number;
 }
 
-interface FilterNodeSpecifics {
+export interface FilterNodeSpecifics {
   mode: "block" | "blockUnlessGreater" | "blockUnlessLower";
   value?: IFilterNodeChange;
   propertyName: string;

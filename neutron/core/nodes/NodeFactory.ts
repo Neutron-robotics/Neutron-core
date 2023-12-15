@@ -11,10 +11,12 @@ import DelayNode from "./implementation/nodes/functions/DelayNode";
 import ErrorNode from "./implementation/nodes/functions/ErrorNode";
 import FilterNode from "./implementation/nodes/functions/FilterNode";
 import FunctionNode from "./implementation/nodes/functions/FunctionNode";
+import InfoNode from "./implementation/nodes/functions/InfoNode";
 import InjectNode from "./implementation/nodes/functions/InjectNode";
 import RangeNode from "./implementation/nodes/functions/RangeNode";
 import SwitchNode from "./implementation/nodes/functions/SwitchNode";
 import TemplateNode from "./implementation/nodes/functions/TemplateNode";
+import WarningNode from "./implementation/nodes/functions/WarningNode";
 
 export const inputNodesSet = new Set(["inject"]);
 
@@ -24,6 +26,8 @@ class NodeFactory {
       inject: (builder: INodeBuilder<any>) => new InjectNode(builder),
       change: (builder: INodeBuilder<any>) => new ChangeNode(builder),
       debug: (builder: INodeBuilder<any>) => new DebugNode(builder),
+      info: (builder: INodeBuilder<any>) => new InfoNode(builder),
+      warning: (builder: INodeBuilder<any>) => new WarningNode(builder),
       error: (builder: INodeBuilder<any>) => new ErrorNode(builder),
       function: (builder: INodeBuilder<any>) => new FunctionNode(builder),
       switch: (builder: INodeBuilder<any>) => new SwitchNode(builder),

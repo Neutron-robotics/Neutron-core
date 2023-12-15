@@ -35,6 +35,59 @@ export { RosContext } from "./context/RosContext";
 
 export { FlowGraph, ConnectorGraph } from "./core/nodes/implementation/graphs";
 export { NeutronGraphType } from "./core/nodes/NeutronBaseGraph";
+export {
+  ChangeNodeSpecifics,
+  ChangeField,
+} from "./core/nodes/implementation/nodes/functions/ChangeNode";
+export {
+  DelayNodeSpecifics,
+  IRandomDelayInterval,
+} from "./core/nodes/implementation/nodes/functions/DelayNode";
+export {
+  ErrorNodeSpecifics,
+  IErrorEvent,
+} from "./core/nodes/implementation/nodes/functions/ErrorNode";
+export {
+  FilterNodeSpecifics,
+  IFilterNodeChange,
+} from "./core/nodes/implementation/nodes/functions/FilterNode";
+export { FunctionNodeSpecifics } from "./core/nodes/implementation/nodes/functions/FunctionNode";
+export {
+  InfoNodeSpecifics,
+  IInfoEvent,
+} from "./core/nodes/implementation/nodes/functions/InfoNode";
+export {
+  SuccessNodeSpecifics,
+  ISuccessEvent,
+} from "./core/nodes/implementation/nodes/functions/SuccessNode";
+export {
+  InjectNodeSpecifics,
+  InjectedField,
+} from "./core/nodes/implementation/nodes/functions/InjectNode";
+export { IRepeatInterval, IRepeatCron } from "./core/nodes/INeutronNode";
+export {
+  RangeNodeSpecifics,
+  IScale,
+} from "./core/nodes/implementation/nodes/functions/RangeNode";
+export {
+  SwitchNodeSpecifics,
+  SwitchField,
+  ComparisonOperator,
+  comparisonOperators,
+} from "./core/nodes/implementation/nodes/functions/SwitchNode";
+export { TemplateNodeSpecifics } from "./core/nodes/implementation/nodes/functions/TemplateNode";
+export {
+  IDebugEvent,
+  DebugNodeSpecifics,
+} from "./core/nodes/implementation/nodes/functions/DebugNode";
+export {
+  WarningNodeSpecifics,
+  IWarningEvent,
+} from "./core/nodes/implementation/nodes/functions/WarningNode";
+export { ActionNodeSpecifics } from "./core/nodes/implementation/nodes/ros2/ActionNode";
+export { PublisherNodeSpecifics } from "./core/nodes/implementation/nodes/ros2/PublishNode";
+export { ServiceNodeSpecifics } from "./core/nodes/implementation/nodes/ros2/ServiceNode";
+export { SubscriberNodeSpecifics } from "./core/nodes/implementation/nodes/ros2/SubscribeNode";
 
 // Interfaces
 export {

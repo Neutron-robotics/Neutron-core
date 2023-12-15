@@ -3,7 +3,7 @@ import BaseNode from "../../../BaseNode";
 import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
 import RosNode from "./RosNode";
 
-interface SubscriberNodeSpecifics {
+export interface SubscriberNodeSpecifics {
   topic: IRos2Topic;
 }
 

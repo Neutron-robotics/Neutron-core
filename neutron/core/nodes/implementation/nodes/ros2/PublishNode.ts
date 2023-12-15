@@ -2,7 +2,7 @@ import { IRos2Topic } from "../../../../../models/ros2/ros2";
 import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
 import RosNode from "./RosNode";
 
-interface PublisherNodeSpecifics {
+export interface PublisherNodeSpecifics {
   topic: IRos2Topic;
 }
 

@@ -10,6 +10,11 @@ export interface IDebugEvent {
   log: string;
 }
 
+export interface DebugNodeSpecifics {
+  output: "full" | "property";
+  propertyName?: string;
+}
+
 class DebugNode extends BaseNode {
   public isInput: boolean = false;
   public readonly type = "debug";

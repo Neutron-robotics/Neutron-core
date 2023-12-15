@@ -8,7 +8,7 @@ export interface IErrorEvent {
   ack: boolean;
 }
 
-interface ErrorNodeSpecifics {
+export interface ErrorNodeSpecifics {
   output: "full" | "property";
   propertyName?: string;
   closeAuto: boolean;

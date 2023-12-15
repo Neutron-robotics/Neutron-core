@@ -2,16 +2,16 @@ import { IRos2Action } from "../../../../../models/ros2/ros2";
 import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
 import RosNode from "./RosNode";
 
-interface ActionrNodeSpecifics {
+export interface ActionNodeSpecifics {
   action: IRos2Action;
 }
 
-class ActionrNode extends RosNode {
+class ActionNode extends RosNode {
   public isInput: boolean = false;
   public readonly type = "action";
-  private readonly specifics: ActionrNodeSpecifics;
+  private readonly specifics: ActionNodeSpecifics;
 
-  constructor(builder: INodeBuilder<ActionrNodeSpecifics>) {
+  constructor(builder: INodeBuilder<ActionNodeSpecifics>) {
     super(builder);
     this.specifics = builder.specifics;
   }
@@ -26,4 +26,4 @@ class ActionrNode extends RosNode {
   public override onContextMount = () => {};
 }
 
-export default ActionrNode;
+export default ActionNode;

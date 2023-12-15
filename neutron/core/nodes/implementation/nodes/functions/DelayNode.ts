@@ -1,12 +1,12 @@
 import BaseNode from "../../../BaseNode";
 import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
 
-interface IRandomDelayInterval {
+export interface IRandomDelayInterval {
   min: number;
   max: number;
 }
 
-interface DelayNodeSpecifics {
+export interface DelayNodeSpecifics {
   mode: "fixed" | "random";
   delay: number | IRandomDelayInterval;
   unit: "millisecond" | "second" | "minute" | "hour";

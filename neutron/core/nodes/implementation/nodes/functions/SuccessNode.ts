@@ -2,29 +2,29 @@ import { ILiteEvent, LiteEvent } from "../../../../../utils/LiteEvent";
 import BaseNode from "../../../BaseNode";
 import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
 
-export interface IWarningEvent {
+export interface ISuccessEvent {
   log: string;
   closeAuto: boolean;
   ack: boolean;
 }
 
-export interface WarningNodeSpecifics {
+export interface SuccessNodeSpecifics {
   output: "full" | "property";
   propertyName?: string;
   closeAuto: boolean;
   ack: boolean;
 }
 
-class WarningNode extends BaseNode {
+class SuccessNode extends BaseNode {
   public isInput: boolean = false;
-  public readonly type = "warning";
-  public WarningEvent: ILiteEvent<IWarningEvent>;
-  public specifics: WarningNodeSpecifics;
+  public readonly type = "success";
+  public SuccessEvent: ILiteEvent<ISuccessEvent>;
+  public specifics: SuccessNodeSpecifics;
 
-  constructor(builder: INodeBuilder<WarningNodeSpecifics>) {
+  constructor(builder: INodeBuilder<SuccessNodeSpecifics>) {
     super(builder);
     this.specifics = builder.specifics;
-    this.WarningEvent = new LiteEvent<IWarningEvent>();
+    this.SuccessEvent = new LiteEvent<ISuccessEvent>();
   }
 
   protected process = async (message: NodeMessage) => {
@@ -33,7 +33,7 @@ class WarningNode extends BaseNode {
         ? message.payload
         : message.payload[this.specifics.propertyName ?? ""];
 
-    this.WarningEvent.trigger({
+    this.SuccessEvent.trigger({
       log,
       closeAuto: this.specifics.closeAuto,
       ack: this.specifics.ack,
@@ -44,4 +44,4 @@ class WarningNode extends BaseNode {
   protected verifyInput = (_: NodeMessage) => {};
 }
 
-export default WarningNode;
+export default SuccessNode;

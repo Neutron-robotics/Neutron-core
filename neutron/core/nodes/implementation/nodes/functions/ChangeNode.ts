@@ -2,14 +2,14 @@ import NeutronNodeComputeError from "../../../../errors/NeutronNodeError";
 import BaseNode from "../../../BaseNode";
 import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
 
-interface ChangeField {
+export interface ChangeField {
   id: string;
   mode: "define" | "remove" | "move";
   inputField: string;
   targetField?: string;
 }
 
-interface ChangeNodeSpecifics {
+export interface ChangeNodeSpecifics {
   fields: ChangeField[];
 }
 

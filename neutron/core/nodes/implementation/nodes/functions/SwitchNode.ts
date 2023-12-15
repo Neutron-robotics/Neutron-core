@@ -7,10 +7,10 @@ import {
   OutputNodeMessage,
 } from "../../../INeutronNode";
 
-const comparisonOperators = ["==", "!=", "<", "<=", ">", ">="] as const;
-type ComparisonOperator = (typeof comparisonOperators)[number];
+export const comparisonOperators = ["==", "!=", "<", "<=", ">", ">="] as const;
+export type ComparisonOperator = (typeof comparisonOperators)[number];
 
-interface SwitchField<T> {
+export interface SwitchField<T> {
   type: NeutronPrimitiveType;
   value: T;
   operator: ComparisonOperator;
@@ -18,7 +18,7 @@ interface SwitchField<T> {
 }
 
 // TODO: Renommer dans l'ui
-interface SwitchNodeSpecifics {
+export interface SwitchNodeSpecifics {
   propertyName: string;
   switchFields: SwitchField<any>[];
   switchMode: "stop" | "continue";
