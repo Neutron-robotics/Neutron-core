@@ -3,6 +3,7 @@ import BaseNode from "../../../BaseNode";
 import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
 
 export interface IWarningEvent {
+  id: string;
   log: string;
   closeAuto: boolean;
   ack: boolean;
@@ -34,6 +35,7 @@ class WarningNode extends BaseNode {
         : message.payload[this.specifics.propertyName ?? ""];
 
     this.WarningEvent.trigger({
+      id: this.id,
       log,
       closeAuto: this.specifics.closeAuto,
       ack: this.specifics.ack,

@@ -1,6 +1,6 @@
 import { ILiteEvent, LiteEvent } from "../../utils/LiteEvent";
 import BaseNode from "./BaseNode";
-import { NeutronEdgeDB, NeutronNodeDB } from "./INeutronNode";
+import { INodeBuilder, NeutronEdgeDB, NeutronNodeDB } from "./INeutronNode";
 import NodeFactory from "./NodeFactory";
 
 export type NeutronGraphType = "Flow" | "Connector" | "Component";
@@ -26,6 +26,12 @@ abstract class NeutronBaseGraph {
     this.edges = edges;
     this.nodes = nodes.map((node) => NodeFactory.createNode(node));
     this.environment = {};
+  }
+
+  public findNodeByType<TNode extends BaseNode>(nodeType: {
+    new (builder: INodeBuilder<any>): TNode;
+  }): TNode[] {
+    return this.nodes.filter((e) => e instanceof nodeType) as TNode[];
   }
 }
 

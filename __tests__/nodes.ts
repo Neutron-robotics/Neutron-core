@@ -1,425 +1,772 @@
-import NeutronNodeGraph from "../neutron/core/node/NeutronGraphNode";
-import BaseControllerNode from "../neutron/core/node/implementation/BaseControllerNode";
-import IfNode from "../neutron/core/node/implementation/IfNode";
-import PublisherNode from "../neutron/core/node/implementation/PublisherNode";
-import SubscriberNode from "../neutron/core/node/implementation/SubscriberNode";
-import {
-  brokenLinkEdges,
-  brokenLinkNodes,
-  complexEdges,
-  complexNodes,
-  cyclicEdges,
-  cyclicNode,
-} from "./__mixture__/nodes";
 import NeutronGraphError from "../neutron/core/errors/NeutronGraphError";
-import _ from "lodash";
-import { ILiteEvent } from "../neutron/utils/LiteEvent";
-import { makeConnectionContext } from "../neutron/context/makeContext";
-import { RobotConnectionType } from "../neutron/interfaces/RobotConnection";
-import { mockRosSystem } from "./__mixture__/rosSystem";
-import { RosContext } from "../neutron/context/RosContext";
-
+import { NodeMessage } from "../neutron/core/nodes/INeutronNode";
+import NodeFactory from "../neutron/core/nodes/NodeFactory";
+import ConnectorGraph from "../neutron/core/nodes/implementation/graphs/ConnectorGraph";
+import FlowGraph from "../neutron/core/nodes/implementation/graphs/FlowGraph";
+import DebugNode from "../neutron/core/nodes/implementation/nodes/functions/DebugNode";
+import ErrorNode from "../neutron/core/nodes/implementation/nodes/functions/ErrorNode";
+import InjectNode from "../neutron/core/nodes/implementation/nodes/functions/InjectNode";
+import { graphTemplate } from "./__mixture__/connectorGraphMock";
+import { flowGraphMock } from "./__mixture__/flowGraphMock";
 jest.mock("../neutron/context/makeContext");
 
 describe("Nodes graph builder", () => {
-  it("build basic nodegraph successfuly", () => {
-    const graph = new NeutronNodeGraph(complexNodes, complexEdges);
+  const edgesDb = graphTemplate.edges;
+  const nodesDb = graphTemplate.nodes;
 
-    expect(graph.inputNode.id).toBe("325bab26-7d75-442e-85f2-4dd328d4f146");
-    expect(Object.entries(graph.inputNode.outputHandles).length).toBe(4);
+  it("build connector graph successfuly", () => {
+    const graph = new ConnectorGraph(nodesDb, edgesDb);
 
-    const endNode =
-      graph.inputNode.outputHandles["top"].targets[0].node.outputHandles[
-        "nodeOutput"
-      ].targets[0].node.outputHandles["nodeOutput"].targets[0].node;
+    expect((graph as any).inputNode.id).toBe(
+      "bb6e7ae5-69d6-4822-8803-d66e18255f73"
+    );
+    expect(graph.nodeCount).toBe(7);
 
-    expect(endNode.id).toBe("aaf1b1c6-bf43-4bcf-bf4b-e354e9316583");
-    expect(Object.values(endNode.inputHandles).length).toBe(2);
-    expect(graph.nodes.length).toBe(10);
+    const switchNode = graph.getNodeById(
+      "2e8704ee-7e4c-4a4d-85f5-aed87b27ef40"
+    );
+    expect(switchNode).toBeDefined();
+    expect(Object.entries(switchNode?.nextNodes ?? []).length).toBe(2);
+
+    const lastDebugNode = graph.getNodeById(
+      "663463fb-5dab-4a37-8521-c24dc73db9cc"
+    );
+    expect(lastDebugNode).toBeDefined();
+    expect(Object.entries(lastDebugNode?.nextNodes ?? []).length).toBe(0);
   });
 
-  it("Get a node by id", () => {
-    const graph = new NeutronNodeGraph(complexNodes, complexEdges);
-
-    const controllerNode = graph.getNode<BaseControllerNode>(
-      "325bab26-7d75-442e-85f2-4dd328d4f146"
-    );
-    const ifNode = graph.getNode<IfNode>(
-      "3059327c-ca55-4c21-9486-ed2e3e46cd85"
-    );
-    const publisherNode = graph.getNode<PublisherNode<any>>(
-      "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583"
-    );
-    const subscriberNode = graph.getNode<SubscriberNode>(
-      "aaf1b1c6-n0op-4bcf-bf4b-e354e9316583"
-    );
-
-    expect(controllerNode).toBeDefined();
-    expect(ifNode).toBeDefined();
-    expect(publisherNode).toBeDefined();
-    expect(subscriberNode).not.toBeDefined();
-  });
-
-  it("Fails to build a graph with broken links", () => {
+  it("Fails to build a graph with broken dependencies", () => {
     let error: any = null;
+
+    const wrongNodesDb = nodesDb.filter(
+      (e) => e.id !== "34095948-8fc8-4286-b4ad-886a0e58277b"
+    );
     try {
-      const graph = new NeutronNodeGraph(brokenLinkNodes, brokenLinkEdges);
+      const graph = new ConnectorGraph(wrongNodesDb, edgesDb);
     } catch (err) {
       error = err;
     }
     expect(error).toBeInstanceOf(NeutronGraphError);
     expect(error.message).toBe(
-      "The node 3059327c-ca55-4c21-9486-ed2e3e46cd85 defined by edge reactflow__edge-325bab26-7d75-442e-85f2-4dd328d4f146top-3059327c-ca55-4c21-9486-ed2e3e46cd85input-7d1502ee-a7af-4504-998d-997fcef0ced0 could not be found while building graph"
+      "No node with id 34095948-8fc8-4286-b4ad-886a0e58277b has been provided"
     );
-    expect(error.name).toBe("NeutronGraphError");
   });
 
-  it("Fails to build the graph because no input node", () => {
-    const brokenNodeWithNoInput = brokenLinkNodes.filter((e) => !e.isInput);
+  it("Fails to build the graph because it is cyclic", async () => {
     let error: any = null;
+    const cyclicEdges = [...edgesDb];
+    cyclicEdges[5].target = "396748fb-c7f3-4d07-a649-49cce5fc03bd";
 
     try {
-      const graph = new NeutronNodeGraph(
-        brokenNodeWithNoInput,
-        brokenLinkEdges
-      );
+      const graph = new ConnectorGraph(nodesDb, cyclicEdges);
     } catch (err) {
       error = err;
     }
-    expect(error).toBeInstanceOf(NeutronGraphError);
-    expect(error.message).toBe("No input node has been provided");
-    expect(error.name).toBe("NeutronGraphError");
-  });
 
-  it("Fails to build the graph because it is cyclic", () => {
-    const brokenNodeWithNoInput = brokenLinkNodes.filter((e) => !e.isInput);
-    let error: any = null;
-
-    try {
-      const graph = new NeutronNodeGraph(cyclicNode, cyclicEdges);
-    } catch (err) {
-      error = err;
-    }
     expect(error).toBeInstanceOf(NeutronGraphError);
     expect(error.message).toBe(
       "A cycle has been detected while building the graph"
     );
-    expect(error.name).toBe("NeutronGraphError");
   });
 
-  it("Failed to build the graph because of a unknown node type", () => {
-    const nodeIncludingForeign = _.cloneDeep(complexNodes);
+  it("Failed to build the graph because of a unknown node type", async () => {
+    const unknownNodes = nodesDb.map((node) => ({ ...node }));
 
-    nodeIncludingForeign[0].type = "inevermetthisnodeNode";
+    unknownNodes[0].data.name = "ThisNodeDoesNotExist";
     let error: any = null;
 
     try {
-      const graph = new NeutronNodeGraph(nodeIncludingForeign, complexEdges);
+      const graph = new ConnectorGraph(unknownNodes, edgesDb);
     } catch (err) {
       error = err;
     }
+
     expect(error).toBeInstanceOf(NeutronGraphError);
-    expect(error.message).toBe("Type inevermetthisnodeNode is not implemented");
-    expect(error.name).toBe("NeutronGraphError");
+    expect(error.message).toBe(
+      "Failed to build the graph, unknown node ThisNodeDoesNotExist"
+    );
   });
-
-  it.todo("build complex nodegraph");
 });
 
-describe("Nodegraph execution", () => {
-  const makeWaitForGraphToProcess = (event: ILiteEvent<any>) =>
-    new Promise((res) => {
-      event.once(() => res({}));
+describe("Nodes graph execution", () => {
+  const edgesDb = graphTemplate.edges;
+  const nodesDb = graphTemplate.nodes;
+
+  it("Trigger a controller node", async () => {
+    const graph = new ConnectorGraph(nodesDb, edgesDb);
+    const mockNodeProcessEvent = jest.fn();
+    const mockLastDebugNode0AfterEvent = jest.fn();
+    const mockLastDebugNode1AfterEvent = jest.fn();
+    const mockLastDebugNode2AfterEvent = jest.fn();
+
+    graph.NodeProcessEvent.on((event) => {
+      mockNodeProcessEvent(event);
     });
-
-  it("Triggers a controller node", async () => {
-    const graph = new NeutronNodeGraph(complexNodes, complexEdges);
-    const publisherNodeCallback = jest.fn();
-
-    const controllerNode = graph.getNode<BaseControllerNode>(
-      "325bab26-7d75-442e-85f2-4dd328d4f146"
-    );
-    const publisherNode = graph.getNode<PublisherNode<any>>(
-      "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583"
-    );
-    publisherNode?.BeforeProcessingEvent.on(publisherNodeCallback);
-
-    const waitForGraphToProcess = new Promise((res) => {
-      publisherNode?.AfterProcessingEvent.once(() => res({}));
-    });
-
-    controllerNode?.sendInput({
-      top: 20,
-      left: 15,
-    });
-
-    await waitForGraphToProcess;
-
-    expect(publisherNodeCallback).toHaveBeenCalledTimes(1);
-    expect(publisherNodeCallback).toHaveBeenCalledWith({
-      data: {
-        x: 20,
-        yaw: 15,
-      },
-      nodeId: "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583",
-    });
-  }, 10000);
-
-  it("Several graphnode execution (awaited)", async () => {
-    const graph = new NeutronNodeGraph(complexNodes, complexEdges);
-    const publisherNodeCallback = jest.fn();
-
-    const controllerNode = graph.getNode<BaseControllerNode>(
-      "325bab26-7d75-442e-85f2-4dd328d4f146"
-    );
-    const publisherNode = graph.getNode<PublisherNode<any>>(
-      "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583"
-    );
-
-    if (!publisherNode) {
-      throw new Error("No publisher node");
-    }
-
-    publisherNode.BeforeProcessingEvent.on(publisherNodeCallback);
-
-    const firstExecutionPromise = makeWaitForGraphToProcess(
-      publisherNode.AfterProcessingEvent
-    );
-    controllerNode?.sendInput({
-      top: 20,
-    });
-    await firstExecutionPromise;
-    expect(publisherNodeCallback).toHaveBeenCalledTimes(1);
-    expect(publisherNodeCallback).toHaveBeenCalledWith({
-      data: {
-        x: 20,
-        yaw: undefined,
-      },
-      nodeId: "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583",
-    });
-
-    // 2
-
-    const publisherNodeCallback2 = jest.fn();
-    publisherNode.BeforeProcessingEvent.once(publisherNodeCallback2);
-    const secondExecutionPromise = makeWaitForGraphToProcess(
-      publisherNode.AfterProcessingEvent
-    );
-    controllerNode?.sendInput({
-      right: 90,
-    });
-    await secondExecutionPromise;
-    expect(publisherNodeCallback2).toHaveBeenCalledTimes(1);
-    expect(publisherNodeCallback2).toHaveBeenCalledWith({
-      data: {
-        x: undefined,
-        yaw: 90,
-      },
-      nodeId: "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583",
-    });
-
-    // 3
-
-    const publisherNodeCallback3 = jest.fn();
-    publisherNode.BeforeProcessingEvent.once(publisherNodeCallback3);
-    const thirdExecutionPromise = makeWaitForGraphToProcess(
-      publisherNode.AfterProcessingEvent
-    );
-    controllerNode?.sendInput({
-      left: 20,
-      top: 10,
-    });
-    await thirdExecutionPromise;
-    expect(publisherNodeCallback3).toHaveBeenCalledTimes(1);
-    expect(publisherNodeCallback3).toHaveBeenCalledWith({
-      data: {
-        x: 10,
-        yaw: 20,
-      },
-      nodeId: "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583",
-    });
-  }, 10000);
-
-  it("Several graph execution (in a row)", async () => {
-    const graph = new NeutronNodeGraph(complexNodes, complexEdges);
-    const publisherNodeCallback = jest.fn();
-
-    const controllerNode = graph.getNode<BaseControllerNode>(
-      "325bab26-7d75-442e-85f2-4dd328d4f146"
-    );
-    const publisherNode = graph.getNode<PublisherNode<any>>(
-      "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583"
-    );
-
-    if (!publisherNode) {
-      throw new Error("No publisher node");
-    }
-
-    const publisherNodeRun = jest.fn();
-    publisherNode.BeforeProcessingEvent.on(publisherNodeRun);
-
-    controllerNode?.sendInput({
-      left: 20,
-      top: 10,
-    });
-    await graph.waitToProcess();
-    controllerNode?.sendInput({
-      right: 90,
-    });
-    await graph.waitToProcess();
-    controllerNode?.sendInput({
-      top: 20,
-      left: 15,
-    });
-    await graph.waitToProcess();
-
-    expect(publisherNodeRun).toHaveBeenCalledTimes(3);
-    expect(publisherNodeRun).toHaveBeenCalledWith({
-      data: {
-        x: 10,
-        yaw: 20,
-      },
-      nodeId: "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583",
-    });
-    expect(publisherNodeRun).toHaveBeenCalledWith({
-      data: {
-        x: undefined,
-        yaw: 90,
-      },
-      nodeId: "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583",
-    });
-    expect(publisherNodeRun).toHaveBeenCalledWith({
-      data: {
-        x: 20,
-        yaw: 15,
-      },
-      nodeId: "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583",
-    });
-  }, 100000);
-});
-
-describe("Nodegraph execution with connection context", () => {
-  beforeEach(() => {
-    (makeConnectionContext as any).mockClear();
-  });
-
-  it("Build nodegraph with context", async () => {
-    const graph = new NeutronNodeGraph(complexNodes, complexEdges);
-    const robotConnectionInfos = {
-      hostname: "localhost",
-      port: 69420,
-      type: RobotConnectionType.ROSBRIDGE,
-    };
-    (makeConnectionContext as any).mockReturnValue({});
-
-    const connectionContext = makeConnectionContext(
-      robotConnectionInfos.type,
-      robotConnectionInfos
-    ) as RosContext;
-
-    graph.useRos(connectionContext, mockRosSystem);
-
-    const node = graph.getNode<PublisherNode<any>>(
-      "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583"
-    );
-    expect(node?.isConnected).toBe(false);
-    expect(
-      graph.nodes.filter((e) => (e as any).context !== undefined).length
-    ).toBe(1);
-  });
-
-  it("Run a node with context", () => {
-    (makeConnectionContext as any).mockReturnValue({
-      send: jest.fn(),
-      isConnected: jest.fn().mockReturnValue(true),
-    });
-    const graph = new NeutronNodeGraph(complexNodes, complexEdges);
-    const robotConnectionInfos = {
-      hostname: "localhost",
-      port: 69420,
-      type: RobotConnectionType.ROSBRIDGE,
-    };
-    const connectionContext = makeConnectionContext(
-      robotConnectionInfos.type,
-      robotConnectionInfos
-    ) as RosContext;
-
-    (connectionContext as any).send.mockImplementation(() =>
-      Promise.resolve(true)
-    );
-
-    graph.useRos(connectionContext, mockRosSystem);
-
-    const node = graph.getNode<PublisherNode<any>>(
-      "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583"
-    );
-    (node as any).process({ x: 3, y: 1 });
-    expect((connectionContext as any).send).toHaveBeenCalledTimes(1);
-    expect((connectionContext as any).send).toHaveBeenCalledWith({
-      methodType: "test topic",
-      format: "std/position",
-      payload: { x: 3, y: 1 },
-    });
-  });
-
-  it("Run a graph with context", async () => {
-    const graph = new NeutronNodeGraph(complexNodes, complexEdges);
-    (makeConnectionContext as any).mockReturnValue({
-      send: jest.fn(),
-      isConnected: jest.fn().mockReturnValue(true),
-    });
-    const robotConnectionInfos = {
-      hostname: "localhost",
-      port: 69420,
-      type: RobotConnectionType.ROSBRIDGE,
-    };
-    const connectionContext = makeConnectionContext(
-      robotConnectionInfos.type,
-      robotConnectionInfos
-    ) as RosContext;
-
-    const publisherNodeCallback = jest.fn();
-
-    (connectionContext as any).send.mockImplementation(() =>
-      Promise.resolve(true)
-    );
-
-    graph.useRos(connectionContext, mockRosSystem);
-
-    const controllerNode = graph.getNode<BaseControllerNode>(
-      "325bab26-7d75-442e-85f2-4dd328d4f146"
-    );
-    const publisherNode = graph.getNode<PublisherNode<any>>(
-      "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583"
-    );
-
-    publisherNode?.BeforeProcessingEvent.on(publisherNodeCallback);
-    const waitForGraphToProcess = new Promise((res) => {
-      publisherNode?.AfterProcessingEvent.once(() => res({}));
-    });
-
-    controllerNode?.sendInput({
-      top: 20,
-      left: 15,
-    });
-
-    await waitForGraphToProcess;
-
-    expect(publisherNodeCallback).toHaveBeenCalledWith({
-      data: {
-        x: 20,
-        yaw: 15,
-      },
-      nodeId: "aaf1b1c6-bf43-4bcf-bf4b-e354e9316583",
-    });
-    expect((connectionContext as any).send).toHaveBeenCalledTimes(1);
-    expect((connectionContext as any).send).toHaveBeenCalledWith({
-      methodType: "test topic",
-      format: "std/position",
+    const message: NodeMessage = {
       payload: {
-        x: 20,
-        yaw: 15,
+        speed: 0.5,
+        rotation: 15,
       },
+    };
+
+    const debugNode0 = graph.getNodeById<DebugNode>(
+      "a560d355-ba9b-43d1-bdd2-8235a45dfb52"
+    );
+    debugNode0?.AfterProcessingEvent.on(mockLastDebugNode0AfterEvent);
+
+    const debugNode1 = graph.getNodeById<DebugNode>(
+      "663463fb-5dab-4a37-8521-c24dc73db9cc"
+    );
+    debugNode1?.AfterProcessingEvent.on(mockLastDebugNode1AfterEvent);
+
+    const debugNode2 = graph.getNodeById<DebugNode>(
+      "f63a4e90-ecb2-44c9-ac39-d9c8d2bca971"
+    );
+    debugNode2?.AfterProcessingEvent.on(mockLastDebugNode2AfterEvent);
+
+    await graph.runInputNode(message);
+
+    expect(mockLastDebugNode0AfterEvent).toHaveBeenCalled();
+    expect(mockLastDebugNode1AfterEvent).toHaveBeenCalled();
+    expect(mockLastDebugNode2AfterEvent).not.toHaveBeenCalled();
+    expect(mockNodeProcessEvent).toHaveBeenCalledTimes(6);
+  });
+});
+
+describe("Nodes Flow builder", () => {
+  const edgesDb = flowGraphMock.edges;
+  const nodesDb = flowGraphMock.nodes;
+  const mockNodeDb = nodesDb[0];
+
+  it("build flow graph successfuly", () => {
+    const graph = new FlowGraph(nodesDb, edgesDb);
+
+    expect(graph.nodeCount).toBe(5);
+
+    const switchNode = graph.getNodeById(
+      "19c60b31-d102-4eb8-b0e8-81c155011f18"
+    );
+    expect(switchNode).toBeDefined();
+    expect(Object.entries(switchNode?.nextNodeToArray ?? []).length).toBe(2);
+
+    const lastDebugNode = graph.getNodeById(
+      "e121382e-caed-4cec-b81c-24c3f3083cc9"
+    );
+    expect(lastDebugNode).toBeDefined();
+    expect(Object.entries(lastDebugNode?.nextNodeToArray ?? []).length).toBe(0);
+
+    const functionNode = graph.getNodeById(
+      "2be1d640-6a57-4bde-96c1-42df250de733"
+    );
+    expect(functionNode).toBeDefined();
+    const functionNodeLooped =
+      functionNode?.nextNodeToArray[0].node.nextNodeToArray[0].node
+        .nextNodeToArray[0].node;
+
+    expect(functionNodeLooped).toBeDefined();
+    expect(functionNodeLooped?.id).toBe(functionNode?.id);
+
+    const debugNodes = graph.findNodeByType<DebugNode>(DebugNode);
+    expect(debugNodes.length).toBe(1);
+    expect(debugNodes[0].id).toBe("e121382e-caed-4cec-b81c-24c3f3083cc9");
+  });
+
+  it("Failed to build the graph because of a unknown node type", async () => {
+    const unknownNodes = nodesDb.map((node) => ({ ...node }));
+
+    unknownNodes[0].data.name = "ThisNodeDoesNotExist";
+    let error: any = null;
+
+    try {
+      const graph = new FlowGraph(unknownNodes, edgesDb);
+    } catch (err) {
+      error = err;
+    }
+
+    expect(error).toBeInstanceOf(NeutronGraphError);
+    expect(error.message).toBe(
+      "Failed to build the graph, unknown node ThisNodeDoesNotExist"
+    );
+  });
+});
+
+describe("Neutron flow execution", () => {
+  const edgesDb = flowGraphMock.edges;
+  const nodesDb = flowGraphMock.nodes;
+  const mockNodeDb = nodesDb[0];
+
+  it("run flow graph", async () => {
+    const graph = new FlowGraph(nodesDb, edgesDb);
+
+    const onDelayNodeProcessed = jest.fn();
+    const delayNode = graph.getNodeById("f9998a91-ce0a-48e0-aa68-fdc028b46e3a");
+    delayNode?.AfterProcessingEvent.on(onDelayNodeProcessed);
+
+    const onDebugNodeProcessed = jest.fn();
+    const debugNode = graph.getNodeById<DebugNode>(
+      "e121382e-caed-4cec-b81c-24c3f3083cc9"
+    );
+    debugNode?.DebugEvent.on(onDebugNodeProcessed);
+
+    const res = await graph.runInputNode(
+      "ad411990-cbf6-49cb-a8ca-acb57917dab6"
+    );
+
+    expect(onDelayNodeProcessed).toHaveBeenCalledTimes(9);
+    expect(onDebugNodeProcessed).toHaveBeenCalledTimes(1);
+  }, 5000);
+});
+
+describe("Neutron Nodes", () => {
+  const mockNodeDb = flowGraphMock.nodes[0];
+
+  const makeNodeBuilder = (type: string, specifics: any) => ({
+    ...mockNodeDb,
+    data: { ...mockNodeDb.data, name: type, specifics },
+  });
+
+  it("Change Node define a field", async () => {
+    const specifics = {
+      fields: [
+        {
+          id: "",
+          mode: "define",
+          inputField: "toto",
+          targetField: "foo",
+        },
+      ],
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("change", specifics));
+    const message: NodeMessage = {
+      payload: {
+        toto: 1,
+      },
+    };
+    const response = await node.processNode(message);
+    expect(response?.payload.foo).toBe(1);
+    expect(response?.payload.toto).toBe(1);
+  });
+
+  it("Change Node remove a field", async () => {
+    const specifics = {
+      fields: [
+        {
+          id: "",
+          mode: "remove",
+          inputField: "toto",
+        },
+      ],
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("change", specifics));
+    const message: NodeMessage = {
+      payload: {
+        toto: 1,
+      },
+    };
+    const response = await node.processNode(message);
+    expect(response?.payload.toto).not.toBeDefined();
+  });
+
+  it("Change Node move a field", async () => {
+    const specifics = {
+      fields: [
+        {
+          id: "",
+          mode: "move",
+          inputField: "toto",
+          targetField: "foo",
+        },
+      ],
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("change", specifics));
+    const message: NodeMessage = {
+      payload: {
+        toto: 1,
+      },
+    };
+    const response = await node.processNode(message);
+    expect(response?.payload.foo).toBe(1);
+    expect(response?.payload.toto).not.toBeDefined();
+  });
+
+  it("Debug node", async () => {
+    const node = NodeFactory.createNode(
+      makeNodeBuilder("debug", {})
+    ) as DebugNode;
+    const message: NodeMessage = {
+      payload: {
+        toto: 1,
+        tata: 2,
+        name: "My name",
+      },
+    };
+    const debugEvent = jest.fn();
+
+    node.DebugEvent.on(debugEvent);
+    await node.processNode(message);
+
+    expect(debugEvent).toHaveBeenCalledTimes(1);
+    expect(debugEvent).toHaveBeenCalledWith({
+      log: { toto: 1, tata: 2, name: "My name" },
+      id: node.id,
     });
+  });
+
+  it("Error node", async () => {
+    const errorSpecifics = {
+      output: "property",
+      propertyName: "toto",
+      closeAuto: true,
+    };
+
+    const node = NodeFactory.createNode(
+      makeNodeBuilder("error", errorSpecifics)
+    ) as ErrorNode;
+
+    const message: NodeMessage = {
+      payload: {
+        toto: "this is indeed an error",
+        tata: 2,
+        name: "My name",
+      },
+    };
+    const errorEvent = jest.fn();
+
+    node.ErrorEvent.on(errorEvent);
+    await node.processNode(message);
+
+    expect(errorEvent).toHaveBeenCalledTimes(1);
+    expect(errorEvent).toHaveBeenCalledWith({
+      id: node.id,
+      log: "this is indeed an error",
+      closeAuto: true,
+    });
+  });
+
+  it("Inject Node", async () => {
+    const specifics = {
+      inject: true,
+      repeat: "no",
+      properties: [
+        {
+          type: "string",
+          name: "firstName",
+          id: "",
+          value: "Hugo",
+        },
+        {
+          type: "number",
+          name: "age",
+          id: "",
+          value: 25,
+        },
+      ],
+    };
+    const node = NodeFactory.createNode(makeNodeBuilder("inject", specifics));
+    const message: NodeMessage = {
+      payload: {},
+    };
+
+    const response = await node.processNode(message);
+    expect(response?.payload).toStrictEqual({
+      firstName: "Hugo",
+      age: 25,
+    });
+  });
+
+  it("Delay Node - Fixed Delay", async () => {
+    const specifics = {
+      mode: "fixed",
+      delay: 500,
+      unit: "millisecond",
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("delay", specifics));
+
+    const message: NodeMessage = { payload: "Test Message" };
+
+    const setTimeoutSpy = jest.spyOn(global, "setTimeout");
+
+    await node.processNode(message);
+
+    expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 500);
+  });
+
+  it("Delay Node - Random Interval", async () => {
+    const specifics = {
+      mode: "random",
+      delay: { min: 100, max: 500 },
+      unit: "millisecond",
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("delay", specifics));
+
+    const message: NodeMessage = { payload: "Test Message" };
+
+    const setTimeoutSpy = jest.spyOn(global, "setTimeout");
+
+    await node.processNode(message);
+
+    const setTimeoutDelay = setTimeoutSpy.mock.calls[0][1];
+
+    expect(setTimeoutDelay).toBeGreaterThanOrEqual(100);
+    expect(setTimeoutDelay).toBeLessThanOrEqual(500);
+  });
+
+  it("Function Node", async () => {
+    const specifics = {
+      code: `
+      const multiplier = msg.fields[0].value * msg.fields[0].value;
+      const res = { ...msg, multiplier };
+      return res;
+      `,
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("function", specifics));
+
+    const message: NodeMessage = {
+      payload: {
+        fields: [{ value: 5 }],
+      },
+    };
+
+    const res = await node.processNode(message);
+    expect(res?.payload).toStrictEqual({
+      fields: [{ value: 5 }],
+      multiplier: 25,
+    });
+  });
+
+  it("Switch Node 2C 2OK", async () => {
+    const specifics = {
+      propertyName: "toto",
+      switchFields: [
+        {
+          type: "number",
+          operator: ">",
+          value: 140,
+          id: "",
+        },
+        {
+          type: "number",
+          operator: "<",
+          value: 180,
+          id: "",
+        },
+      ],
+      switchMode: "continue",
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("switch", specifics));
+    const message: NodeMessage = {
+      payload: {
+        toto: 150,
+      },
+    };
+    const nodeOutput = await node.processNode(message);
+    expect(nodeOutput).toBeDefined();
+    expect(nodeOutput?.outputHandles).toStrictEqual(["output-0", "output-1"]);
+  });
+
+  it("Switch Node 2C 1OK", async () => {
+    const specifics = {
+      propertyName: "toto",
+      switchFields: [
+        {
+          type: "number",
+          operator: ">",
+          value: 140,
+          id: "",
+        },
+        {
+          type: "number",
+          operator: "<",
+          value: 180,
+          id: "",
+        },
+      ],
+      switchMode: "continue",
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("switch", specifics));
+    const message: NodeMessage = {
+      payload: {
+        toto: 0,
+      },
+    };
+    const nodeOutput = await node.processNode(message);
+    expect(nodeOutput).toBeDefined();
+    expect(nodeOutput?.outputHandles).toStrictEqual(["output-1"]);
+  });
+
+  it("Switch Node 2C 1KO stop", async () => {
+    const specifics = {
+      propertyName: "toto",
+      switchFields: [
+        {
+          type: "number",
+          operator: ">",
+          value: 140,
+          id: "",
+        },
+        {
+          type: "number",
+          operator: "<",
+          value: 180,
+          id: "",
+        },
+      ],
+      switchMode: "stop",
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("switch", specifics));
+    const message: NodeMessage = {
+      payload: {
+        toto: 0,
+      },
+    };
+    const nodeOutput = await node.processNode(message);
+    expect(nodeOutput).toBeDefined();
+    expect(nodeOutput?.outputHandles).toStrictEqual(["output-1"]);
+  });
+
+  it("Filter node block", async () => {
+    const specifics = {
+      propertyName: "count",
+      mode: "block",
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("filter", specifics));
+    const nodeNext = NodeFactory.createNode(makeNodeBuilder("debug", {}));
+    node.nextNodes["output-0"] = [nodeNext];
+    const message: NodeMessage = {
+      payload: {
+        name: "hugo",
+        count: 4,
+      },
+    };
+
+    const res1 = await node.processNode(message);
+    expect(res1?.payload).toStrictEqual(message.payload);
+    expect(res1?.outputHandles).toStrictEqual(["output-0"]);
+
+    const res2 = await node.processNode(message);
+    expect(res2?.payload).toStrictEqual(message.payload);
+    expect(res2?.outputHandles).toStrictEqual([]);
+
+    const messageNotSoDifferent: NodeMessage = {
+      payload: {
+        name: "hugo P",
+        count: 4,
+      },
+    };
+
+    const res3 = await node.processNode(messageNotSoDifferent);
+    expect(res3?.payload).toStrictEqual(messageNotSoDifferent.payload);
+    expect(res3?.outputHandles).toStrictEqual([]);
+
+    const messageDifferent: NodeMessage = {
+      payload: {
+        name: "hugo P",
+        count: 444,
+      },
+    };
+    const res4 = await node.processNode(messageDifferent);
+    expect(res4?.payload).toStrictEqual(messageDifferent.payload);
+    expect(res4?.outputHandles).toStrictEqual(["output-0"]);
+  });
+
+  it("Filter block until greater", async () => {
+    const specifics = {
+      propertyName: "count",
+      mode: "blockUnlessGreater",
+      value: {
+        type: "latestValid",
+        value: 50,
+      },
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("filter", specifics));
+    const nodeNext = NodeFactory.createNode(makeNodeBuilder("debug", {}));
+    node.nextNodes["output-0"] = [nodeNext];
+    const message: NodeMessage = {
+      payload: {
+        name: "hugo",
+        count: 4,
+      },
+    };
+
+    const res1 = await node.processNode(message);
+    expect(res1?.payload).toStrictEqual(message.payload);
+    expect(res1?.outputHandles).toStrictEqual(["output-0"]);
+
+    const res2 = await node.processNode(message);
+    expect(res2?.payload).toStrictEqual(message.payload);
+    expect(res2?.outputHandles).toStrictEqual([]);
+
+    const messageGreaterButStillInvalid: NodeMessage = {
+      payload: {
+        name: "hugo P",
+        count: 40,
+      },
+    };
+    const res3 = await node.processNode(messageGreaterButStillInvalid);
+    expect(res3?.payload).toStrictEqual(messageGreaterButStillInvalid.payload);
+    expect(res3?.outputHandles).toStrictEqual([]);
+
+    const messageGreater: NodeMessage = {
+      payload: {
+        name: "hugo P",
+        count: 444,
+      },
+    };
+    const res4 = await node.processNode(messageGreater);
+    expect(res4?.payload).toStrictEqual(messageGreater.payload);
+    expect(res4?.outputHandles).toStrictEqual(["output-0"]);
+  });
+
+  it("Filter block until lower", async () => {
+    const specifics = {
+      propertyName: "count",
+      mode: "blockUnlessLower",
+      value: {
+        type: "latest",
+        value: -10,
+      },
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("filter", specifics));
+    const nodeNext = NodeFactory.createNode(makeNodeBuilder("debug", {}));
+    node.nextNodes["output-0"] = [nodeNext];
+    const message: NodeMessage = {
+      payload: {
+        name: "hugo",
+        count: 4,
+      },
+    };
+
+    const res1 = await node.processNode(message);
+    expect(res1?.payload).toStrictEqual(message.payload);
+    expect(res1?.outputHandles).toStrictEqual(["output-0"]);
+
+    const res2 = await node.processNode(message);
+    expect(res2?.payload).toStrictEqual(message.payload);
+    expect(res2?.outputHandles).toStrictEqual([]);
+
+    const messageLowerButStillInvalid: NodeMessage = {
+      payload: {
+        name: "hugo P",
+        count: 0,
+      },
+    };
+    const res3 = await node.processNode(messageLowerButStillInvalid);
+    expect(res3?.payload).toStrictEqual(messageLowerButStillInvalid.payload);
+    expect(res3?.outputHandles).toStrictEqual([]);
+
+    const messageEvenLowerButStillInvalid: NodeMessage = {
+      payload: {
+        name: "hugo P",
+        count: -9,
+      },
+    };
+    const res4 = await node.processNode(messageEvenLowerButStillInvalid);
+    expect(res4?.payload).toStrictEqual(
+      messageEvenLowerButStillInvalid.payload
+    );
+    expect(res4?.outputHandles).toStrictEqual([]);
+
+    const messageLowerAndValid: NodeMessage = {
+      payload: {
+        name: "hugo P",
+        count: -21,
+      },
+    };
+    const res5 = await node.processNode(messageLowerAndValid);
+    expect(res5?.payload).toStrictEqual(messageLowerAndValid.payload);
+    expect(res5?.outputHandles).toStrictEqual(["output-0"]);
+  });
+
+  it("Scale node scale", async () => {
+    const specifics = {
+      propertyName: "value",
+      mode: "scale",
+      inputScale: {
+        from: 0,
+        to: 10,
+      },
+      outputScale: {
+        from: 0,
+        to: 100,
+      },
+      round: false,
+    };
+
+    const message: NodeMessage = {
+      payload: {
+        name: "Hugo",
+        value: 5,
+      },
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("range", specifics));
+    const res = await node.processNode(message);
+
+    expect(res?.payload.value).toBe(50);
+    expect(res?.payload.name).toBe("Hugo");
+  });
+
+  it("Scale node scale with limits", async () => {
+    const specifics = {
+      propertyName: "value",
+      mode: "scaleAndLimit",
+      inputScale: {
+        from: 12,
+        to: 10,
+      },
+      outputScale: {
+        from: 0,
+        to: 100,
+      },
+      round: false,
+    };
+
+    const message: NodeMessage = {
+      payload: {
+        name: "Hugo",
+        value: 5,
+      },
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("range", specifics));
+    const res = await node.processNode(message);
+
+    expect(res?.payload.value).toBe(100);
+    expect(res?.payload.name).toBe("Hugo");
+  });
+
+  it("Template node", async () => {
+    const specifics = {
+      propertyName: "sentence",
+      template: "Salut {{name}}, tu as {{age}}, c'est bien ca ?",
+    };
+
+    const message: NodeMessage = {
+      payload: {
+        name: "Hugo",
+        age: 5,
+        value: "toto",
+      },
+    };
+
+    const node = NodeFactory.createNode(makeNodeBuilder("template", specifics));
+    const res = await node.processNode(message);
+
+    expect(res?.payload.name).toBe("Hugo");
+    expect(res?.payload.value).toBe("toto");
+    expect(res?.payload.age).toBe(5);
+    expect(res?.payload.sentence).toBe("Salut Hugo, tu as 5, c'est bien ca ?");
   });
 });

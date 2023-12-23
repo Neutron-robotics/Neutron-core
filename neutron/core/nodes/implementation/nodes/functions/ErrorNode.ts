@@ -3,9 +3,11 @@ import BaseNode from "../../../BaseNode";
 import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
 
 export interface IErrorEvent {
+  id: string;
   log: string;
   closeAuto: boolean;
   ack: boolean;
+  exception: string;
 }
 
 export interface ErrorNodeSpecifics {
@@ -13,6 +15,7 @@ export interface ErrorNodeSpecifics {
   propertyName?: string;
   closeAuto: boolean;
   ack: boolean;
+  exception: string;
 }
 
 class ErrorNode extends BaseNode {
@@ -34,9 +37,11 @@ class ErrorNode extends BaseNode {
         : message.payload[this.specifics.propertyName ?? ""];
 
     this.ErrorEvent.trigger({
+      id: this.id,
       log,
       closeAuto: this.specifics.closeAuto,
       ack: this.specifics.ack,
+      exception: this.specifics.exception,
     });
     return Promise.resolve({ payload: undefined });
   };

@@ -7,6 +7,7 @@ import {
 } from "../../../INeutronNode";
 
 export interface IDebugEvent {
+  id: string;
   log: string;
 }
 
@@ -28,15 +29,10 @@ class DebugNode extends BaseNode {
   protected process = async (
     message: NodeMessage
   ): Promise<OutputNodeMessage> => {
-    if (typeof message.payload === "string") {
-      this.DebugEvent.trigger({
-        log: message.payload,
-      });
-    } else if (typeof message.payload === "object") {
-      this.DebugEvent.trigger({
-        log: JSON.stringify(message.payload),
-      });
-    }
+    this.DebugEvent.trigger({
+      id: this.id,
+      log: message.payload,
+    });
     return Promise.resolve({ payload: undefined });
   };
 
