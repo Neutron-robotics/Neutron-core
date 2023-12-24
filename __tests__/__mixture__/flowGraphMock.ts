@@ -102,7 +102,7 @@ export const flowGraphMock = {
         outputHandles: 1,
         icon: "function.svg",
         specifics: {
-          code: "return({\n    ...msg, payload: { ...msg.payload, \n    count: msg.payload.count + 1}\n})",
+          code: "return({\n    ...msg, count: msg.count + 1\n})",
         },
       },
       selected: false,

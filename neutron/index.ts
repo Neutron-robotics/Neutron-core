@@ -33,6 +33,8 @@ export { RosContext } from "./context/RosContext";
 
 // Graphs
 
+export { INeutronGraphProcessEvent } from "./core/nodes/NeutronBaseGraph";
+
 export {
   NeutronNodeDB,
   NeutronNodeData,

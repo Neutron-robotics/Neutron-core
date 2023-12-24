@@ -1,4 +1,5 @@
 import NeutronGraphError from "../../../errors/NeutronGraphError";
+import NeutronNodeComputeError from "../../../errors/NeutronNodeError";
 import BaseNode from "../../BaseNode";
 import { NeutronEdgeDB, NeutronNodeDB, NodeMessage } from "../../INeutronNode";
 import NeutronBaseGraph from "../../NeutronBaseGraph";
@@ -15,23 +16,54 @@ class ConnectorGraph extends NeutronBaseGraph {
     super(nodes, edges);
     this.nodes = [];
     this.inputNode = this.buildGraph(nodes, edges);
-    this.nodes.forEach((e) =>
-      e.AfterProcessingEvent.on((e) => this.NodeProcessEvent.trigger(e.nodeId))
-    );
+    this.nodes.forEach((e) => {
+      e.BeforeProcessingEvent.on((proc) =>
+        this.NodeProcessEvent.trigger({
+          nodeId: proc.nodeId,
+          status: "running",
+        })
+      );
+      e.AfterProcessingEvent.on((proc) =>
+        this.NodeProcessEvent.trigger({
+          nodeId: proc.nodeId,
+          status: "completed",
+        })
+      );
+    });
   }
 
-  public async runInputNode(message?: NodeMessage): Promise<void> {
+  public async runInputNode(
+    nodeId?: string,
+    message?: NodeMessage
+  ): Promise<void> {
+    this.shouldStop = false;
+    if (nodeId !== undefined && nodeId !== this.inputNode.id)
+      throw new NeutronNodeComputeError(`Node ${nodeId} is not the input`);
+
     await this.run(this.inputNode, message);
   }
 
+  public async runAllNodes(
+    message?: Record<string, NodeMessage>
+  ): Promise<void> {
+    if (!message) return;
+
+    this.shouldStop = false;
+    await this.run(this.inputNode, message[this.inputNode.id]);
+  }
+
   public async run(node: BaseNode, message?: NodeMessage): Promise<void> {
+    if (this.shouldStop) return;
+
     const output = await node.processNode(message ?? { payload: {} });
 
     const nextNodes = Object.entries(node.nextNodes)
       .filter(([handle, nodes]) => output?.outputHandles?.includes(handle))
       .reduce<BaseNode[]>((acc, [handle, nodes]) => [...acc, ...nodes], []);
 
-    const nextNodesPromises = nextNodes.map((nextNode) => this.run(nextNode, output));
+    const nextNodesPromises = nextNodes.map((nextNode) =>
+      this.run(nextNode, output)
+    );
     await Promise.all(nextNodesPromises);
   }
 

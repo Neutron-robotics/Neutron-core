@@ -16,14 +16,26 @@ class FlowGraph extends NeutronBaseGraph {
     super(nodes, edges);
     this.inputNodes = [];
     this.buildGraph(edges);
-    this.nodes.forEach((e) =>
-      e.AfterProcessingEvent.on((e) => this.NodeProcessEvent.trigger(e.nodeId))
-    );
+    this.nodes.forEach((e) => {
+      e.BeforeProcessingEvent.on((proc) =>
+        this.NodeProcessEvent.trigger({
+          nodeId: proc.nodeId,
+          status: "running",
+        })
+      );
+      e.AfterProcessingEvent.on((proc) =>
+        this.NodeProcessEvent.trigger({
+          nodeId: proc.nodeId,
+          status: "completed",
+        })
+      );
+    });
   }
 
   public async runAllNodes(
     message?: Record<string, NodeMessage>
   ): Promise<void> {
+    this.shouldStop = false;
     await Promise.all(
       this.inputNodes.map((e) =>
         this.run(e, message ? message[e.id] : undefined)
@@ -44,10 +56,12 @@ class FlowGraph extends NeutronBaseGraph {
     if (!node.isInput)
       throw new NeutronNodeComputeError(`Node ${nodeId} is not an input`);
 
+    this.shouldStop = false;
     return await this.run(node, message);
   }
 
   public async run(node: BaseNode, message?: NodeMessage): Promise<void> {
+    if (this.shouldStop) return;
     const output = await node.processNode(message ?? { payload: {} });
 
     const nextNodes = Object.entries(node.nextNodes)

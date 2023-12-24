@@ -23,22 +23,12 @@ class DelayNode extends BaseNode {
   }
 
   protected process = async (message: NodeMessage) => {
-    const { delay, unit, mode } = this.specifics;
     const delayInMillis = this.calculateDelayInMillis();
 
-    if (mode === "random") {
-      console.log(`Applying random delay of ${delayInMillis} milliseconds`);
-    } else {
-      console.log(`Applying fixed delay of ${delayInMillis} milliseconds`);
-    }
-
-    // Simulate delay with setTimeout
     await new Promise((resolve) => setTimeout(resolve, delayInMillis));
 
-    // Continue processing the message or perform any other desired action
-    console.log("Message processed after delay:", message.payload);
     return {
-      payload: message.payload
+      payload: message.payload,
     };
   };
 

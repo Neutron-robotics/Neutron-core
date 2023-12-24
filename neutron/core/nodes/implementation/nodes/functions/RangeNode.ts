@@ -8,7 +8,7 @@ export interface IScale {
 
 export interface RangeNodeSpecifics {
   propertyName: string;
-  mode: "scale" | "scaleAndLimit";
+  mode: "scale" | "scaleAndLimit" | "scaleAndDeleteOverflow";
   inputScale: IScale;
   outputScale: IScale;
   round: boolean;
@@ -30,7 +30,7 @@ class RangeNode extends BaseNode {
       throw new Error("Input value must be a number.");
     }
 
-    let scaledValue = this.scaleValue(
+    let scaledValue: number | undefined = this.scaleValue(
       inputValue,
       this.specifics.inputScale,
       this.specifics.outputScale
@@ -44,6 +44,13 @@ class RangeNode extends BaseNode {
       scaledValue = Math.round(scaledValue);
     }
 
+    if (
+      this.specifics.mode === "scaleAndDeleteOverflow" &&
+      (scaledValue > this.specifics.outputScale.to ||
+        scaledValue < this.specifics.outputScale.from)
+    ) {
+      scaledValue = undefined;
+    }
     const outputMessage: NodeMessage = {
       payload: {
         ...message.payload,

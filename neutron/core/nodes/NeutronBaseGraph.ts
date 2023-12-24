@@ -5,11 +5,17 @@ import NodeFactory from "./NodeFactory";
 
 export type NeutronGraphType = "Flow" | "Connector" | "Component";
 
+export interface INeutronGraphProcessEvent {
+  nodeId: string;
+  status: "running" | "completed";
+}
+
 abstract class NeutronBaseGraph {
-  public NodeProcessEvent: ILiteEvent<string>;
+  public NodeProcessEvent: ILiteEvent<INeutronGraphProcessEvent>;
   protected nodes: BaseNode[];
   protected edges: NeutronEdgeDB[];
   protected environment: Record<string, any>;
+  protected shouldStop: boolean;
 
   public get nodeCount(): number {
     return this.nodes.length;
@@ -21,11 +27,16 @@ abstract class NeutronBaseGraph {
     if (node) return node as TNode;
   }
 
+  public stopExecution(): void {
+    this.shouldStop = true;
+  }
+
   constructor(nodes: NeutronNodeDB[], edges: NeutronEdgeDB[]) {
-    this.NodeProcessEvent = new LiteEvent<string>();
+    this.NodeProcessEvent = new LiteEvent<INeutronGraphProcessEvent>();
     this.edges = edges;
     this.nodes = nodes.map((node) => NodeFactory.createNode(node));
     this.environment = {};
+    this.shouldStop = false;
   }
 
   public findNodeByType<TNode extends BaseNode>(nodeType: {
