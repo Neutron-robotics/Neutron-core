@@ -1,9 +1,12 @@
+import { IConnectionContext } from "../../context/ConnectionContext";
+import { RosContext } from "../../context/RosContext";
 import { ILiteEvent, LiteEvent } from "../../utils/LiteEvent";
 import BaseNode from "./BaseNode";
 import { INodeBuilder, NeutronEdgeDB, NeutronNodeDB } from "./INeutronNode";
 import NodeFactory from "./NodeFactory";
+import { RosNode } from "./implementation/nodes";
 
-export type NeutronGraphType = "Flow" | "Connector" | "Component";
+export type NeutronGraphType = "Flow" | "Connector";
 
 export interface INeutronGraphProcessEvent {
   nodeId: string;
@@ -43,6 +46,14 @@ abstract class NeutronBaseGraph {
     new (builder: INodeBuilder<any>): TNode;
   }): TNode[] {
     return this.nodes.filter((e) => e instanceof nodeType) as TNode[];
+  }
+
+  public useContext(context: IConnectionContext) {
+    if (context.constructor.name === 'RosContext')
+      this.nodes.forEach((e) => {
+        if ((e as RosNode).useRosContext)
+        (e as RosNode).useRosContext(context as RosContext)
+    })
   }
 }
 

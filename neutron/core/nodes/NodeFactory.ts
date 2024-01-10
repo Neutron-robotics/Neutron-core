@@ -1,6 +1,7 @@
 import NeutronGraphError from "../errors/NeutronGraphError";
 import BaseNode from "./BaseNode";
 import { INodeBuilder, NeutronNodeDB } from "./INeutronNode";
+import { ActionNode, PublisherNode, ServiceNode, SubscriberNode } from "./implementation/nodes";
 import {
   BaseControllerNode,
   MJPEGCameraNode,
@@ -38,6 +39,10 @@ class NodeFactory {
       mjpegcamera: (builder: INodeBuilder<any>) => new MJPEGCameraNode(builder),
       basecontroller: (builder: INodeBuilder<any>) =>
         new BaseControllerNode(builder),
+      publisher: (builder: INodeBuilder<any>) => new PublisherNode(builder),
+      action: (builder: INodeBuilder<any>) => new ActionNode(builder),
+      subscriber: (builder: INodeBuilder<any>) => new SubscriberNode(builder),
+      service: (builder: INodeBuilder<any>) => new ServiceNode(builder),
     };
 
   static createNode(nodeDb: NeutronNodeDB): BaseNode {

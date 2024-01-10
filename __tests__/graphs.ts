@@ -6,7 +6,10 @@ import DebugNode from "../neutron/core/nodes/implementation/nodes/functions/Debu
 import { graphTemplate } from "./__mixture__/connectorGraphMock";
 import { flowGraphMock } from "./__mixture__/flowGraphMock";
 import { sleep } from "../neutron/utils/time";
+import { PublisherNode } from "../neutron/core/nodes/implementation/nodes";
+import { IRosContextConfiguration, RosContext } from "../neutron/context/RosContext";
 jest.mock("../neutron/context/makeContext");
+jest.mock("roslib");
 
 describe("Nodes graph builder", () => {
   const edgesDb = graphTemplate.edges;
@@ -52,25 +55,23 @@ describe("Nodes graph builder", () => {
 
   it("Fails to build the graph because it is cyclic", async () => {
     let error: any = null;
-    const cyclicEdges = [...edgesDb];
-    cyclicEdges[5].target = "396748fb-c7f3-4d07-a649-49cce5fc03bd";
-
+  
+    const freshEdges = edgesDb.map((edge, index) => (index === 5 ? { ...edge, target: "396748fb-c7f3-4d07-a649-49cce5fc03bd" } : edge));
+  
     try {
-      const graph = new ConnectorGraph(nodesDb, cyclicEdges);
+      const graph = new ConnectorGraph(nodesDb, freshEdges);
     } catch (err) {
       error = err;
     }
-
+  
     expect(error).toBeInstanceOf(NeutronGraphError);
     expect(error.message).toBe(
       "A cycle has been detected while building the graph"
     );
   });
-
   it("Failed to build the graph because of a unknown node type", async () => {
-    const unknownNodes = nodesDb.map((node) => ({ ...node }));
+    const unknownNodes = nodesDb.map((node) => ({ ...node, data: {... node.data, name: 'ThisNodeDoesNotExist'} }));
 
-    unknownNodes[0].data.name = "ThisNodeDoesNotExist";
     let error: any = null;
 
     try {
@@ -84,7 +85,38 @@ describe("Nodes graph builder", () => {
       "Failed to build the graph, unknown node ThisNodeDoesNotExist"
     );
   });
-});
+  
+  it('Use a ros context', async () => {
+    const ctxConfiguration = {
+      hostname: "localhost",
+      port: 9090,
+      clientId: 'test'
+    };
+  
+    const context = new RosContext(ctxConfiguration as IRosContextConfiguration);
+  
+    const modifiedNode = {
+      ...nodesDb[6],
+      data: {
+        ...nodesDb[6].data,
+        name: "publisher",
+        specifics: {
+          topic: {
+            name: 'topic',
+            messageType: 'messageType'
+          },
+        } as any
+      }
+    };
+  
+    const modfiedNodes = nodesDb.map(e => e.id === modifiedNode.id ? modifiedNode : e)
+    const graph = new ConnectorGraph(modfiedNodes, edgesDb);
+    graph.useContext(context);
+  
+    const rosNode = graph.getNodeById<PublisherNode>("663463fb-5dab-4a37-8521-c24dc73db9cc");
+    expect((rosNode as any).rosContext).toBeDefined();
+  });
+})
 
 describe("Nodes graph execution", () => {
   const edgesDb = graphTemplate.edges;
