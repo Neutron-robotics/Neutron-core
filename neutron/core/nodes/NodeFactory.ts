@@ -19,7 +19,7 @@ import SwitchNode from "./implementation/nodes/functions/SwitchNode";
 import TemplateNode from "./implementation/nodes/functions/TemplateNode";
 import WarningNode from "./implementation/nodes/functions/WarningNode";
 
-export const inputNodesSet = new Set(["inject"]);
+export const inputNodesSet = new Set(["inject", 'subscriber']);
 
 class NodeFactory {
   static nodeFactory: Record<string, (builder: INodeBuilder<any>) => BaseNode> =

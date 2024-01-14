@@ -1,14 +1,14 @@
 import { IRos2Topic } from "../../../../../models/ros2/ros2";
 import BaseNode from "../../../BaseNode";
-import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
-import RosNode from "./RosNode";
+import { IBaseNodeEvent, INodeBuilder, NodeMessage } from "../../../INeutronNode";
+import { RosNodeInput } from "./RosNode";
 
 export interface SubscriberNodeSpecifics {
   topic: IRos2Topic;
 }
 
-class SubscriberNode extends RosNode {
-  public isInput: boolean = false;
+class SubscriberNode extends RosNodeInput {
+  public isInput: boolean = true;
   public readonly type = "subscriber";
   private readonly specifics: SubscriberNodeSpecifics;
 
@@ -18,13 +18,18 @@ class SubscriberNode extends RosNode {
   }
 
   protected process = async (message: NodeMessage) => {
-    return message;
+    return Promise.resolve(message);
   };
 
   protected verifyInput = (_: NodeMessage) => {};
 
-  public trigger(data: any) {
-    this.processNode({ payload: data });
+  public trigger = async (data: any) => {
+    const event: IBaseNodeEvent = {
+      nodeId: this.id,
+      data
+    }
+    
+    this.ProcessingBegin.trigger(event)
   }
 
   public override onContextMount = () => {

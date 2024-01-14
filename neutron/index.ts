@@ -121,7 +121,7 @@ export {
 export {
   IRobotConnectionConfiguration,
   IRobotConnectionInfo,
-  RobotConnectionType,
+  ConnectionContextType,
   getRobotConnectionTypeFromString,
   RobotStatus,
   IBatteryInfo,

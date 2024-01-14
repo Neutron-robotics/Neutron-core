@@ -15,7 +15,7 @@ import {
   IRosFrameExecutorPeriodic,
 } from "../interfaces/frames";
 import { LiteEvent, LiteEventHandler } from "../utils/LiteEvent";
-import { RobotConnectionType } from "../interfaces/RobotConnection";
+import { ConnectionContextType } from "../interfaces/RobotConnection";
 
 export interface IRosContextConfiguration {
   hostname: string;
@@ -35,8 +35,9 @@ class RosContext extends ConnectionContext {
   }
 
   constructor(config: IRosContextConfiguration) {
-    super(RobotConnectionType.ROSBRIDGE, config);
+    super(ConnectionContextType.Ros2, config);
     this.ros = new Ros({});
+
     this.handlers = new Map<string, LiteEventHandler<Message>[]>();
     this.clientId = config.clientId;
   }

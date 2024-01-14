@@ -13,25 +13,25 @@ interface IRobotConnectionConfiguration {
 interface IRobotConnectionInfo {
   hostname: string;
   port: number;
-  type: RobotConnectionType;
+  type: ConnectionContextType;
 }
-enum RobotConnectionType {
-  HTTP,
-  TCP,
-  UDP,
-  ROSBRIDGE,
+
+enum ConnectionContextType {
+  Ros2 = "ros2",
+  Tcp = "tcp",
+  WebSocket = "websocket",
 }
 
 const getRobotConnectionTypeFromString = (
   type: string
-): RobotConnectionType => {
+): ConnectionContextType => {
   switch (type.toUpperCase()) {
     case "TCP":
-      return RobotConnectionType.TCP;
-    case "UDP":
-      return RobotConnectionType.UDP;
-    case "ROSBRIDGE":
-      return RobotConnectionType.ROSBRIDGE;
+      return ConnectionContextType.Tcp;
+    case "WEBSOCKET":
+      return ConnectionContextType.WebSocket;
+    case "ROS2":
+      return ConnectionContextType.Ros2;
     default:
       throw new Error(`Unknown robot connection type: ${type}`);
   }
@@ -70,4 +70,4 @@ export type {
   IRobotModuleDefinition
 };
 
-export { RobotStatus, RobotConnectionType, getRobotConnectionTypeFromString };
+export { RobotStatus, ConnectionContextType, getRobotConnectionTypeFromString };

@@ -8,7 +8,7 @@ import {
   IRobotConnectionInfo,
   IRobotModule,
   IRobotModuleDefinition,
-  RobotConnectionType,
+  ConnectionContextType,
   RobotStatus,
 } from "../interfaces/RobotConnection";
 
@@ -70,7 +70,7 @@ export class Core implements IRobotModule {
     this.contextConfiguration = {
       hostname: "",
       port: -1,
-      type: RobotConnectionType.HTTP,
+      type: ConnectionContextType.Tcp,
     };
   }
 

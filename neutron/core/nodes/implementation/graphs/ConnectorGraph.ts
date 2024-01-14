@@ -2,6 +2,7 @@ import NeutronGraphError from "../../../errors/NeutronGraphError";
 import NeutronNodeComputeError from "../../../errors/NeutronNodeError";
 import BaseNode from "../../BaseNode";
 import { NeutronEdgeDB, NeutronNodeDB, NodeMessage } from "../../INeutronNode";
+import { IInputNode } from "../../InputNode";
 import NeutronBaseGraph from "../../NeutronBaseGraph";
 import NodeFactory, { inputNodesSet } from "../../NodeFactory";
 
@@ -29,6 +30,10 @@ class ConnectorGraph extends NeutronBaseGraph {
           status: "completed",
         })
       );
+
+      if (e.isInput === true) {
+        (e as unknown as IInputNode).ProcessingBegin.on(this.handleInputNodeProcessingBegin)
+      }
     });
   }
 

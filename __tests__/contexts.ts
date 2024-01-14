@@ -6,7 +6,7 @@ import {
 } from "../neutron/interfaces/frames";
 import { sleep } from "../neutron/utils/time";
 import { makeConnectionContext } from "../neutron/context/makeContext";
-import { RobotConnectionType } from "../neutron/interfaces/RobotConnection";
+import { ConnectionContextType } from "../neutron/interfaces/RobotConnection";
 
 jest.mock("roslib");
 
@@ -15,15 +15,15 @@ describe("robot connection factory", () => {
     const ctxConfiguration = {
       hostname: "localhost",
       port: 9090,
-      type: RobotConnectionType.ROSBRIDGE,
+      type: ConnectionContextType.Ros2,
     };
 
     const context = makeConnectionContext(
-      RobotConnectionType.ROSBRIDGE,
+      ConnectionContextType.Ros2,
       ctxConfiguration
     );
     expect(context).toBeDefined();
-    expect(context.type).toBe(RobotConnectionType.ROSBRIDGE);
+    expect(context.type).toBe(ConnectionContextType.Ros2);
     expect(context.hostname).toBe("localhost");
     expect(context.port).toBe(9090);
     expect(context.isConnected).toBe(false);
@@ -33,11 +33,11 @@ describe("robot connection factory", () => {
     const ctxConfiguration = {
       hostname: "localhost",
       port: 9090,
-      type: RobotConnectionType.ROSBRIDGE,
+      type: ConnectionContextType.Ros2,
     };
 
     expect(() =>
-      makeConnectionContext(RobotConnectionType.TCP, ctxConfiguration)
+      makeConnectionContext(ConnectionContextType.Tcp, ctxConfiguration)
     ).toThrowError("Invalid connection type");
   });
 });

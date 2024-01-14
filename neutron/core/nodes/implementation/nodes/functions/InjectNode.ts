@@ -1,11 +1,13 @@
 import BaseNode from "../../../BaseNode";
 import {
+  IBaseNodeEvent,
   INodeBuilder,
   IRepeatCron,
   IRepeatInterval,
   NeutronPrimitiveType,
   NodeMessage,
 } from "../../../INeutronNode";
+import { NodeInput } from "../../../InputNode";
 
 export interface InjectedField<T> {
   value: T;
@@ -22,7 +24,7 @@ export interface InjectNodeSpecifics {
   repeatOptions?: IRepeatCron | IRepeatInterval;
 }
 
-class InjectNode extends BaseNode {
+class InjectNode extends NodeInput {
   public isInput: boolean = true;
   public readonly type = "inject";
   private readonly specifics: InjectNodeSpecifics;
@@ -32,16 +34,23 @@ class InjectNode extends BaseNode {
     this.specifics = builder.specifics;
   }
 
-  protected process = async (_: NodeMessage) => {
+  protected process = async (message: NodeMessage) => {
+    return Promise.resolve({
+      payload: message.payload,
+    });
+  };
+
+  public trigger = async (data: any) => {
     const injectedProperties = this.specifics.properties.reduce(
       (acc, cur) => ({ ...acc, [cur.name]: cur.value }),
       {}
     );
-
-    return {
-      payload: injectedProperties,
-    };
-  };
+    const event: IBaseNodeEvent = {
+      nodeId: this.id,
+      data: injectedProperties
+    }
+    this.ProcessingBegin.trigger(event)
+  }
 
   protected verifyInput = (_: NodeMessage) => {};
 }
