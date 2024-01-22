@@ -59,10 +59,10 @@ class FilterNode extends BaseNode {
 
     this.previousValue = message.payload[this.specifics.propertyName];
 
-    return {
+    return Promise.resolve({
       payload: message.payload,
       outputHandles: shouldContinue ? undefined : [],
-    };
+    });
   };
 
   private blockUnlessGreaterShouldContinue(payload: any): boolean {

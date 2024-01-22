@@ -35,8 +35,13 @@ class InjectNode extends NodeInput {
   }
 
   protected process = async (message: NodeMessage) => {
+    const injectedProperties = this.specifics.properties.reduce(
+      (acc, cur) => ({ ...acc, [cur.name]: cur.value }),
+      {}
+    );
+    
     return Promise.resolve({
-      payload: message.payload,
+      payload: injectedProperties,
     });
   };
 

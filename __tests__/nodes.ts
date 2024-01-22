@@ -1,5 +1,6 @@
 import { NodeMessage } from "../neutron/core/nodes/INeutronNode";
 import NodeFactory from "../neutron/core/nodes/NodeFactory";
+import { InjectNode } from "../neutron/core/nodes/implementation/nodes";
 import DebugNode from "../neutron/core/nodes/implementation/nodes/functions/DebugNode";
 import ErrorNode from "../neutron/core/nodes/implementation/nodes/functions/ErrorNode";
 import { flowGraphMock } from "./__mixture__/flowGraphMock";
@@ -153,15 +154,24 @@ describe("Neutron Nodes", () => {
         },
       ],
     };
-    const node = NodeFactory.createNode(makeNodeBuilder("inject", specifics));
+    const mockInputEvent = jest.fn();
+    const node = NodeFactory.createNode(
+      makeNodeBuilder("inject", specifics)
+    ) as InjectNode;
+    node.ProcessingBegin.on(mockInputEvent);
     const message: NodeMessage = {
       payload: {},
     };
 
-    const response = await node.processNode(message);
-    expect(response?.payload).toStrictEqual({
-      firstName: "Hugo",
-      age: 25,
+    const response = await node.trigger({});
+
+    expect(mockInputEvent).toHaveBeenCalledTimes(1);
+    expect(mockInputEvent).toHaveBeenCalledWith({
+      data: {
+        age: 25,
+        firstName: "Hugo",
+      },
+      nodeId: "ad411990-cbf6-49cb-a8ca-acb57917dab6",
     });
   });
 

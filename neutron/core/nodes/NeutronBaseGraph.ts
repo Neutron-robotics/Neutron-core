@@ -26,6 +26,14 @@ abstract class NeutronBaseGraph {
     return this.nodes.length;
   }
 
+  public get requireRosContext(): boolean {
+    for (const node of this.nodes) {
+      if ((node as RosNode).useRosContext !== undefined)
+        return true
+    }
+    return false
+  }
+
   constructor(nodes: NeutronNodeDB[], edges: NeutronEdgeDB[]) {
     this.NodeProcessEvent = new LiteEvent<INeutronGraphProcessEvent>();
     this.edges = edges;

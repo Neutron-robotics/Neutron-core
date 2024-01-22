@@ -34,7 +34,7 @@ class SwitchNode extends BaseNode {
     this.specifics = builder.specifics;
   }
 
-  protected process = async (
+  protected process = (
     message: NodeMessage
   ): Promise<OutputNodeMessage> => {
     const { propertyName, switchFields, switchMode } = this.specifics;
@@ -77,10 +77,10 @@ class SwitchNode extends BaseNode {
       if (switchMode === "stop" && evaluation) shouldForward = false;
     });
 
-    return {
+    return Promise.resolve({
       payload: message.payload,
       outputHandles: handleNames,
-    };
+    });
   };
   protected verifyInput = (_: NodeMessage) => {};
 }

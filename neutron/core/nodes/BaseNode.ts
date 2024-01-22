@@ -72,10 +72,10 @@ abstract class BaseNode implements INeutronNode {
       nodeId: this.id,
       data: output,
     });
-    return {
+    return Promise.resolve({
       ...output,
       outputHandles: output.outputHandles ?? Object.keys(this.nextNodes),
-    };
+    });
   }
 }
 

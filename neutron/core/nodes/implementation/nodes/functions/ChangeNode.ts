@@ -1,6 +1,6 @@
 import NeutronNodeComputeError from "../../../../errors/NeutronNodeError";
 import BaseNode from "../../../BaseNode";
-import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
+import { INodeBuilder, NodeMessage, OutputNodeMessage } from "../../../INeutronNode";
 
 export interface ChangeField {
   id: string;
@@ -23,7 +23,7 @@ class ChangeNode extends BaseNode {
     this.specifics = builder.specifics;
   }
 
-  protected process = async (message: NodeMessage) => {
+  protected process = async (message: NodeMessage): Promise<OutputNodeMessage> => {
     let modifiedPayload = { ...message.payload };
 
     for (const field of this.specifics.fields) {
@@ -53,7 +53,7 @@ class ChangeNode extends BaseNode {
       }
     }
 
-    return { payload: modifiedPayload };
+    return Promise.resolve({ payload: modifiedPayload });
   };
 
   protected verifyInput = (_: NodeMessage) => {};

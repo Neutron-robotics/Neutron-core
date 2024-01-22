@@ -1,6 +1,6 @@
 import { ILiteEvent, LiteEvent } from "../../../../../utils/LiteEvent";
 import BaseNode from "../../../BaseNode";
-import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
+import { INodeBuilder, NodeMessage, OutputNodeMessage } from "../../../INeutronNode";
 
 export interface IErrorEvent {
   id: string;
@@ -30,7 +30,7 @@ class ErrorNode extends BaseNode {
     this.ErrorEvent = new LiteEvent<IErrorEvent>();
   }
 
-  protected process = async (message: NodeMessage) => {
+  protected process = async (message: NodeMessage): Promise<OutputNodeMessage> => {
     const log =
       this.specifics.output === "full"
         ? message.payload
