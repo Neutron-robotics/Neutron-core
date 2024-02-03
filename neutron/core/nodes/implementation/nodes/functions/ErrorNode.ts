@@ -33,8 +33,8 @@ class ErrorNode extends BaseNode {
   protected process = async (message: NodeMessage): Promise<OutputNodeMessage> => {
     const log =
       this.specifics.output === "full"
-        ? message.payload
-        : message.payload[this.specifics.propertyName ?? ""];
+        ? message.payload.toString()
+        : message.payload[this.specifics.propertyName ?? ""].toString();
 
     this.ErrorEvent.trigger({
       id: this.id,

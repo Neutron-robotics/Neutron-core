@@ -19,7 +19,7 @@ import SwitchNode from "./implementation/nodes/functions/SwitchNode";
 import TemplateNode from "./implementation/nodes/functions/TemplateNode";
 import WarningNode from "./implementation/nodes/functions/WarningNode";
 
-export const inputNodesSet = new Set(["inject", 'subscriber']);
+export const inputNodesSet = new Set(["inject", 'subscriber', 'basecontroller']);
 
 class NodeFactory {
   static nodeFactory: Record<string, (builder: INodeBuilder<any>) => BaseNode> =
@@ -46,7 +46,8 @@ class NodeFactory {
     };
 
   static createNode(nodeDb: NeutronNodeDB): BaseNode {
-    const factory = NodeFactory.nodeFactory[nodeDb.data.name];
+    const key = nodeDb.data.name.toLowerCase().replaceAll(' ', '')
+    const factory = NodeFactory.nodeFactory[key];
 
     const builder: INodeBuilder<any> = {
       id: nodeDb.id,

@@ -1,3 +1,4 @@
+import BaseNode from "./core/nodes/BaseNode";
 import {
   CreateActionModel,
   CreateMessageTypeModel,
@@ -40,6 +41,7 @@ export {
   NeutronNodeData,
   NeutronEdgeDB,
   NodeMessage,
+  INodeBuilder
 } from "./core/nodes/INeutronNode";
 export { FlowGraph, ConnectorGraph } from "./core/nodes/implementation/graphs";
 export { NeutronGraphType } from "./core/nodes/NeutronBaseGraph";
@@ -115,7 +117,10 @@ export {
   RosNode,
   ServiceNode,
   SubscriberNode,
+  ControllerNode,
+  BaseControllerNode
 } from "./core/nodes/implementation/nodes";
+export { BaseNode } 
 
 // Interfaces
 export {

@@ -5,6 +5,7 @@ import { NeutronEdgeDB, NeutronNodeDB, NodeMessage } from "../../INeutronNode";
 import { IInputNode } from "../../InputNode";
 import NeutronBaseGraph from "../../NeutronBaseGraph";
 import NodeFactory, { inputNodesSet } from "../../NodeFactory";
+import { ControllerNode } from "../nodes";
 
 /*
  * The connector graph has a single input node.
@@ -72,8 +73,13 @@ class ConnectorGraph extends NeutronBaseGraph {
     await Promise.all(nextNodesPromises);
   }
 
+  public getControllerNodes(): ControllerNode<any>[] {
+    return (this.nodes as ControllerNode<any>[])
+      .filter(node => node.isControllerNode)
+  } 
+
   private buildGraph(nodes: NeutronNodeDB[], edges: NeutronEdgeDB[]): BaseNode {
-    const inputNode = nodes.find((e) => inputNodesSet.has(e.data.name));
+    const inputNode = nodes.find((e) => inputNodesSet.has(e.data.name.toLowerCase().replaceAll(' ', '')));
     if (!inputNode)
       throw new NeutronGraphError("No input node has been provided");
 

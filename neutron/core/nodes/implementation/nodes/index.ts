@@ -1,3 +1,5 @@
+import { BaseControllerNode } from "./controllers";
+import ControllerNode from "./controllers/ControllerNode";
 import ChangeNode from "./functions/ChangeNode";
 import DebugNode from "./functions/DebugNode";
 import DelayNode from "./functions/DelayNode";
@@ -36,4 +38,6 @@ export {
   RosNode,
   ServiceNode,
   SubscriberNode,
+  ControllerNode,
+  BaseControllerNode
 };

@@ -7,7 +7,7 @@ export interface IBaseNodeControllerPayload {
 }
 
 export class BaseControllerNode extends ControllerNode<IBaseNodeControllerPayload> {
-  public readonly type = "base";
+  public readonly type = "base controller";
 }
 
 export interface IMJPEGCameraPayload {

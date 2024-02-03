@@ -1,9 +1,11 @@
-import BaseNode from "../../../BaseNode";
-import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
+import { IBaseNodeEvent, INodeBuilder, NodeMessage } from "../../../INeutronNode";
+import { NodeInput } from "../../../InputNode";
 
-abstract class ControllerNode<TMessageFormat> extends BaseNode {
+abstract class ControllerNode<TMessageFormat> extends NodeInput {
   public isInput: boolean = true;
   public abstract readonly type: string;
+
+  public isControllerNode = true
 
   constructor(builder: INodeBuilder<{}>) {
     super(builder);
@@ -14,9 +16,11 @@ abstract class ControllerNode<TMessageFormat> extends BaseNode {
   };
 
   public trigger = async (message: TMessageFormat) => {
-    this.processNode({
-      payload: message,
-    });
+    const event: IBaseNodeEvent = {
+      nodeId: this.id,
+      data: message
+    }
+    this.ProcessingBegin.trigger(event)
   };
 
   protected verifyInput = (_: NodeMessage) => {};

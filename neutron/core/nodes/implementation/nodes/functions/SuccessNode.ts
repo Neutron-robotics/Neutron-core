@@ -31,8 +31,8 @@ class SuccessNode extends BaseNode {
   protected process = async (message: NodeMessage) => {
     const log =
       this.specifics.output === "full"
-        ? message.payload
-        : message.payload[this.specifics.propertyName ?? ""];
+        ? message.payload.toString()
+        : message.payload[this.specifics.propertyName ?? ""].toString();
 
     this.SuccessEvent.trigger({
       id: this.id,
