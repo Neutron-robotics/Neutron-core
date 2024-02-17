@@ -4,13 +4,13 @@ interface IRobotConnectionConfiguration {
   type: string;
   batteryInfo: IBatteryInfo;
   status: RobotStatus;
-  context: IRobotConnectionInfo;
-  core: IRobotConnectionInfo;
+  context: RobotConnectionInfo;
+  core: RobotConnectionInfo;
 
   modules: IRobotModule[];
 }
 
-interface IRobotConnectionInfo {
+interface RobotConnectionInfo {
   hostname: string;
   port: number;
   type: ConnectionContextType;
@@ -66,7 +66,7 @@ export type {
   IRobotConnectionConfiguration,
   IRobotModule,
   IBatteryInfo,
-  IRobotConnectionInfo,
+  RobotConnectionInfo,
   IRobotModuleDefinition
 };
 

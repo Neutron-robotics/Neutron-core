@@ -1,7 +1,9 @@
 import { IConnectionContext } from "../../context/ConnectionContext";
-import { RosContext } from "../../context/RosContext";
 import { ILiteEvent, LiteEvent } from "../../utils/LiteEvent";
 import NeutronGraphError from "../errors/NeutronGraphError";
+import NeutronConnectionContext from "../network/NeutronConnectionContext";
+import RosContext from "../network/RosContext";
+import { ConnectionContextType } from "../network/connection";
 import BaseNode from "./BaseNode";
 import { IBaseNodeEvent, INodeBuilder, NeutronEdgeDB, NeutronNodeDB, NodeMessage } from "./INeutronNode";
 import { IInputNode } from "./InputNode";
@@ -65,8 +67,8 @@ abstract class NeutronBaseGraph {
     return this.nodes.filter(e => e.isInput === true) as unknown as IInputNode[]
   }  
 
-  public useContext(context: IConnectionContext) {
-    if (context.constructor.name === 'RosContext')
+  public useContext(context: NeutronConnectionContext) {
+    if (context.type === ConnectionContextType.Ros2)
       this.nodes.forEach((e) => {
         if ((e as RosNode).useRosContext)
         (e as RosNode).useRosContext(context as RosContext)

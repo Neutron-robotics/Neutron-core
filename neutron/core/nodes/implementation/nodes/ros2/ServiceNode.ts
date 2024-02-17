@@ -18,11 +18,11 @@ class ServiceNode extends RosNode {
   }
 
   protected process = async (message: NodeMessage) => {
-    const result = await this.rosContext?.request({
-      methodType: this.specifics.service.name,
-      format: this.specifics.service.serviceType.name,
-      payload: message.payload,
-    });
+    const result = await this.rosContext?.request(
+      this.specifics.service.name,
+      this.specifics.service.serviceType.name,
+      message.payload
+    );
 
     if (!result)
       throw new NeutronNodeComputeError(

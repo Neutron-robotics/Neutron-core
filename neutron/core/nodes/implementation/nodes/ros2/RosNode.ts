@@ -1,5 +1,5 @@
-import { RosContext } from "../../../../../context/RosContext";
 import { LiteEvent } from "../../../../../utils/LiteEvent";
+import RosContext from "../../../../network/RosContext";
 import BaseNode from "../../../BaseNode";
 import { IBaseNodeEvent } from "../../../INeutronNode";
 import { IInputNode } from "../../../InputNode";

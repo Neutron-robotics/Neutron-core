@@ -1,9 +1,11 @@
 import NeutronGraphError from "../errors/NeutronGraphError";
 import BaseNode from "./BaseNode";
 import { INodeBuilder, NeutronNodeDB } from "./INeutronNode";
-import { ActionNode, PublisherNode, ServiceNode, SubscriberNode } from "./implementation/nodes";
+import { ActionNode, PublisherNode, ServiceNode, SubscriberNode, SuccessNode } from "./implementation/nodes";
 import {
   BaseControllerNode,
+  CameraControllerNode,
+  CameraFrameNode,
   MJPEGCameraNode,
 } from "./implementation/nodes/controllers";
 import ChangeNode from "./implementation/nodes/functions/ChangeNode";
@@ -19,7 +21,7 @@ import SwitchNode from "./implementation/nodes/functions/SwitchNode";
 import TemplateNode from "./implementation/nodes/functions/TemplateNode";
 import WarningNode from "./implementation/nodes/functions/WarningNode";
 
-export const inputNodesSet = new Set(["inject", 'subscriber', 'basecontroller']);
+export const inputNodesSet = new Set(["inject", 'subscriber', 'basecontroller', 'cameracontroller']);
 
 class NodeFactory {
   static nodeFactory: Record<string, (builder: INodeBuilder<any>) => BaseNode> =
@@ -30,6 +32,7 @@ class NodeFactory {
       info: (builder: INodeBuilder<any>) => new InfoNode(builder),
       warning: (builder: INodeBuilder<any>) => new WarningNode(builder),
       error: (builder: INodeBuilder<any>) => new ErrorNode(builder),
+      success: (builder: INodeBuilder<any>) => new SuccessNode(builder),
       function: (builder: INodeBuilder<any>) => new FunctionNode(builder),
       switch: (builder: INodeBuilder<any>) => new SwitchNode(builder),
       delay: (builder: INodeBuilder<any>) => new DelayNode(builder),
@@ -43,6 +46,8 @@ class NodeFactory {
       action: (builder: INodeBuilder<any>) => new ActionNode(builder),
       subscriber: (builder: INodeBuilder<any>) => new SubscriberNode(builder),
       service: (builder: INodeBuilder<any>) => new ServiceNode(builder),
+      cameracontroller: (builder: INodeBuilder<any>) => new CameraControllerNode(builder),
+      cameraframe: (builder: INodeBuilder<any>) => new CameraFrameNode(builder),
     };
 
   static createNode(nodeDb: NeutronNodeDB): BaseNode {

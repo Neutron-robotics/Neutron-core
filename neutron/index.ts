@@ -1,4 +1,6 @@
 import BaseNode from "./core/nodes/BaseNode";
+import RosContext from "./core/network/RosContext";
+
 import {
   CreateActionModel,
   CreateMessageTypeModel,
@@ -21,6 +23,7 @@ import {
   Ros2Field,
   Ros2SystemModel,
 } from "./models/ros2/ros2";
+import NeutronConnectionContext from "./core/network/NeutronConnectionContext";
 
 // Context
 export {
@@ -28,9 +31,14 @@ export {
   IConnectionContext,
   ConnectionContext,
 } from "./context/ConnectionContext";
-export { makeConnectionContext } from "./context/makeContext";
+export { makeConnectionContext } from "./core/network/makeContext";
+export { NeutronConnectionContext };
+export {
+  NeutronConnectionInfoMessage,
+  RobotStatus,
+} from "./core/network/connection";
 
-export { RosContext } from "./context/RosContext";
+export { RosContext };
 
 // Graphs
 
@@ -41,7 +49,7 @@ export {
   NeutronNodeData,
   NeutronEdgeDB,
   NodeMessage,
-  INodeBuilder
+  INodeBuilder,
 } from "./core/nodes/INeutronNode";
 export { FlowGraph, ConnectorGraph } from "./core/nodes/implementation/graphs";
 export { NeutronGraphType } from "./core/nodes/NeutronBaseGraph";
@@ -74,7 +82,7 @@ export {
   InjectNodeSpecifics,
   InjectedField,
 } from "./core/nodes/implementation/nodes/functions/InjectNode";
-export { IRepeatInterval, IRepeatCron } from "./core/nodes/INeutronNode";
+export { IRepeatInterval, IRepeatCron, IBaseNodeEvent } from "./core/nodes/INeutronNode";
 export {
   RangeNodeSpecifics,
   IScale,
@@ -117,18 +125,20 @@ export {
   RosNode,
   ServiceNode,
   SubscriberNode,
-  ControllerNode,
-  BaseControllerNode
+  InputControllerNode,
+  OutputControllerNode,
+  CameraControllerNode,
+  CameraFrameNode,
+  BaseControllerNode,
 } from "./core/nodes/implementation/nodes";
-export { BaseNode } 
+export { BaseNode };
 
 // Interfaces
 export {
   IRobotConnectionConfiguration,
-  IRobotConnectionInfo,
+  RobotConnectionInfo,
   ConnectionContextType,
   getRobotConnectionTypeFromString,
-  RobotStatus,
   IBatteryInfo,
   IRobotModule,
   IRobotModuleDefinition,
@@ -136,7 +146,6 @@ export {
 export { TopicSettings } from "./interfaces/ros";
 
 // Modules
-export { Core } from "./modules/Core";
 export { ICoreProcess, ICoreModule, IRobotStatus } from "./interfaces/core";
 export { CameraInfoUpdate, Resolution } from "./interfaces/camera";
 export { WebRTC } from "./modules/WebRTC";

@@ -7,7 +7,7 @@ export interface TemplateNodeSpecifics {
 }
 
 class TemplateNode extends BaseNode {
-  public isInput: boolean = true;
+  public isInput: boolean = false;
   public readonly type = "template";
   private readonly specifics: TemplateNodeSpecifics;
 

@@ -1,8 +1,9 @@
+import BaseNode from "../../../BaseNode";
 import { IBaseNodeEvent, INodeBuilder, NodeMessage } from "../../../INeutronNode";
 import { NodeInput } from "../../../InputNode";
 
-abstract class ControllerNode<TMessageFormat> extends NodeInput {
-  public isInput: boolean = true;
+abstract class InputControllerNode<TMessageFormat> extends NodeInput {
+  public isInput: boolean = true
   public abstract readonly type: string;
 
   public isControllerNode = true
@@ -26,4 +27,24 @@ abstract class ControllerNode<TMessageFormat> extends NodeInput {
   protected verifyInput = (_: NodeMessage) => {};
 }
 
-export default ControllerNode;
+abstract class OutputControllerNode extends BaseNode {
+  public isInput: boolean = false
+  public abstract readonly type: string;
+
+  public isControllerNode = true
+
+  constructor(builder: INodeBuilder<{}>) {
+    super(builder);
+  }
+
+  protected process = async (message: NodeMessage) => {
+    return message;
+  };
+
+  protected verifyInput = (_: NodeMessage) => {};
+} 
+
+export {
+  InputControllerNode,
+  OutputControllerNode
+};

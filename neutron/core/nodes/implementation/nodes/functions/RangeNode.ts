@@ -14,7 +14,7 @@ export interface RangeNodeSpecifics {
   round: boolean;
 }
 class RangeNode extends BaseNode {
-  public isInput: boolean = true;
+  public isInput: boolean = false;
   public readonly type = "range";
   private readonly specifics: RangeNodeSpecifics;
 

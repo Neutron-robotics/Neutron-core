@@ -1,256 +1,276 @@
-import { ConnectionContext } from "./ConnectionContext";
-import {
-  Ros,
-  Topic,
-  Service,
-  Message,
-  ServiceRequest,
-  ServiceResponse,
-} from "roslib";
-import { TopicSettings } from "../interfaces/ros";
-import {
-  IFrameResult,
-  IFrameResultLoop,
-  IRosFrameExecutor,
-  IRosFrameExecutorPeriodic,
-} from "../interfaces/frames";
-import { LiteEvent, LiteEventHandler } from "../utils/LiteEvent";
-import { ConnectionContextType } from "../interfaces/RobotConnection";
+// import { ConnectionContext } from "./ConnectionContext";
+// import {
+//   Ros,
+//   Topic,
+//   Service,
+//   Message,
+//   ServiceRequest,
+//   ServiceResponse,
+// } from "roslib";
+// import { TopicSettings } from "../interfaces/ros";
+// import {
+//   IFrameResult,
+//   IFrameResultLoop,
+//   IRosFrameExecutor,
+//   IRosFrameExecutorPeriodic,
+// } from "../interfaces/frames";
+// import { LiteEvent, LiteEventHandler } from "../utils/LiteEvent";
+// import { ConnectionContextType } from "../interfaces/RobotConnection";
+// import { RawData, WebSocket } from "ws";
 
-export interface IRosContextConfiguration {
-  hostname: string;
-  port: number;
-  clientId: string;
-}
+// export interface IRosContextConfiguration {
+//   hostname: string;
+//   port: number;
+//   clientId: string;
+// }
 
-class RosContext extends ConnectionContext {
-  private ros: Ros;
+// class RosContext extends ConnectionContext {
+//   private ros: Ros;
 
-  private handlers: Map<string, LiteEventHandler<Message>[]>;
+//   private handlers: Map<string, LiteEventHandler<Message>[]>;
 
-  private clientId: string;
+//   private clientId: string;
 
-  public override get isConnected(): boolean {
-    return this.ros.isConnected ?? false;
-  }
+//   public override get isConnected(): boolean {
+//     return this.ros.isConnected ?? false;
+//   }
 
-  constructor(config: IRosContextConfiguration) {
-    super(ConnectionContextType.Ros2, config);
-    this.ros = new Ros({});
+//   private get ws() {
+//     return (this.ros as any).socket as WebSocket;
+//   }
 
-    this.handlers = new Map<string, LiteEventHandler<Message>[]>();
-    this.clientId = config.clientId;
-  }
+//   constructor(config: IRosContextConfiguration) {
+//     super(ConnectionContextType.Ros2, config);
+//     this.ros = new Ros({});
 
-  public override connect(): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      this.ros.on("connection", () => {
-        console.log("Connected to websocket server.");
-        resolve(true);
-      });
+//     this.handlers = new Map<string, LiteEventHandler<Message>[]>();
+//     this.clientId = config.clientId;
+//   }
 
-      this.ros.on("error", (error: any) => {
-        console.log("Error connecting to websocket server: ", error);
-        resolve(false);
-      });
+//   public neutronInfo() {
+//     const handleInfoMessage = (data: RawData) => {
+//       console.log(data);
+//     };
 
-      this.ros.on("close", () => {
-        console.log("Connection to websocket server closed.");
-      });
+//     this.ws.on("message", handleInfoMessage);
 
-      this.ros.connect(
-        `ws://${this.hostname}:${this.port}/connection/${this.clientId}`
-      );
-    });
-  }
+//     const infoRequest = {
+//       command: "infos",
+//       params: "",
+//     };
+//     const infoMsg = JSON.stringify(infoRequest);
 
-  public override disconnect(): Promise<boolean> {
-    this.ros.close();
-    return Promise.resolve(true);
-  }
+//     this.ws.send(infoMsg);    
+//   }
 
-  public request(executor: IRosFrameExecutor): Promise<IFrameResult> {
-    return new Promise((resolve, reject) => {
-      const onSuccess = (result: ServiceResponse) => {
-        console.log("Resolved!", result);
-        resolve({
-          success: true,
-          result: result,
-        });
-      };
-      const onError = (error: any) => {
-        reject(error);
-      };
+//   public override connect(): Promise<boolean> {
+//     return new Promise((resolve, reject) => {
+//       this.ros.on("connection", () => {
+//         console.log("Connected to websocket server.");
+//         resolve(true);
+//       });
 
-      const { methodType, payload, format } = executor;
-      const service = new Service({
-        ros: this.ros,
-        name: methodType,
-        serviceType: format,
-      });
-      console.log("request with ", methodType, format, payload);
-      const serviceRequest = new ServiceRequest(payload);
-      service.callService(serviceRequest, onSuccess, onError);
-    });
-  }
+//       this.ros.on("error", (error: any) => {
+//         console.log("Error connecting to websocket server: ", error);
+//         resolve(false);
+//       });
 
-  public override send(executor: IRosFrameExecutor): Promise<IFrameResult> {
-    const { methodType, payload, format } = executor;
-    const topicSettings: TopicSettings = {
-      topic: methodType,
-      messageType: format,
-    };
-    const topicInstance: Topic<Message> = this.getTopic(topicSettings);
-    const message = new Message(payload);
-    console.log("publish", message, "on topic", topicSettings);
-    topicInstance.publish(message);
-    topicInstance.unadvertise();
-    return Promise.resolve({
-      success: true,
-      result: null,
-    });
-  }
+//       this.ros.on("close", () => {
+//         console.log("Connection to websocket server closed.");
+//       });
 
-  public override sendLoop(
-    executor: IRosFrameExecutorPeriodic
-  ): Promise<IFrameResultLoop> {
-    const { methodType, payload, format, period } = executor;
-    const topicSettings: TopicSettings = {
-      topic: methodType,
-      messageType: format,
-    };
-    const onSent = new LiteEvent<IFrameResult>();
-    const topicInstance = this.getTopic(topicSettings);
-    const message = new Message(payload.data);
-    const interval = setInterval(() => {
-      topicInstance.publish(message);
-      onSent.trigger({
-        success: true,
-        result: null,
-      });
-    }, (1 / period) * 1000);
-    const stop = () => {
-      clearInterval(interval);
-      topicInstance.unadvertise();
-    };
-    const loopHandler: LiteEventHandler<void> = () => {
-      stop();
-      this.handlers.delete(`loop-${methodType}`);
-    };
-    this.loopHandlers.set(`loop-${methodType}`, loopHandler);
-    return Promise.resolve({
-      success: true,
-      result: null,
-      event: onSent,
-      stop: stop,
-    });
-  }
+//       this.ros.connect(
+//         `ws://${this.hostname}:${this.port}/connection/${this.clientId}`
+//       );
+//     });
+//   }
 
-  public override on<T>(
-    executor: IRosFrameExecutor,
-    handler: LiteEventHandler<T>
-  ): void {
-    const { methodType, format } = executor;
-    const topicSettings: TopicSettings = {
-      topic: methodType,
-      messageType: format,
-    };
-    this.addHandler(methodType, handler as any);
-    const topicInstance = this.getTopic(topicSettings);
-    topicInstance.subscribe((message: Message) => {
-      console.log("Ros message received", message);
-      this.triggerHandlers(methodType, message);
-    });
-  }
+//   public override disconnect(): Promise<boolean> {
+//     this.ros.close();
+//     return Promise.resolve(true);
+//   }
 
-  public override off<T>(
-    executor: IRosFrameExecutor,
-    handler?: LiteEventHandler<T>
-  ): void {
-    const { methodType, payload, format } = executor;
-    const remainingHandlersCount = this.removeHandler(
-      methodType,
-      handler as any
-    );
-    if (remainingHandlersCount === 0) {
-      const topicSettings: TopicSettings = {
-        topic: methodType,
-        messageType: format,
-      };
-      const topicInstance = this.getTopic(topicSettings);
-      handler && topicInstance.unsubscribe(handler as any);
-    }
-  }
+//   public request(executor: IRosFrameExecutor): Promise<IFrameResult> {
+//     return new Promise((resolve, reject) => {
+//       const onSuccess = (result: ServiceResponse) => {
+//         console.log("Resolved!", result);
+//         resolve({
+//           success: true,
+//           result: result,
+//         });
+//       };
+//       const onError = (error: any) => {
+//         reject(error);
+//       };
 
-  public override removeAllListeners(): void {
-    const removeTopicList = (list: { topics: string[]; types: string[] }) => {
-      const { topics, types } = list;
-      topics.forEach((topic, index) => {
-        const topicSettings: TopicSettings = {
-          topic: topic,
-          messageType: types[index],
-        };
-        const topicInstance = this.getTopic(topicSettings);
-        topicInstance.unsubscribe();
-      });
-    };
-    const handleError = (error: any) => {
-      console.log("Error getting topics: ", error);
-    };
-    this.ros.getTopics(removeTopicList, handleError);
-  }
+//       const { methodType, payload, format } = executor;
+//       const service = new Service({
+//         ros: this.ros,
+//         name: methodType,
+//         serviceType: format,
+//       });
+//       console.log("request with ", methodType, format, payload);
+//       const serviceRequest = new ServiceRequest(payload);
+//       service.callService(serviceRequest, onSuccess, onError);
+//     });
+//   }
 
-  private getTopic(settings: TopicSettings): Topic {
-    const options = {
-      ros: this.ros,
-      name: settings.topic,
-      messageType: settings.messageType,
-      throttle_rate: settings.throttleRate || 10,
-      latch: settings.latch || false,
-      queue_length: settings.queueLength || 1,
-      queue_size: settings.queueSize || 10,
-    };
-    return new Topic(options);
-  }
+//   public override send(executor: IRosFrameExecutor): Promise<IFrameResult> {
+//     const { methodType, payload, format } = executor;
+//     const topicSettings: TopicSettings = {
+//       topic: methodType,
+//       messageType: format,
+//     };
+//     const topicInstance: Topic<Message> = this.getTopic(topicSettings);
+//     const message = new Message(payload);
+//     topicInstance.publish(message);
+//     topicInstance.unadvertise();
+//     return Promise.resolve({
+//       success: true,
+//       result: null,
+//     });
+//   }
 
-  private addHandler(topic: string, handler: LiteEventHandler<Message>): void {
-    if (!this.handlers.has(topic)) {
-      this.handlers.set(topic, []);
-    }
-    this.handlers.get(topic)?.push(handler);
-  }
+//   public override sendLoop(
+//     executor: IRosFrameExecutorPeriodic
+//   ): Promise<IFrameResultLoop> {
+//     const { methodType, payload, format, period } = executor;
+//     const topicSettings: TopicSettings = {
+//       topic: methodType,
+//       messageType: format,
+//     };
+//     const onSent = new LiteEvent<IFrameResult>();
+//     const topicInstance = this.getTopic(topicSettings);
+//     const message = new Message(payload.data);
+//     const interval = setInterval(() => {
+//       topicInstance.publish(message);
+//       onSent.trigger({
+//         success: true,
+//         result: null,
+//       });
+//     }, (1 / period) * 1000);
+//     const stop = () => {
+//       clearInterval(interval);
+//       topicInstance.unadvertise();
+//     };
+//     const loopHandler: LiteEventHandler<void> = () => {
+//       stop();
+//       this.handlers.delete(`loop-${methodType}`);
+//     };
+//     this.loopHandlers.set(`loop-${methodType}`, loopHandler);
+//     return Promise.resolve({
+//       success: true,
+//       result: null,
+//       event: onSent,
+//       stop: stop,
+//     });
+//   }
 
-  private triggerHandlers(topic: string, message: Message): void {
-    this.handlers.get(topic)?.forEach((handler) => {
-      handler(message);
-    });
-  }
+//   public override on<T>(
+//     executor: IRosFrameExecutor,
+//     handler: LiteEventHandler<T>
+//   ): void {
+//     const { methodType, format } = executor;
+//     const topicSettings: TopicSettings = {
+//       topic: methodType,
+//       messageType: format,
+//     };
+//     this.addHandler(methodType, handler as any);
+//     const topicInstance = this.getTopic(topicSettings);
+//     topicInstance.subscribe((message: Message) => {
+//       console.log("Ros message received", message);
+//       this.triggerHandlers(methodType, message);
+//     });
+//   }
 
-  private removeHandler(
-    topic: string,
-    handler: LiteEventHandler<Message>
-  ): number {
-    if (!this.handlers.has(topic)) {
-      return 0;
-    }
-    const handlers = this.handlers.get(topic);
-    const index = handlers?.indexOf(handler);
-    if (index !== undefined && index > -1) {
-      handlers?.splice(index, 1);
-    }
-    if (handlers?.length === 0) {
-      this.handlers.delete(topic);
-      return 0;
-    }
-    return handlers?.length ?? 0;
-  }
+//   public override off<T>(
+//     executor: IRosFrameExecutor,
+//     handler?: LiteEventHandler<T>
+//   ): void {
+//     const { methodType, payload, format } = executor;
+//     const remainingHandlersCount = this.removeHandler(
+//       methodType,
+//       handler as any
+//     );
+//     if (remainingHandlersCount === 0) {
+//       const topicSettings: TopicSettings = {
+//         topic: methodType,
+//         messageType: format,
+//       };
+//       const topicInstance = this.getTopic(topicSettings);
+//       handler && topicInstance.unsubscribe(handler as any);
+//     }
+//   }
 
-  protected override stopLoop(cancellationToken: string): void {
-    const loopHandler = this.loopHandlers.get(`loop-${cancellationToken}`);
-    if (loopHandler) {
-      loopHandler();
-    }
-  }
-}
+//   public override removeAllListeners(): void {
+//     const removeTopicList = (list: { topics: string[]; types: string[] }) => {
+//       const { topics, types } = list;
+//       topics.forEach((topic, index) => {
+//         const topicSettings: TopicSettings = {
+//           topic: topic,
+//           messageType: types[index],
+//         };
+//         const topicInstance = this.getTopic(topicSettings);
+//         topicInstance.unsubscribe();
+//       });
+//     };
+//     const handleError = (error: any) => {
+//       console.log("Error getting topics: ", error);
+//     };
+//     this.ros.getTopics(removeTopicList, handleError);
+//   }
 
-export { RosContext };
+//   private getTopic(settings: TopicSettings): Topic {
+//     const options = {
+//       ros: this.ros,
+//       name: settings.topic,
+//       messageType: settings.messageType,
+//       throttle_rate: settings.throttleRate || 10,
+//       latch: settings.latch || false,
+//       queue_length: settings.queueLength || 1,
+//       queue_size: settings.queueSize || 10,
+//     };
+//     return new Topic(options);
+//   }
+
+//   private addHandler(topic: string, handler: LiteEventHandler<Message>): void {
+//     if (!this.handlers.has(topic)) {
+//       this.handlers.set(topic, []);
+//     }
+//     this.handlers.get(topic)?.push(handler);
+//   }
+
+//   private triggerHandlers(topic: string, message: Message): void {
+//     this.handlers.get(topic)?.forEach((handler) => {
+//       handler(message);
+//     });
+//   }
+
+//   private removeHandler(
+//     topic: string,
+//     handler: LiteEventHandler<Message>
+//   ): number {
+//     if (!this.handlers.has(topic)) {
+//       return 0;
+//     }
+//     const handlers = this.handlers.get(topic);
+//     const index = handlers?.indexOf(handler);
+//     if (index !== undefined && index > -1) {
+//       handlers?.splice(index, 1);
+//     }
+//     if (handlers?.length === 0) {
+//       this.handlers.delete(topic);
+//       return 0;
+//     }
+//     return handlers?.length ?? 0;
+//   }
+
+//   protected override stopLoop(cancellationToken: string): void {
+//     const loopHandler = this.loopHandlers.get(`loop-${cancellationToken}`);
+//     if (loopHandler) {
+//       loopHandler();
+//     }
+//   }
+// }
+
+// export { RosContext };

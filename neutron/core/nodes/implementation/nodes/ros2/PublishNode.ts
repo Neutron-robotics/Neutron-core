@@ -17,11 +17,11 @@ class PublisherNode extends RosNode {
   }
 
   protected process = async (message: NodeMessage) => {
-    this.rosContext?.send({
-      methodType: this.specifics.topic.name,
-      format: this.specifics.topic.messageType.name,
-      payload: message.payload,
-    });
+    this.rosContext?.publish(
+      this.specifics.topic.name,
+      this.specifics.topic.messageType.name,
+      message.payload
+    );
     return message;
   };
 

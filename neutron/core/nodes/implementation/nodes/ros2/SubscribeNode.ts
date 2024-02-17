@@ -1,6 +1,10 @@
 import { IRos2Topic } from "../../../../../models/ros2/ros2";
 import BaseNode from "../../../BaseNode";
-import { IBaseNodeEvent, INodeBuilder, NodeMessage } from "../../../INeutronNode";
+import {
+  IBaseNodeEvent,
+  INodeBuilder,
+  NodeMessage,
+} from "../../../INeutronNode";
 import { RosNodeInput } from "./RosNode";
 
 export interface SubscriberNodeSpecifics {
@@ -26,19 +30,16 @@ class SubscriberNode extends RosNodeInput {
   public trigger = async (data: any) => {
     const event: IBaseNodeEvent = {
       nodeId: this.id,
-      data
-    }
-    
-    this.ProcessingBegin.trigger(event)
-  }
+      data,
+    };
+
+    this.ProcessingBegin.trigger(event);
+  };
 
   public override onContextMount = () => {
-    this.rosContext?.on(
-      {
-        methodType: this.specifics.topic.name,
-        format: this.specifics.topic.messageType.name,
-        payload: null,
-      },
+    this.rosContext?.subscribe(
+      this.specifics.topic.name,
+      this.specifics.topic.messageType.name,
       this.trigger
     );
   };

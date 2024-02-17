@@ -5,7 +5,7 @@ import { NeutronEdgeDB, NeutronNodeDB, NodeMessage } from "../../INeutronNode";
 import { IInputNode } from "../../InputNode";
 import NeutronBaseGraph from "../../NeutronBaseGraph";
 import NodeFactory, { inputNodesSet } from "../../NodeFactory";
-import { ControllerNode } from "../nodes";
+import { InputControllerNode, OutputControllerNode } from "../nodes";
 
 /*
  * The connector graph has a single input node.
@@ -73,8 +73,8 @@ class ConnectorGraph extends NeutronBaseGraph {
     await Promise.all(nextNodesPromises);
   }
 
-  public getControllerNodes(): ControllerNode<any>[] {
-    return (this.nodes as ControllerNode<any>[])
+  public getControllerNodes(): (InputControllerNode<any> | OutputControllerNode)[] {
+    return (this.nodes as (InputControllerNode<any> | OutputControllerNode)[])
       .filter(node => node.isControllerNode)
   } 
 
