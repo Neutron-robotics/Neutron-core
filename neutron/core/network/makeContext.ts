@@ -1,8 +1,17 @@
-import {
-  ConnectionContextType, RobotConnectionInfo,
-} from "../../interfaces/RobotConnection";
 import RosContext, { RosContextConfiguration } from "./RosContext";
 import NeutronConnectionContext from "./NeutronConnectionContext";
+
+export enum ConnectionContextType {
+  Ros2 = "ros2",
+  Tcp = "tcp",
+  WebSocket = "websocket",
+}
+
+export interface RobotConnectionInfo {
+  hostname: string;
+  port: number;
+  type: ConnectionContextType;
+}
 
 export const makeConnectionContext = (
   type: ConnectionContextType,

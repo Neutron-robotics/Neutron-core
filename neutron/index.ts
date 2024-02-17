@@ -26,11 +26,6 @@ import {
 import NeutronConnectionContext from "./core/network/NeutronConnectionContext";
 
 // Context
-export {
-  IConnectionContextConfiguration,
-  IConnectionContext,
-  ConnectionContext,
-} from "./context/ConnectionContext";
 export { makeConnectionContext } from "./core/network/makeContext";
 export { NeutronConnectionContext };
 export {
@@ -133,22 +128,7 @@ export {
 } from "./core/nodes/implementation/nodes";
 export { BaseNode };
 
-// Interfaces
-export {
-  IRobotConnectionConfiguration,
-  RobotConnectionInfo,
-  ConnectionContextType,
-  getRobotConnectionTypeFromString,
-  IBatteryInfo,
-  IRobotModule,
-  IRobotModuleDefinition,
-} from "./interfaces/RobotConnection";
-export { TopicSettings } from "./interfaces/ros";
-
-// Modules
-export { ICoreProcess, ICoreModule, IRobotStatus } from "./interfaces/core";
-export { CameraInfoUpdate, Resolution } from "./interfaces/camera";
-export { WebRTC } from "./modules/WebRTC";
+export { TopicSettings } from "./core/ros2/topicSettings";
 
 // Utils
 export { inRange } from "./utils/math";

@@ -1,6 +1,6 @@
 {
   "name": "neutron-core",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "repository": "git@github.com:hugoperier/Neutron-core.git",
   "author": "hugo <hugo.perier@cern.ch>",
   "license": "MIT",
@@ -15,6 +15,7 @@
     "debug": "tsc && node --inspect build/index.js",
     "debug-brk": "tsc && node --inspect-brk build/index.js",
     "test": "jest",
+    "test:verbose": "jest --verbose --runInBand --silent",
     "tsc": "tsc"
   },
   "engines": {

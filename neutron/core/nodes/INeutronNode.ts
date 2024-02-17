@@ -1,7 +1,7 @@
 import { IRos2System } from "../../models/ros2/ros2";
 import { ILiteEvent } from "../../utils/LiteEvent";
 import RosContext from "../network/RosContext";
-import XYPosition from "../utils/XYPosition";
+import XYPosition from "../../types/XYPosition";
 
 export interface NodeMessage {
   payload: any;

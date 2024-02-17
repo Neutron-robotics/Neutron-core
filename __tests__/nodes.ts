@@ -4,7 +4,7 @@ import { InjectNode } from "../neutron/core/nodes/implementation/nodes";
 import DebugNode from "../neutron/core/nodes/implementation/nodes/functions/DebugNode";
 import ErrorNode from "../neutron/core/nodes/implementation/nodes/functions/ErrorNode";
 import { flowGraphMock } from "./__mixture__/flowGraphMock";
-jest.mock("../neutron/context/makeContext");
+jest.mock("../neutron/core/network/makeContext");
 
 describe("Neutron Nodes", () => {
   const mockNodeDb = flowGraphMock.nodes[0];

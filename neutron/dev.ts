@@ -1,9 +1,10 @@
 import axios from "axios";
-import { RosContext } from "./context/RosContext";
 import { sleep } from "./utils/time";
 import { ConnectorGraph } from "./core/nodes/implementation/graphs";
 import { DebugNode } from "./core/nodes/implementation/nodes";
 import { IDebugEvent } from "./core/nodes/implementation/nodes/functions/DebugNode";
+import RosContext from "./core/network/RosContext";
+import * as fs from 'fs';
 
 const nodes = [
   {
@@ -115,30 +116,49 @@ async function main() {
     clientId: clientId,
   };
 
-  const rosConfig = {
-    hostname: "192.168.1.117",
+  const robotContextConfiguration = {
+    hostname: '192.168.1.116',
     port: 9090,
-    clientId: clientId,
-  };
+    clientId: ''
+  }
 
-  const context = new RosContext(neutronContextConfiguration);
+  const context = new RosContext(robotContextConfiguration);
 
-  await axios.post(
-    `http://${connectionHostname}:${connectionPort}/register/${clientId}`
-  );
-  await context.connect();
+  const connected = await context.connect()
 
-  const graph = new ConnectorGraph(nodes, edges);
+  console.log("Connected! ", connected)
 
-  graph.useContext(context)
+  context.subscribe(
+    '/video_frames',
+    'sensor_msgs/msg/CompressedImage',
+    (data: any) => {
+      console.log("Received data!", data)
+      fs.writeFileSync('./test.jpg',  Buffer.from(data.data, 'base64'))
+      const jpg = Buffer.from(data.data, 'base64')
 
-  const debugNode = graph.getNodeById<DebugNode>('ab3819bd-4692-4144-b211-5364901ad233')
+      
+    }
+  )
 
-  const handleDebugEvent = (data: IDebugEvent): void | Promise<void> => {
-    console.log("debug event: ", data);
-  }  
+  // await axios.post(
+  //   `http://${connectionHostname}:${connectionPort}/register/${clientId}`
+  // );
+  // await context.connect();
 
-  debugNode?.DebugEvent.on(handleDebugEvent)
+  // const infos = await context.getInfo();
+
+
+  // const graph = new ConnectorGraph(nodes, edges);
+
+  // graph.useContext(context)
+
+  // const debugNode = graph.getNodeById<DebugNode>('ab3819bd-4692-4144-b211-5364901ad233')
+
+  // const handleDebugEvent = (data: IDebugEvent): void | Promise<void> => {
+  //   console.log("debug event: ", data);
+  // }
+
+  // debugNode?.DebugEvent.on(handleDebugEvent)
 
   // const trigger = (data: any) => {
   //   console.log("Triggered data", data);

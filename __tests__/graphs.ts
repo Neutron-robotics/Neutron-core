@@ -7,8 +7,8 @@ import { graphTemplate } from "./__mixture__/connectorGraphMock";
 import { flowGraphMock } from "./__mixture__/flowGraphMock";
 import { sleep } from "../neutron/utils/time";
 import { PublisherNode } from "../neutron/core/nodes/implementation/nodes";
-import { IRosContextConfiguration, RosContext } from "../neutron/context/RosContext";
-jest.mock("../neutron/context/makeContext");
+import RosContext, {RosContextConfiguration} from "../neutron/core/network/RosContext";
+jest.mock("../neutron/core/network/makeContext");
 jest.mock("roslib");
 
 describe("Nodes graph builder", () => {
@@ -87,13 +87,13 @@ describe("Nodes graph builder", () => {
   });
   
   it('Use a ros context', async () => {
-    const ctxConfiguration = {
+    const config: RosContextConfiguration = {
       hostname: "localhost",
       port: 9090,
       clientId: 'test'
     };
   
-    const context = new RosContext(ctxConfiguration as IRosContextConfiguration);
+    const context = new RosContext(config);
   
     const modifiedNode = {
       ...nodesDb[6],

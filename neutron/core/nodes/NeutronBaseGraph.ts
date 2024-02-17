@@ -1,4 +1,3 @@
-import { IConnectionContext } from "../../context/ConnectionContext";
 import { ILiteEvent, LiteEvent } from "../../utils/LiteEvent";
 import NeutronGraphError from "../errors/NeutronGraphError";
 import NeutronConnectionContext from "../network/NeutronConnectionContext";

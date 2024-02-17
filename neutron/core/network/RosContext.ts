@@ -11,7 +11,7 @@ import {
 import NeutronConnectionContext from "./NeutronConnectionContext";
 import WebSocket from "ws";
 import { ConnectionContextType } from "./connection";
-import { TopicSettings } from "../../interfaces/ros";
+import { TopicSettings } from '../ros2/topicSettings'
 
 export interface RosContextConfiguration {
   hostname: string;

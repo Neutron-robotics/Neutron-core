@@ -1,5 +1,5 @@
 import { ILiteEvent, LiteEvent } from "../../utils/LiteEvent";
-import XYPosition from "../utils/XYPosition";
+import XYPosition from "../../types/XYPosition";
 import {
   IBaseNodeEvent,
   INeutronNode,

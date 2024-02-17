@@ -1,12 +1,7 @@
-import { RosContext } from "../neutron/context/RosContext";
 import { Ros, Service, ServiceRequest, Topic, Message } from "roslib";
-import {
-  IRosFrameExecutor,
-  IRosFrameExecutorPeriodic,
-} from "../neutron/interfaces/frames";
 import { sleep } from "../neutron/utils/time";
-import { makeConnectionContext } from "../neutron/context/makeContext";
-import { ConnectionContextType } from "../neutron/interfaces/RobotConnection";
+import {ConnectionContextType, makeConnectionContext} from '../neutron/core/network/makeContext'
+import RosContext from "../neutron/core/network/RosContext";
 
 jest.mock("roslib");
 
@@ -21,7 +16,7 @@ describe("robot connection factory", () => {
     const context = makeConnectionContext(
       ConnectionContextType.Ros2,
       ctxConfiguration
-    );
+    ) as RosContext;
     expect(context).toBeDefined();
     expect(context.type).toBe(ConnectionContextType.Ros2);
     expect(context.hostname).toBe("localhost");
@@ -100,21 +95,16 @@ describe("Ros Contexts", () => {
   });
 
   test("Request", () => {
-    const frameExecutor: IRosFrameExecutor = {
-      format: "/std_types/Float64Array",
-      methodType: "/move_something",
-      payload: {
-        x: 0,
-        y: 0,
-      },
-    };
     const rosContext = new RosContext({
       hostname: "localhost",
       port: 9090,
       clientId: "toto",
     });
 
-    rosContext.request(frameExecutor);
+    rosContext.request("/std_types/Float64Array", '/move_something', {
+      x: 0,
+      y: 0,
+    });
     const mockServiceInstance = (Service as any).mock.instances[0];
     const mockcallServiceInstance = mockServiceInstance.callService;
     expect(Service).toHaveBeenCalledTimes(1);
@@ -133,22 +123,17 @@ describe("Ros Contexts", () => {
     });
   });
 
-  test("Send", () => {
-    const frameExecutor: IRosFrameExecutor = {
-      format: "/std_types/Float64Array",
-      methodType: "/move_something",
-      payload: {
-        x: 0,
-        y: 0,
-      },
-    };
+  test("Publish", () => {
     const rosContext = new RosContext({
       hostname: "localhost",
       port: 9090,
       clientId: "toto",
     });
 
-    rosContext.send(frameExecutor);
+    rosContext.publish('/move_something', '/std_types/Float64Array', {
+      x: 0,
+      y: 0,
+    });
     const mockTopicInstance = (Topic as any).mock.instances[0];
     const mockpublishInstance = mockTopicInstance.publish;
     expect(Topic).toHaveBeenCalledTimes(1);
@@ -167,66 +152,14 @@ describe("Ros Contexts", () => {
     });
   });
 
-  test("SendLoop", async () => {
-    const frameExecutor: IRosFrameExecutorPeriodic = {
-      format: "/std_types/Float64Array",
-      methodType: "/move_something",
-      payload: {
-        x: 0,
-        y: 0,
-      },
-      period: 3,
-    };
-    const rosContext = new RosContext({
-      hostname: "localhost",
-      port: 9090,
-      clientId: "toto",
-    });
-
-    const res = await rosContext.sendLoop(frameExecutor);
-    const onSend = jest.fn();
-    res.event.on(onSend);
-    await sleep(2000);
-    res.stop();
-    expect(onSend.mock.calls.length).toBeGreaterThan(4);
-    await sleep(2000);
-    expect(onSend.mock.calls.length).toBeGreaterThan(4);
-    expect(onSend.mock.calls.length).toBeLessThanOrEqual(6);
-
-    const mockTopicInstance = (Topic as any).mock.instances[0];
-    const mockpublishInstance = mockTopicInstance.publish;
-    expect(Topic).toHaveBeenCalledTimes(1);
-    expect(mockpublishInstance.mock.calls.length).toBeGreaterThan(4);
-    expect(mockpublishInstance).toHaveBeenCalledWith(
-      new Message({ x: 0, y: 0 })
-    );
-    expect(Topic).toHaveBeenCalledWith({
-      ros: (Ros as any).mock.instances[0],
-      name: "/move_something",
-      messageType: "/std_types/Float64Array",
-      throttle_rate: 10,
-      latch: false,
-      queue_length: 1,
-      queue_size: 10,
-    });
-  });
-
-  test("Subscribe to an event", () => {
-    const frameExecutor: IRosFrameExecutor = {
-      format: "/std_types/Float64Array",
-      methodType: "/move_something",
-      payload: {
-        x: 0,
-        y: 0,
-      },
-    };
+  test("Subscribe to a topic", () => {
     const rosContext = new RosContext({
       hostname: "localhost",
       port: 9090,
       clientId: "toto",
     });
     const handler = jest.fn();
-    rosContext.on(frameExecutor, handler);
+    rosContext.subscribe('/move_something', '/std_types/Float64Array', handler);
     const mockTopicInstance = (Topic as any).mock.instances[0];
     const mocksubscribeInstance = mockTopicInstance.subscribe;
     expect(Topic).toHaveBeenCalledTimes(1);
@@ -244,21 +177,13 @@ describe("Ros Contexts", () => {
   });
 
   test("subscribe and unsubscribe", () => {
-    const frameExecutor: IRosFrameExecutor = {
-      format: "/std_types/Float64Array",
-      methodType: "/move_something",
-      payload: {
-        x: 0,
-        y: 0,
-      },
-    };
     const rosContext = new RosContext({
       hostname: "localhost",
       port: 9090,
       clientId: "toto",
     });
     const handler = jest.fn();
-    rosContext.on(frameExecutor, handler);
+    rosContext.subscribe('/move_something', '/std_types/Float64Array', handler);
     const mockTopicInstance = (Topic as any).mock.instances[0];
     const mocksubscribeInstance = mockTopicInstance.subscribe;
     expect(Topic).toHaveBeenCalledTimes(1);
@@ -273,7 +198,7 @@ describe("Ros Contexts", () => {
       queue_length: 1,
       queue_size: 10,
     });
-    rosContext.off(frameExecutor, handler);
+    rosContext.unsubscribe('/move_something', '/std_types/Float64Array', handler);
     const mockTopicInstance2 = (Topic as any).mock.instances[1];
     const mockunsubscribeInstance = mockTopicInstance2.unsubscribe;
     expect(mockunsubscribeInstance).toHaveBeenCalledTimes(1);
