@@ -16,7 +16,7 @@ export class LiteEvent<T> implements ILiteEvent<T> {
   }
 
   public off(handler: LiteEventHandler<T>): void {
-    this.handlers = this.handlers.filter((h) => h !== handler);
+    this.handlers = this.handlers.filter(h => h !== handler);
   }
 
   public offAll() {
@@ -33,7 +33,7 @@ export class LiteEvent<T> implements ILiteEvent<T> {
 
   public async trigger(data: T) {
     // TODO: Maybe await all call to this method?
-    const handlers = this.handlers.slice(0).map(async (h) => h(data));
+    const handlers = this.handlers.slice(0).map(async h => h(data));
     await Promise.all(handlers);
   }
 

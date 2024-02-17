@@ -18,4 +18,4 @@ export interface UserDTO {
 
 export type UserLight = Partial<UserModel>;
 
-export type UserUpdateModel = Partial<Omit<UserModel, "id">>;
+export type UserUpdateModel = Partial<Omit<UserModel, 'id'>>;

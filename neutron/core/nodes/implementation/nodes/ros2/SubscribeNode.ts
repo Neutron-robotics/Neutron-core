@@ -1,11 +1,11 @@
-import { IRos2Topic } from "../../../../../models/ros2/ros2";
-import BaseNode from "../../../BaseNode";
+import { IRos2Topic } from '../../../../../models/ros2/ros2';
+import BaseNode from '../../../BaseNode';
 import {
   IBaseNodeEvent,
   INodeBuilder,
-  NodeMessage,
-} from "../../../INeutronNode";
-import { RosNodeInput } from "./RosNode";
+  NodeMessage
+} from '../../../INeutronNode';
+import { RosNodeInput } from './RosNode';
 
 export interface SubscriberNodeSpecifics {
   topic: IRos2Topic;
@@ -13,7 +13,9 @@ export interface SubscriberNodeSpecifics {
 
 class SubscriberNode extends RosNodeInput {
   public isInput: boolean = true;
-  public readonly type = "subscriber";
+
+  public readonly type = 'subscriber';
+
   private readonly specifics: SubscriberNodeSpecifics;
 
   constructor(builder: INodeBuilder<SubscriberNodeSpecifics>) {
@@ -21,16 +23,14 @@ class SubscriberNode extends RosNodeInput {
     this.specifics = builder.specifics;
   }
 
-  protected process = async (message: NodeMessage) => {
-    return Promise.resolve(message);
-  };
+  protected process = async (message: NodeMessage) => Promise.resolve(message);
 
   protected verifyInput = (_: NodeMessage) => {};
 
   public trigger = async (data: any) => {
     const event: IBaseNodeEvent = {
       nodeId: this.id,
-      data,
+      data
     };
 
     this.ProcessingBegin.trigger(event);

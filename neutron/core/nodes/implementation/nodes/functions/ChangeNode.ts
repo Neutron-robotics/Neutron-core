@@ -1,10 +1,10 @@
-import NeutronNodeComputeError from "../../../../errors/NeutronNodeError";
-import BaseNode from "../../../BaseNode";
-import { INodeBuilder, NodeMessage, OutputNodeMessage } from "../../../INeutronNode";
+import NeutronNodeComputeError from '../../../../errors/NeutronNodeError';
+import BaseNode from '../../../BaseNode';
+import { INodeBuilder, NodeMessage, OutputNodeMessage } from '../../../INeutronNode';
 
 export interface ChangeField {
   id: string;
-  mode: "define" | "remove" | "move";
+  mode: 'define' | 'remove' | 'move';
   inputField: string;
   targetField?: string;
 }
@@ -15,7 +15,9 @@ export interface ChangeNodeSpecifics {
 
 class ChangeNode extends BaseNode {
   public isInput: boolean = false;
-  public readonly type = "Change";
+
+  public readonly type = 'Change';
+
   private readonly specifics: ChangeNodeSpecifics;
 
   constructor(builder: INodeBuilder<ChangeNodeSpecifics>) {
@@ -24,25 +26,23 @@ class ChangeNode extends BaseNode {
   }
 
   protected process = async (message: NodeMessage): Promise<OutputNodeMessage> => {
-    let modifiedPayload = { ...message.payload };
+    const modifiedPayload = { ...message.payload };
 
     for (const field of this.specifics.fields) {
       switch (field.mode) {
-        case "define":
+        case 'define':
           if (!field.targetField) break;
-          modifiedPayload[field.targetField] =
-            modifiedPayload[field.inputField];
+          modifiedPayload[field.targetField] = modifiedPayload[field.inputField];
           break;
-        case "remove":
+        case 'remove':
           delete modifiedPayload[field.inputField];
           break;
-        case "move":
+        case 'move':
           if (
-            field.targetField &&
-            modifiedPayload.hasOwnProperty(field.inputField)
+            field.targetField
+            && modifiedPayload.hasOwnProperty(field.inputField)
           ) {
-            modifiedPayload[field.targetField] =
-              modifiedPayload[field.inputField];
+            modifiedPayload[field.targetField] = modifiedPayload[field.inputField];
             delete modifiedPayload[field.inputField];
           }
           break;

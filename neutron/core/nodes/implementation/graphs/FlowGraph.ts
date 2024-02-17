@@ -1,10 +1,10 @@
-import NeutronGraphError from "../../../errors/NeutronGraphError";
-import NeutronNodeComputeError from "../../../errors/NeutronNodeError";
-import BaseNode from "../../BaseNode";
-import { NeutronEdgeDB, NeutronNodeDB, NodeMessage } from "../../INeutronNode";
-import { IInputNode } from "../../InputNode";
-import NeutronBaseGraph from "../../NeutronBaseGraph";
-import NodeFactory, { inputNodesSet } from "../../NodeFactory";
+import NeutronGraphError from '../../../errors/NeutronGraphError';
+import NeutronNodeComputeError from '../../../errors/NeutronNodeError';
+import BaseNode from '../../BaseNode';
+import { NeutronEdgeDB, NeutronNodeDB, NodeMessage } from '../../INeutronNode';
+import { IInputNode } from '../../InputNode';
+import NeutronBaseGraph from '../../NeutronBaseGraph';
+import NodeFactory, { inputNodesSet } from '../../NodeFactory';
 
 /*
  * The flow graph can be composed of severals input node.
@@ -17,22 +17,18 @@ class FlowGraph extends NeutronBaseGraph {
     super(nodes, edges);
     this.inputNodes = [];
     this.buildGraph(edges);
-    this.nodes.forEach((e) => {
-      e.BeforeProcessingEvent.on((proc) =>
-        this.NodeProcessEvent.trigger({
-          nodeId: proc.nodeId,
-          status: "running",
-        })
-      );
-      e.AfterProcessingEvent.on((proc) =>
-        this.NodeProcessEvent.trigger({
-          nodeId: proc.nodeId,
-          status: "completed",
-        })
-      );
+    this.nodes.forEach(e => {
+      e.BeforeProcessingEvent.on(proc => this.NodeProcessEvent.trigger({
+        nodeId: proc.nodeId,
+        status: 'running'
+      }));
+      e.AfterProcessingEvent.on(proc => this.NodeProcessEvent.trigger({
+        nodeId: proc.nodeId,
+        status: 'completed'
+      }));
 
       if (e.isInput === true) {
-        (e as unknown as IInputNode).ProcessingBegin.on(this.handleInputNodeProcessingBegin)
+        (e as unknown as IInputNode).ProcessingBegin.on(this.handleInputNodeProcessingBegin);
       }
     });
   }
@@ -42,9 +38,7 @@ class FlowGraph extends NeutronBaseGraph {
   ): Promise<void> {
     this.shouldStop = false;
     await Promise.all(
-      this.inputNodes.map((e) =>
-        this.run(e, message ? message[e.id] : undefined)
-      )
+      this.inputNodes.map(e => this.run(e, message ? message[e.id] : undefined))
     );
   }
 
@@ -52,14 +46,14 @@ class FlowGraph extends NeutronBaseGraph {
     nodeId: string,
     message?: NodeMessage
   ): Promise<void> {
-    const node = this.nodes.find((e) => e.id === nodeId);
-    if (!node)
+    const node = this.nodes.find(e => e.id === nodeId);
+    if (!node) {
       throw new NeutronNodeComputeError(
         `Could not find node ${nodeId} in graph`
       );
+    }
 
-    if (!node.isInput)
-      throw new NeutronNodeComputeError(`Node ${nodeId} is not an input`);
+    if (!node.isInput) throw new NeutronNodeComputeError(`Node ${nodeId} is not an input`);
 
     this.shouldStop = false;
     return await this.run(node, message);
@@ -73,17 +67,15 @@ class FlowGraph extends NeutronBaseGraph {
       .filter(([handle, nodes]) => output?.outputHandles?.includes(handle))
       .reduce<BaseNode[]>((acc, [handle, nodes]) => [...acc, ...nodes], []);
 
-    const nextNodesPromises = nextNodes.map((nextNode) =>
-      this.run(nextNode, output)
-    );
+    const nextNodesPromises = nextNodes.map(nextNode => this.run(nextNode, output));
     await Promise.all(nextNodesPromises);
   }
 
   private buildGraph(edges: NeutronEdgeDB[]): void {
-    this.nodes.forEach((node) => {
-      const nextEdges = edges.filter((e) => e.source === node.id);
-      nextEdges.forEach((edge) => {
-        const nextNode = this.nodes.find((e) => e.id === edge.target);
+    this.nodes.forEach(node => {
+      const nextEdges = edges.filter(e => e.source === node.id);
+      nextEdges.forEach(edge => {
+        const nextNode = this.nodes.find(e => e.id === edge.target);
         if (!nextNode) {
           throw new NeutronGraphError(
             `No node with id ${edge.target} has been provided`

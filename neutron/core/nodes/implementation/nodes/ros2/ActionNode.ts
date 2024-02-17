@@ -1,6 +1,6 @@
-import { IRos2Action } from "../../../../../models/ros2/ros2";
-import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
-import RosNode from "./RosNode";
+import { IRos2Action } from '../../../../../models/ros2/ros2';
+import { INodeBuilder, NodeMessage } from '../../../INeutronNode';
+import RosNode from './RosNode';
 
 export interface ActionNodeSpecifics {
   action: IRos2Action;
@@ -8,7 +8,9 @@ export interface ActionNodeSpecifics {
 
 class ActionNode extends RosNode {
   public isInput: boolean = false;
-  public readonly type = "action";
+
+  public readonly type = 'action';
+
   private readonly specifics: ActionNodeSpecifics;
 
   constructor(builder: INodeBuilder<ActionNodeSpecifics>) {
@@ -16,10 +18,9 @@ class ActionNode extends RosNode {
     this.specifics = builder.specifics;
   }
 
-  protected process = async (message: NodeMessage) => {
+  protected process = async (message: NodeMessage) =>
     // Not implemented
-    return message;
-  };
+    message;
 
   protected verifyInput = (_: NodeMessage) => {};
 

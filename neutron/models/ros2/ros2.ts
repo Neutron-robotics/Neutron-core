@@ -1,4 +1,4 @@
-import { IDBObject } from "../common";
+import { IDBObject } from '../common';
 
 export interface IRos2System extends IDBObject {
   name: string;

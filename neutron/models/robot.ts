@@ -1,13 +1,13 @@
 export enum RobotPartCategory {
-  Actuator = "actuator",
-  Vison = "vision",
-  Base = "base",
+  Actuator = 'actuator',
+  Vison = 'vision',
+  Base = 'base',
 }
 
 export enum ConnectionContextType {
-  Ros2 = "ros2",
-  Tcp = "tcp",
-  WebSocket = "websocket",
+  Ros2 = 'ros2',
+  Tcp = 'tcp',
+  WebSocket = 'websocket',
 }
 
 export interface IRobotPart {

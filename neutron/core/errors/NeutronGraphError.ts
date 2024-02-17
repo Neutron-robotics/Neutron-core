@@ -3,7 +3,7 @@ class NeutronGraphError extends Error {
 
   constructor(message: string, nodeId?: string) {
     super(message);
-    this.name = "NeutronGraphError";
+    this.name = 'NeutronGraphError';
     this.nodeId = nodeId;
   }
 }

@@ -3,7 +3,7 @@ class NeutronNodeComputeError extends Error {
 
   constructor(message: string, nodeId?: string) {
     super(message);
-    this.name = "NeutronNodeComputeError";
+    this.name = 'NeutronNodeComputeError';
     this.nodeId = nodeId;
   }
 }

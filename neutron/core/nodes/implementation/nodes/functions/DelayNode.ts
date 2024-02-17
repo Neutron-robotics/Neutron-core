@@ -1,5 +1,5 @@
-import BaseNode from "../../../BaseNode";
-import { INodeBuilder, NodeMessage, OutputNodeMessage } from "../../../INeutronNode";
+import BaseNode from '../../../BaseNode';
+import { INodeBuilder, NodeMessage, OutputNodeMessage } from '../../../INeutronNode';
 
 export interface IRandomDelayInterval {
   min: number;
@@ -7,14 +7,16 @@ export interface IRandomDelayInterval {
 }
 
 export interface DelayNodeSpecifics {
-  mode: "fixed" | "random";
+  mode: 'fixed' | 'random';
   delay: number | IRandomDelayInterval;
-  unit: "millisecond" | "second" | "minute" | "hour";
+  unit: 'millisecond' | 'second' | 'minute' | 'hour';
 }
 
 class DelayNode extends BaseNode {
   public isInput: boolean = false;
-  public readonly type = "delay";
+
+  public readonly type = 'delay';
+
   private readonly specifics: DelayNodeSpecifics;
 
   constructor(builder: INodeBuilder<DelayNodeSpecifics>) {
@@ -25,10 +27,10 @@ class DelayNode extends BaseNode {
   protected process = async (message: NodeMessage): Promise<OutputNodeMessage> => {
     const delayInMillis = this.calculateDelayInMillis();
 
-    await new Promise((resolve) => setTimeout(resolve, delayInMillis));
+    await new Promise(resolve => setTimeout(resolve, delayInMillis));
 
     return {
-      payload: message.payload,
+      payload: message.payload
     };
   };
 
@@ -38,7 +40,7 @@ class DelayNode extends BaseNode {
     const { delay, unit } = this.specifics;
     let delayInMillis: number;
 
-    if (typeof delay === "number") {
+    if (typeof delay === 'number') {
       delayInMillis = this.convertToMilliseconds(delay, unit);
     } else {
       // For random delay, calculate a random value within the specified interval
@@ -51,11 +53,11 @@ class DelayNode extends BaseNode {
 
   private convertToMilliseconds(value: number, unit: string): number {
     switch (unit) {
-      case "second":
+      case 'second':
         return value * 1000;
-      case "minute":
+      case 'minute':
         return value * 60 * 1000;
-      case "hour":
+      case 'hour':
         return value * 60 * 60 * 1000;
       default:
         return value;

@@ -1,9 +1,9 @@
-import BaseNode from "../../../BaseNode";
+import BaseNode from '../../../BaseNode';
 import {
   INodeBuilder,
   NodeMessage,
-  OutputNodeMessage,
-} from "../../../INeutronNode";
+  OutputNodeMessage
+} from '../../../INeutronNode';
 
 export interface FunctionNodeSpecifics {
   code: string;
@@ -11,7 +11,9 @@ export interface FunctionNodeSpecifics {
 
 class FunctionNode extends BaseNode {
   public isInput: boolean = false;
-  public readonly type = "function";
+
+  public readonly type = 'function';
+
   private readonly specifics: FunctionNodeSpecifics;
 
   constructor(builder: INodeBuilder<FunctionNodeSpecifics>) {
@@ -22,10 +24,10 @@ class FunctionNode extends BaseNode {
   protected process = async (
     message: NodeMessage
   ): Promise<OutputNodeMessage> => {
-    const func = new Function("msg", this.specifics.code);
+    const func = new Function('msg', this.specifics.code);
     const result = func(message.payload);
     return {
-      payload: result,
+      payload: result
     };
   };
 

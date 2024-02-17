@@ -1,13 +1,13 @@
-import NeutronNodeComputeError from "../../../../errors/NeutronNodeError";
-import BaseNode from "../../../BaseNode";
+import NeutronNodeComputeError from '../../../../errors/NeutronNodeError';
+import BaseNode from '../../../BaseNode';
 import {
   INodeBuilder,
   NeutronPrimitiveType,
   NodeMessage,
-  OutputNodeMessage,
-} from "../../../INeutronNode";
+  OutputNodeMessage
+} from '../../../INeutronNode';
 
-export const comparisonOperators = ["==", "!=", "<", "<=", ">", ">="] as const;
+export const comparisonOperators = ['==', '!=', '<', '<=', '>', '>='] as const;
 export type ComparisonOperator = (typeof comparisonOperators)[number];
 
 export interface SwitchField<T> {
@@ -21,12 +21,14 @@ export interface SwitchField<T> {
 export interface SwitchNodeSpecifics {
   propertyName: string;
   switchFields: SwitchField<any>[];
-  switchMode: "stop" | "continue";
+  switchMode: 'stop' | 'continue';
 }
 
 class SwitchNode extends BaseNode {
   public isInput: boolean = false;
-  public readonly type = "switch";
+
+  public readonly type = 'switch';
+
   private readonly specifics: SwitchNodeSpecifics;
 
   constructor(builder: INodeBuilder<SwitchNodeSpecifics>) {
@@ -50,22 +52,22 @@ class SwitchNode extends BaseNode {
 
       let evaluation = false;
       switch (operator) {
-        case "!=":
+        case '!=':
           evaluation = messagePropertyValue !== value;
           break;
-        case "<":
+        case '<':
           evaluation = messagePropertyValue < value;
           break;
-        case "<=":
+        case '<=':
           evaluation = messagePropertyValue <= value;
           break;
-        case ">":
+        case '>':
           evaluation = messagePropertyValue > value;
           break;
-        case ">=":
+        case '>=':
           evaluation = messagePropertyValue >= value;
           break;
-        case "==":
+        case '==':
           evaluation = messagePropertyValue === value;
           break;
         default:
@@ -74,14 +76,15 @@ class SwitchNode extends BaseNode {
           );
       }
       if (evaluation) handleNames.push(handleName);
-      if (switchMode === "stop" && evaluation) shouldForward = false;
+      if (switchMode === 'stop' && evaluation) shouldForward = false;
     });
 
     return Promise.resolve({
       payload: message.payload,
-      outputHandles: handleNames,
+      outputHandles: handleNames
     });
   };
+
   protected verifyInput = (_: NodeMessage) => {};
 }
 

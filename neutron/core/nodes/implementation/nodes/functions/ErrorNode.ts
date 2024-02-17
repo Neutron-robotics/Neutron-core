@@ -1,6 +1,6 @@
-import { ILiteEvent, LiteEvent } from "../../../../../utils/LiteEvent";
-import BaseNode from "../../../BaseNode";
-import { INodeBuilder, NodeMessage, OutputNodeMessage } from "../../../INeutronNode";
+import { ILiteEvent, LiteEvent } from '../../../../../utils/LiteEvent';
+import BaseNode from '../../../BaseNode';
+import { INodeBuilder, NodeMessage, OutputNodeMessage } from '../../../INeutronNode';
 
 export interface IErrorEvent {
   id: string;
@@ -11,7 +11,7 @@ export interface IErrorEvent {
 }
 
 export interface ErrorNodeSpecifics {
-  output: "full" | "property";
+  output: 'full' | 'property';
   propertyName?: string;
   closeAuto: boolean;
   ack: boolean;
@@ -20,8 +20,11 @@ export interface ErrorNodeSpecifics {
 
 class ErrorNode extends BaseNode {
   public isInput: boolean = false;
-  public readonly type = "error";
+
+  public readonly type = 'error';
+
   public ErrorEvent: ILiteEvent<IErrorEvent>;
+
   public specifics: ErrorNodeSpecifics;
 
   constructor(builder: INodeBuilder<ErrorNodeSpecifics>) {
@@ -31,17 +34,16 @@ class ErrorNode extends BaseNode {
   }
 
   protected process = async (message: NodeMessage): Promise<OutputNodeMessage> => {
-    const log =
-      this.specifics.output === "full"
-        ? message.payload.toString()
-        : message.payload[this.specifics.propertyName ?? ""].toString();
+    const log = this.specifics.output === 'full'
+      ? message.payload.toString()
+      : message.payload[this.specifics.propertyName ?? ''].toString();
 
     this.ErrorEvent.trigger({
       id: this.id,
       log,
       closeAuto: this.specifics.closeAuto,
       ack: this.specifics.ack,
-      exception: this.specifics.exception,
+      exception: this.specifics.exception
     });
     return Promise.resolve({ payload: undefined });
   };

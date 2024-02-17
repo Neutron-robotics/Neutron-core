@@ -1,23 +1,28 @@
-import { ILiteEvent, LiteEvent } from "../../utils/LiteEvent";
-import XYPosition from "../../types/XYPosition";
+import { ILiteEvent, LiteEvent } from '../../utils/LiteEvent';
+import XYPosition from '../../types/XYPosition';
 import {
   IBaseNodeEvent,
   INeutronNode,
   INodeBuilder,
   NodeMessage,
-  OutputNodeMessage,
-} from "./INeutronNode";
+  OutputNodeMessage
+} from './INeutronNode';
 
 abstract class BaseNode implements INeutronNode {
   public readonly id: string;
+
   public abstract type: string;
+
   public abstract isInput: boolean;
+
   public position: XYPosition;
 
   public nextNodes: Record<string, BaseNode[]> = {};
 
   public BeforeProcessingEvent: ILiteEvent<IBaseNodeEvent>;
+
   public AfterProcessingEvent: ILiteEvent<IBaseNodeEvent>;
+
   public ProcessingErrorEvent: ILiteEvent<IBaseNodeEvent>;
 
   public get nextNodeToArray() {
@@ -26,7 +31,7 @@ abstract class BaseNode implements INeutronNode {
     for (const key in this.nextNodes) {
       if (this.nextNodes.hasOwnProperty(key)) {
         const nodes = this.nextNodes[key];
-        nodes.forEach((node) => {
+        nodes.forEach(node => {
           formattedArray.push({ key, node });
         });
       }
@@ -58,23 +63,23 @@ abstract class BaseNode implements INeutronNode {
       console.error(`${this.id} Error happens while formatting input`, err);
       this.ProcessingErrorEvent.trigger({
         nodeId: this.id,
-        data: err,
+        data: err
       });
       return;
     }
 
     this.BeforeProcessingEvent.trigger({
       nodeId: this.id,
-      data: input,
+      data: input
     });
     const output = await this.process(input);
     this.AfterProcessingEvent.trigger({
       nodeId: this.id,
-      data: output,
+      data: output
     });
     return Promise.resolve({
       ...output,
-      outputHandles: output.outputHandles ?? Object.keys(this.nextNodes),
+      outputHandles: output.outputHandles ?? Object.keys(this.nextNodes)
     });
   }
 }

@@ -1,10 +1,10 @@
-import { ILiteEvent, LiteEvent } from "../../../../../utils/LiteEvent";
-import BaseNode from "../../../BaseNode";
+import { ILiteEvent, LiteEvent } from '../../../../../utils/LiteEvent';
+import BaseNode from '../../../BaseNode';
 import {
   INodeBuilder,
   NodeMessage,
-  OutputNodeMessage,
-} from "../../../INeutronNode";
+  OutputNodeMessage
+} from '../../../INeutronNode';
 
 export interface IDebugEvent {
   id: string;
@@ -12,13 +12,15 @@ export interface IDebugEvent {
 }
 
 export interface DebugNodeSpecifics {
-  output: "full" | "property";
+  output: 'full' | 'property';
   propertyName?: string;
 }
 
 class DebugNode extends BaseNode {
   public isInput: boolean = false;
-  public readonly type = "debug";
+
+  public readonly type = 'debug';
+
   public DebugEvent: ILiteEvent<IDebugEvent>;
 
   constructor(builder: INodeBuilder<void>) {
@@ -31,7 +33,7 @@ class DebugNode extends BaseNode {
   ): Promise<OutputNodeMessage> => {
     this.DebugEvent.trigger({
       id: this.id,
-      log: message.payload,
+      log: message.payload
     });
     return Promise.resolve({ payload: undefined });
   };

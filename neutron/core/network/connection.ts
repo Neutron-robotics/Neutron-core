@@ -1,7 +1,7 @@
 export enum ConnectionContextType {
-  Ros2 = "ros2",
-  Tcp = "tcp",
-  WebSocket = "websocket",
+  Ros2 = 'ros2',
+  Tcp = 'tcp',
+  WebSocket = 'websocket',
 }
 
 export interface NeutronConnectionInfoMessage {
@@ -12,7 +12,7 @@ export interface NeutronConnectionInfoMessage {
 }
 
 export interface RobotStatus {
-  status: "Online" | "Operating" | "Offline" | "Unknown";
+  status: 'Online' | 'Operating' | 'Offline' | 'Unknown';
   battery?: IBatteryStatus;
   system: IRobotSystemStatus;
   location?: IRobotLocationStatus;

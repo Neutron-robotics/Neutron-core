@@ -1,33 +1,33 @@
-import { IRos2System } from "../../neutron/models/ros2/ros2";
+import { IRos2System } from '../../neutron/models/ros2/ros2';
 
 const mockRosSystem: IRos2System = {
-  _id: "randomId",
-  name: "test system",
+  _id: 'randomId',
+  name: 'test system',
   topics: [
     {
-      _id: "qiehiehi",
-      name: "test topic",
+      _id: 'qiehiehi',
+      name: 'test topic',
       messageType: {
-        _id: "dddidi",
-        name: "std/position",
+        _id: 'dddidi',
+        name: 'std/position',
         fields: [
           {
-            fieldname: "x",
-            fieldtype: "number",
+            fieldname: 'x',
+            fieldtype: 'number'
           },
           {
-            fieldname: "y",
-            fieldtype: "number",
-          },
-        ],
-      },
-    },
+            fieldname: 'y',
+            fieldtype: 'number'
+          }
+        ]
+      }
+    }
   ],
   publishers: [],
   subscribers: [],
   actions: [],
   services: [],
-  robotId: "sooososos",
+  robotId: 'sooososos'
 };
 
 export { mockRosSystem };

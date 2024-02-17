@@ -1,7 +1,7 @@
-import { IRos2Service } from "../../../../../models/ros2/ros2";
-import NeutronNodeComputeError from "../../../../errors/NeutronNodeError";
-import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
-import RosNode from "./RosNode";
+import { IRos2Service } from '../../../../../models/ros2/ros2';
+import NeutronNodeComputeError from '../../../../errors/NeutronNodeError';
+import { INodeBuilder, NodeMessage } from '../../../INeutronNode';
+import RosNode from './RosNode';
 
 export interface ServiceNodeSpecifics {
   service: IRos2Service;
@@ -9,7 +9,9 @@ export interface ServiceNodeSpecifics {
 
 class ServiceNode extends RosNode {
   public isInput: boolean = false;
-  public readonly type = "service";
+
+  public readonly type = 'service';
+
   private readonly specifics: ServiceNodeSpecifics;
 
   constructor(builder: INodeBuilder<ServiceNodeSpecifics>) {
@@ -24,13 +26,14 @@ class ServiceNode extends RosNode {
       message.payload
     );
 
-    if (!result)
+    if (!result) {
       throw new NeutronNodeComputeError(
         `Service node ${this.id} did not send a response`
       );
+    }
 
     return {
-      payload: result.result,
+      payload: result.result
     };
   };
 

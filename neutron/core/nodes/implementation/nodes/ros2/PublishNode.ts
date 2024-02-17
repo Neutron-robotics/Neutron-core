@@ -1,6 +1,6 @@
-import { IRos2Topic } from "../../../../../models/ros2/ros2";
-import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
-import RosNode from "./RosNode";
+import { IRos2Topic } from '../../../../../models/ros2/ros2';
+import { INodeBuilder, NodeMessage } from '../../../INeutronNode';
+import RosNode from './RosNode';
 
 export interface PublisherNodeSpecifics {
   topic: IRos2Topic;
@@ -8,7 +8,9 @@ export interface PublisherNodeSpecifics {
 
 class PublisherNode extends RosNode {
   public isInput: boolean = false;
-  public readonly type = "publisher";
+
+  public readonly type = 'publisher';
+
   private readonly specifics: PublisherNodeSpecifics;
 
   constructor(builder: INodeBuilder<PublisherNodeSpecifics>) {

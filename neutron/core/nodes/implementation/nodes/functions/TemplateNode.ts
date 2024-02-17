@@ -1,5 +1,5 @@
-import BaseNode from "../../../BaseNode";
-import { INodeBuilder, NodeMessage } from "../../../INeutronNode";
+import BaseNode from '../../../BaseNode';
+import { INodeBuilder, NodeMessage } from '../../../INeutronNode';
 
 export interface TemplateNodeSpecifics {
   propertyName: string;
@@ -8,7 +8,9 @@ export interface TemplateNodeSpecifics {
 
 class TemplateNode extends BaseNode {
   public isInput: boolean = false;
-  public readonly type = "template";
+
+  public readonly type = 'template';
+
   private readonly specifics: TemplateNodeSpecifics;
 
   constructor(builder: INodeBuilder<TemplateNodeSpecifics>) {
@@ -29,8 +31,8 @@ class TemplateNode extends BaseNode {
     return {
       payload: {
         ...message.payload,
-        [this.specifics.propertyName]: replaced,
-      },
+        [this.specifics.propertyName]: replaced
+      }
     };
   };
 

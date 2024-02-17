@@ -1,4 +1,4 @@
-import {InputControllerNode, OutputControllerNode } from "./ControllerNode";
+import { InputControllerNode, OutputControllerNode } from './ControllerNode';
 
 export interface IBaseNodeControllerPayload {
   x: number;
@@ -7,7 +7,7 @@ export interface IBaseNodeControllerPayload {
 }
 
 export class BaseControllerNode extends InputControllerNode<IBaseNodeControllerPayload> {
-  public readonly type = "base controller";
+  public readonly type = 'base controller';
 }
 
 export interface IMJPEGCameraPayload {
@@ -17,7 +17,7 @@ export interface IMJPEGCameraPayload {
 }
 
 export class MJPEGCameraNode extends InputControllerNode<IBaseNodeControllerPayload> {
-  public readonly type = "mjpegcamera";
+  public readonly type = 'mjpegcamera';
 }
 
 export interface ICameraControllerPayload {
@@ -25,7 +25,7 @@ export interface ICameraControllerPayload {
 }
 
 export class CameraControllerNode extends InputControllerNode<ICameraControllerPayload> {
-  public readonly type = "camera controller";
+  public readonly type = 'camera controller';
 }
 
 export interface ICameraFramePayload {
@@ -33,5 +33,5 @@ export interface ICameraFramePayload {
 }
 
 export class CameraFrameNode extends InputControllerNode<ICameraFramePayload> {
-  public readonly type = "camera frame";
+  public readonly type = 'camera frame';
 }

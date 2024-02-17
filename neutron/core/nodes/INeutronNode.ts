@@ -1,19 +1,19 @@
-import { IRos2System } from "../../models/ros2/ros2";
-import { ILiteEvent } from "../../utils/LiteEvent";
-import RosContext from "../network/RosContext";
-import XYPosition from "../../types/XYPosition";
+import { IRos2System } from '../../models/ros2/ros2';
+import { ILiteEvent } from '../../utils/LiteEvent';
+import RosContext from '../network/RosContext';
+import XYPosition from '../../types/XYPosition';
 
 export interface NodeMessage {
   payload: any;
 }
 
 export type NeutronPrimitiveType =
-  | "string"
-  | "number"
-  | "bool"
-  | "json"
-  | "env"
-  | "msg";
+  | 'string'
+  | 'number'
+  | 'bool'
+  | 'json'
+  | 'env'
+  | 'msg';
 
 export interface IRepeatInterval {
   delay: number;

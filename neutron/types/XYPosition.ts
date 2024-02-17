@@ -1,4 +1,6 @@
-export default interface XYPosition {
+interface XYPosition {
   x: number;
   y: number;
-}
+};
+
+export default XYPosition;
