@@ -1,4 +1,2 @@
-import ConnectorGraph from './ConnectorGraph';
-import FlowGraph from './FlowGraph';
-
-export { ConnectorGraph, FlowGraph };
+export * from './ConnectorGraph';
+export * from './FlowGraph';

@@ -1,4 +1,4 @@
-import BaseNode from '../../../BaseNode';
+import { BaseNode } from '../../../BaseNode';
 import { INodeBuilder, NodeMessage } from '../../../INeutronNode';
 
 export interface TemplateNodeSpecifics {
@@ -6,7 +6,7 @@ export interface TemplateNodeSpecifics {
   template: string;
 }
 
-class TemplateNode extends BaseNode {
+export class TemplateNode extends BaseNode {
   public isInput: boolean = false;
 
   public readonly type = 'template';
@@ -38,5 +38,3 @@ class TemplateNode extends BaseNode {
 
   protected verifyInput = (_: NodeMessage) => {};
 }
-
-export default TemplateNode;

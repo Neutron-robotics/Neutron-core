@@ -7,6 +7,7 @@ export function parseRos2MessageContent(fileContent: string): IRos2Field[] {
   // Ignore the first line, which is the message name.
 
   for (const line of lines) {
+    // eslint-disable-next-line no-continue
     if (!line.replaceAll(' ', '').length) continue;
     const [fieldName, fieldType] = line.split(' ');
     // The field type can be either a basic type or a message type.

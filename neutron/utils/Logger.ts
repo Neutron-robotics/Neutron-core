@@ -3,26 +3,19 @@ import moment from 'moment';
 import { LiteEvent } from './LiteEvent';
 import { isBlank } from './string';
 
+export enum LogType {
+  DEBUG = 'DEBUG',
+  ERROR = 'ERROR',
+  INFO = 'INFO',
+  WARNING = 'WARNING',
+}
+
 export interface ILoggerMessage {
   _id?: string;
   source?: string;
   content: string;
   type: LogType;
   time: Date;
-}
-
-// export enum LogType {
-//   DEBUG = "#4f5051",
-//   ERROR = "#d81a1a",
-//   INFO = "#387a30",
-//   WARNING = "#d17e32",
-// }
-
-export enum LogType {
-  DEBUG = 'DEBUG',
-  ERROR = 'ERROR',
-  INFO = 'INFO',
-  WARNING = 'WARNING',
 }
 
 export class Logger {

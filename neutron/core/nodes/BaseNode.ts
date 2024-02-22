@@ -8,7 +8,7 @@ import {
   OutputNodeMessage
 } from './INeutronNode';
 
-abstract class BaseNode implements INeutronNode {
+export abstract class BaseNode implements INeutronNode {
   public readonly id: string;
 
   public abstract type: string;
@@ -17,6 +17,7 @@ abstract class BaseNode implements INeutronNode {
 
   public position: XYPosition;
 
+  // eslint-disable-next-line no-use-before-define
   public nextNodes: Record<string, BaseNode[]> = {};
 
   public BeforeProcessingEvent: ILiteEvent<IBaseNodeEvent>;
@@ -29,6 +30,7 @@ abstract class BaseNode implements INeutronNode {
     const formattedArray: { key: string; node: BaseNode }[] = [];
 
     for (const key in this.nextNodes) {
+      // eslint-disable-next-line no-prototype-builtins
       if (this.nextNodes.hasOwnProperty(key)) {
         const nodes = this.nextNodes[key];
         nodes.forEach(node => {
@@ -83,5 +85,3 @@ abstract class BaseNode implements INeutronNode {
     });
   }
 }
-
-export default BaseNode;

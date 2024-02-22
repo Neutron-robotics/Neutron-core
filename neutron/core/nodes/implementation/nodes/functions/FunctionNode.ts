@@ -1,4 +1,4 @@
-import BaseNode from '../../../BaseNode';
+import { BaseNode } from '../../../BaseNode';
 import {
   INodeBuilder,
   NodeMessage,
@@ -9,7 +9,7 @@ export interface FunctionNodeSpecifics {
   code: string;
 }
 
-class FunctionNode extends BaseNode {
+export class FunctionNode extends BaseNode {
   public isInput: boolean = false;
 
   public readonly type = 'function';
@@ -33,5 +33,3 @@ class FunctionNode extends BaseNode {
 
   protected verifyInput = (_: NodeMessage) => {};
 }
-
-export default FunctionNode;

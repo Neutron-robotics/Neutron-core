@@ -1,5 +1,5 @@
-import RosContext, { RosContextConfiguration } from './RosContext';
-import NeutronConnectionContext from './NeutronConnectionContext';
+import { RosContext, RosContextConfiguration } from './RosContext';
+import { NeutronConnectionContext } from './NeutronConnectionContext';
 
 export enum ConnectionContextType {
   Ros2 = 'ros2',

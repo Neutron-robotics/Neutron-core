@@ -1,5 +1,5 @@
-import NeutronNodeComputeError from '../../../../errors/NeutronNodeError';
-import BaseNode from '../../../BaseNode';
+import { NeutronNodeComputeError } from '../../../../errors/NeutronNodeError';
+import { BaseNode } from '../../../BaseNode';
 import {
   INodeBuilder,
   NodeMessage,
@@ -17,7 +17,7 @@ export interface FilterNodeSpecifics {
   propertyName: string;
 }
 
-class FilterNode extends BaseNode {
+export class FilterNode extends BaseNode {
   public isInput: boolean = false;
 
   public readonly type = 'filter';
@@ -69,7 +69,7 @@ class FilterNode extends BaseNode {
   };
 
   private blockUnlessGreaterShouldContinue(payload: any): boolean {
-    const cachedValue = this.specifics.value?.type == 'latest'
+    const cachedValue = this.specifics.value?.type === 'latest'
       ? this.previousValue
       : this.previousValidValue;
 
@@ -86,7 +86,7 @@ class FilterNode extends BaseNode {
   }
 
   private blockUnlessLowerShouldContinue(payload: any): boolean {
-    const cachedValue = this.specifics.value?.type == 'latest'
+    const cachedValue = this.specifics.value?.type === 'latest'
       ? this.previousValue
       : this.previousValidValue;
 
@@ -104,5 +104,3 @@ class FilterNode extends BaseNode {
 
   protected verifyInput = (_: NodeMessage) => {};
 }
-
-export default FilterNode;

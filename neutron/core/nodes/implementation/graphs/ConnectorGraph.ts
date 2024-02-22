@@ -1,17 +1,17 @@
-import NeutronGraphError from '../../../errors/NeutronGraphError';
-import NeutronNodeComputeError from '../../../errors/NeutronNodeError';
-import BaseNode from '../../BaseNode';
+import { NeutronGraphError } from '../../../errors/NeutronGraphError';
+import { NeutronNodeComputeError } from '../../../errors/NeutronNodeError';
+import { BaseNode } from '../../BaseNode';
 import { NeutronEdgeDB, NeutronNodeDB, NodeMessage } from '../../INeutronNode';
 import { IInputNode } from '../../InputNode';
-import NeutronBaseGraph from '../../NeutronBaseGraph';
-import NodeFactory, { inputNodesSet } from '../../NodeFactory';
+import { NeutronBaseGraph } from '../../NeutronBaseGraph';
+import { NodeFactory, inputNodesSet } from '../../NodeFactory';
 import { InputControllerNode, OutputControllerNode } from '../nodes';
 
 /*
  * The connector graph has a single input node.
  * This graph is unidirectional.
  */
-class ConnectorGraph extends NeutronBaseGraph {
+export class ConnectorGraph extends NeutronBaseGraph {
   private inputNode: BaseNode;
 
   constructor(nodes: NeutronNodeDB[], edges: NeutronEdgeDB[]) {
@@ -125,12 +125,9 @@ class ConnectorGraph extends NeutronBaseGraph {
         );
       }
 
-      node.nextNodes[nextEdge.sourceHandle]
-        ? node.nextNodes[nextEdge.sourceHandle].push(nextNode)
-        : (node.nextNodes[nextEdge.sourceHandle] = [nextNode]);
+      if (node.nextNodes[nextEdge.sourceHandle]) node.nextNodes[nextEdge.sourceHandle].push(nextNode);
+      else (node.nextNodes[nextEdge.sourceHandle] = [nextNode]);
     }
     return node;
   }
 }
-
-export default ConnectorGraph;

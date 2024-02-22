@@ -1,11 +1,10 @@
 import { IRos2Topic } from '../../../../../models/ros2/ros2';
-import BaseNode from '../../../BaseNode';
 import {
   IBaseNodeEvent,
   INodeBuilder,
   NodeMessage
 } from '../../../INeutronNode';
-import { RosNodeInput } from './RosNode';
+import { RosNodeInput } from './RosNodeInput';
 
 export interface SubscriberNodeSpecifics {
   topic: IRos2Topic;

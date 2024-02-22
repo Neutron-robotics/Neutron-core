@@ -1,12 +1,12 @@
 import { IRos2Topic } from '../../../../../models/ros2/ros2';
 import { INodeBuilder, NodeMessage } from '../../../INeutronNode';
-import RosNode from './RosNode';
+import { RosNode } from './RosNode';
 
 export interface PublisherNodeSpecifics {
   topic: IRos2Topic;
 }
 
-class PublisherNode extends RosNode {
+export class PublisherNode extends RosNode {
   public isInput: boolean = false;
 
   public readonly type = 'publisher';
@@ -31,5 +31,3 @@ class PublisherNode extends RosNode {
 
   public override onContextMount = () => {};
 }
-
-export default PublisherNode;

@@ -1,5 +1,5 @@
-import NeutronNodeComputeError from '../../../../errors/NeutronNodeError';
-import BaseNode from '../../../BaseNode';
+import { NeutronNodeComputeError } from '../../../../errors/NeutronNodeError';
+import { BaseNode } from '../../../BaseNode';
 import {
   INodeBuilder,
   NeutronPrimitiveType,
@@ -24,7 +24,7 @@ export interface SwitchNodeSpecifics {
   switchMode: 'stop' | 'continue';
 }
 
-class SwitchNode extends BaseNode {
+export class SwitchNode extends BaseNode {
   public isInput: boolean = false;
 
   public readonly type = 'switch';
@@ -87,5 +87,3 @@ class SwitchNode extends BaseNode {
 
   protected verifyInput = (_: NodeMessage) => {};
 }
-
-export default SwitchNode;

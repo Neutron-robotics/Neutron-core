@@ -1,5 +1,5 @@
 import { ILiteEvent, LiteEvent } from '../../../../../utils/LiteEvent';
-import BaseNode from '../../../BaseNode';
+import { BaseNode } from '../../../BaseNode';
 import {
   INodeBuilder,
   NodeMessage,
@@ -16,7 +16,7 @@ export interface DebugNodeSpecifics {
   propertyName?: string;
 }
 
-class DebugNode extends BaseNode {
+export class DebugNode extends BaseNode {
   public isInput: boolean = false;
 
   public readonly type = 'debug';
@@ -40,5 +40,3 @@ class DebugNode extends BaseNode {
 
   protected verifyInput = (_: NodeMessage) => {};
 }
-
-export default DebugNode;

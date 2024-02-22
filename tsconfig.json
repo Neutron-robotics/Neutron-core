@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
+    "module": "Node16",
     "target": "es6",
     "lib": ["es2021"],
     "declaration": true,
@@ -10,6 +10,7 @@
     "esModuleInterop": true,
     "paths": {
       "roslib": ["./src/types/roslib.d.ts"]
+      // "roslib": ["./node_modules/roslib"]
     }
   },
   "include": ["neutron/**/*"],

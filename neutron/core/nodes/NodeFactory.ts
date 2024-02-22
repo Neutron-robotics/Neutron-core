@@ -1,31 +1,36 @@
-import NeutronGraphError from '../errors/NeutronGraphError';
-import BaseNode from './BaseNode';
+import { NeutronGraphError } from '../errors/NeutronGraphError';
+import { BaseNode } from './BaseNode';
 import { INodeBuilder, NeutronNodeDB } from './INeutronNode';
-import {
-  ActionNode, PublisherNode, ServiceNode, SubscriberNode, SuccessNode
-} from './implementation/nodes';
 import {
   BaseControllerNode,
   CameraControllerNode,
   CameraFrameNode,
   MJPEGCameraNode
 } from './implementation/nodes/controllers';
-import ChangeNode from './implementation/nodes/functions/ChangeNode';
-import DebugNode from './implementation/nodes/functions/DebugNode';
-import DelayNode from './implementation/nodes/functions/DelayNode';
-import ErrorNode from './implementation/nodes/functions/ErrorNode';
-import FilterNode from './implementation/nodes/functions/FilterNode';
-import FunctionNode from './implementation/nodes/functions/FunctionNode';
-import InfoNode from './implementation/nodes/functions/InfoNode';
-import InjectNode from './implementation/nodes/functions/InjectNode';
-import RangeNode from './implementation/nodes/functions/RangeNode';
-import SwitchNode from './implementation/nodes/functions/SwitchNode';
-import TemplateNode from './implementation/nodes/functions/TemplateNode';
-import WarningNode from './implementation/nodes/functions/WarningNode';
+import {
+  ChangeNode,
+  DebugNode,
+  DelayNode,
+  ErrorNode,
+  FilterNode,
+  FunctionNode,
+  InfoNode,
+  InjectNode,
+  RangeNode,
+  SuccessNode,
+  SwitchNode,
+  TemplateNode,
+  WarningNode,
+  ActionNode,
+  PublisherNode
+} from './implementation/nodes';
+
+import ServiceNode from './implementation/nodes/ros2/ServiceNode';
+import SubscriberNode from './implementation/nodes/ros2/SubscribeNode';
 
 export const inputNodesSet = new Set(['inject', 'subscriber', 'basecontroller', 'cameracontroller']);
 
-class NodeFactory {
+export class NodeFactory {
   static nodeFactory: Record<string, (builder: INodeBuilder<any>) => BaseNode> = {
     inject: (builder: INodeBuilder<any>) => new InjectNode(builder),
     change: (builder: INodeBuilder<any>) => new ChangeNode(builder),
@@ -69,5 +74,3 @@ class NodeFactory {
     );
   }
 }
-
-export default NodeFactory;

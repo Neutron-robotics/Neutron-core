@@ -1,7 +1,7 @@
 import { IRos2Service } from '../../../../../models/ros2/ros2';
-import NeutronNodeComputeError from '../../../../errors/NeutronNodeError';
+import { NeutronNodeComputeError } from '../../../../errors/NeutronNodeError';
 import { INodeBuilder, NodeMessage } from '../../../INeutronNode';
-import RosNode from './RosNode';
+import { RosNode } from './RosNode';
 
 export interface ServiceNodeSpecifics {
   service: IRos2Service;

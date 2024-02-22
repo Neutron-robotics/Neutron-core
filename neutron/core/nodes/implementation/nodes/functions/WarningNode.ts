@@ -1,5 +1,5 @@
 import { ILiteEvent, LiteEvent } from '../../../../../utils/LiteEvent';
-import BaseNode from '../../../BaseNode';
+import { BaseNode } from '../../../BaseNode';
 import { INodeBuilder, NodeMessage } from '../../../INeutronNode';
 
 export interface IWarningEvent {
@@ -16,7 +16,7 @@ export interface WarningNodeSpecifics {
   ack: boolean;
 }
 
-class WarningNode extends BaseNode {
+export class WarningNode extends BaseNode {
   public isInput: boolean = false;
 
   public readonly type = 'warning';
@@ -47,5 +47,3 @@ class WarningNode extends BaseNode {
 
   protected verifyInput = (_: NodeMessage) => {};
 }
-
-export default WarningNode;

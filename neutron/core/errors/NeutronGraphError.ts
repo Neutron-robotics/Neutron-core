@@ -1,4 +1,4 @@
-class NeutronGraphError extends Error {
+export class NeutronGraphError extends Error {
   public nodeId?: string;
 
   constructor(message: string, nodeId?: string) {
@@ -7,5 +7,3 @@ class NeutronGraphError extends Error {
     this.nodeId = nodeId;
   }
 }
-
-export default NeutronGraphError;

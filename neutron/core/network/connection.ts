@@ -1,23 +1,8 @@
-export enum ConnectionContextType {
-  Ros2 = 'ros2',
-  Tcp = 'tcp',
-  WebSocket = 'websocket',
-}
-
 export interface NeutronConnectionInfoMessage {
   connectionId: string;
   clients: string[];
   clientsQueue: string[];
   leaderId: string;
-}
-
-export interface RobotStatus {
-  status: 'Online' | 'Operating' | 'Offline' | 'Unknown';
-  battery?: IBatteryStatus;
-  system: IRobotSystemStatus;
-  location?: IRobotLocationStatus;
-  processes?: IRobotProcess[];
-  context?: IRobotContextProcess;
 }
 
 export interface IRobotProcess {
@@ -47,4 +32,13 @@ export interface IRobotSystemStatus {
   cpu: number;
   memory: number;
   latency: number
+}
+
+export interface RobotStatus {
+  status: 'Online' | 'Operating' | 'Offline' | 'Unknown';
+  battery?: IBatteryStatus;
+  system: IRobotSystemStatus;
+  location?: IRobotLocationStatus;
+  processes?: IRobotProcess[];
+  context?: IRobotContextProcess;
 }

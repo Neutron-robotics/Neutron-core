@@ -1,5 +1,5 @@
 import { ILiteEvent, LiteEvent } from '../../../../../utils/LiteEvent';
-import BaseNode from '../../../BaseNode';
+import { BaseNode } from '../../../BaseNode';
 import { INodeBuilder, NodeMessage } from '../../../INeutronNode';
 
 export interface ISuccessEvent {
@@ -16,7 +16,7 @@ export interface SuccessNodeSpecifics {
   ack: boolean;
 }
 
-class SuccessNode extends BaseNode {
+export class SuccessNode extends BaseNode {
   public isInput: boolean = false;
 
   public readonly type = 'success';
@@ -47,5 +47,3 @@ class SuccessNode extends BaseNode {
 
   protected verifyInput = (_: NodeMessage) => {};
 }
-
-export default SuccessNode;

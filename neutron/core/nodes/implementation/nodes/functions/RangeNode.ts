@@ -1,4 +1,4 @@
-import BaseNode from '../../../BaseNode';
+import { BaseNode } from '../../../BaseNode';
 import { INodeBuilder, NodeMessage } from '../../../INeutronNode';
 
 export interface IScale {
@@ -13,7 +13,8 @@ export interface RangeNodeSpecifics {
   outputScale: IScale;
   round: boolean;
 }
-class RangeNode extends BaseNode {
+
+export class RangeNode extends BaseNode {
   public isInput: boolean = false;
 
   public readonly type = 'range';
@@ -28,7 +29,7 @@ class RangeNode extends BaseNode {
   protected process = async (message: NodeMessage) => {
     const inputValue = Number(message.payload[this.specifics.propertyName]);
 
-    if (isNaN(inputValue)) {
+    if (Number.isNaN(inputValue)) {
       throw new Error('Input value must be a number.');
     }
 
@@ -80,5 +81,3 @@ class RangeNode extends BaseNode {
 
   protected verifyInput = (_: NodeMessage) => {};
 }
-
-export default RangeNode;

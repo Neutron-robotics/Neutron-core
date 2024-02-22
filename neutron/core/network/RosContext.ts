@@ -9,15 +9,19 @@ import {
   Topic
 } from 'roslib';
 import WebSocket from 'ws';
-import NeutronConnectionContext from './NeutronConnectionContext';
-import { ConnectionContextType } from './connection';
+import { NeutronConnectionContext } from './NeutronConnectionContext';
 import { TopicSettings } from '../ros2/topicSettings';
+import { ConnectionContextType } from './makeContext';
 
 export interface RosContextConfiguration {
   hostname: string;
   port: number;
   clientId: string;
 }
+
+export type RosActionCallback = (data: any) => void;
+
+export type RosSubscriptionHandler = (data: Message) => void;
 
 export interface RosActionGoal {
   message: any;
@@ -27,11 +31,7 @@ export interface RosActionGoal {
   timeout?: RosActionCallback;
 }
 
-export type RosActionCallback = (data: any) => void;
-
-export type RosSubscriptionHandler = (data: Message) => void;
-
-class RosContext extends NeutronConnectionContext {
+export class RosContext extends NeutronConnectionContext {
   private ros: Ros;
 
   private clientId: string;
@@ -181,5 +181,3 @@ class RosContext extends NeutronConnectionContext {
     return new Topic(options);
   }
 }
-
-export default RosContext;

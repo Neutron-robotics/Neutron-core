@@ -1,4 +1,4 @@
-import BaseNode from '../../../BaseNode';
+import { BaseNode } from '../../../BaseNode';
 import { INodeBuilder, NodeMessage, OutputNodeMessage } from '../../../INeutronNode';
 
 export interface IRandomDelayInterval {
@@ -12,7 +12,7 @@ export interface DelayNodeSpecifics {
   unit: 'millisecond' | 'second' | 'minute' | 'hour';
 }
 
-class DelayNode extends BaseNode {
+export class DelayNode extends BaseNode {
   public isInput: boolean = false;
 
   public readonly type = 'delay';
@@ -27,7 +27,7 @@ class DelayNode extends BaseNode {
   protected process = async (message: NodeMessage): Promise<OutputNodeMessage> => {
     const delayInMillis = this.calculateDelayInMillis();
 
-    await new Promise(resolve => setTimeout(resolve, delayInMillis));
+    await new Promise(resolve => { setTimeout(resolve, delayInMillis); });
 
     return {
       payload: message.payload
@@ -64,5 +64,3 @@ class DelayNode extends BaseNode {
     }
   }
 }
-
-export default DelayNode;

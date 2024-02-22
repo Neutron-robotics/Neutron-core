@@ -1,12 +1,12 @@
-import WebSocket, { MessageEvent, RawData } from 'ws';
+import WebSocket, { MessageEvent } from 'ws';
 import {
-  ConnectionContextType,
   NeutronConnectionInfoMessage,
   RobotStatus
 } from './connection';
 import { ILiteEvent, LiteEvent } from '../../utils/LiteEvent';
+import { ConnectionContextType } from './makeContext';
 
-abstract class NeutronConnectionContext {
+export abstract class NeutronConnectionContext {
   public type: ConnectionContextType;
 
   public abstract isConnected: boolean;
@@ -100,5 +100,3 @@ abstract class NeutronConnectionContext {
     }
   };
 }
-
-export default NeutronConnectionContext;

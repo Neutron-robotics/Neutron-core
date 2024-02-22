@@ -1,5 +1,5 @@
 import { ILiteEvent, LiteEvent } from '../../../../../utils/LiteEvent';
-import BaseNode from '../../../BaseNode';
+import { BaseNode } from '../../../BaseNode';
 import { INodeBuilder, NodeMessage } from '../../../INeutronNode';
 
 export interface IInfoEvent {
@@ -16,7 +16,7 @@ export interface InfoNodeSpecifics {
   ack: boolean;
 }
 
-class InfoNode extends BaseNode {
+export class InfoNode extends BaseNode {
   public isInput: boolean = false;
 
   public readonly type = 'info';
@@ -47,5 +47,3 @@ class InfoNode extends BaseNode {
 
   protected verifyInput = (_: NodeMessage) => {};
 }
-
-export default InfoNode;

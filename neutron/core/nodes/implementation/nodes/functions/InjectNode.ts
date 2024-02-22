@@ -1,4 +1,4 @@
-import BaseNode from '../../../BaseNode';
+import { BaseNode } from '../../../BaseNode';
 import {
   IBaseNodeEvent,
   INodeBuilder,
@@ -24,7 +24,7 @@ export interface InjectNodeSpecifics {
   repeatOptions?: IRepeatCron | IRepeatInterval;
 }
 
-class InjectNode extends NodeInput {
+export class InjectNode extends NodeInput {
   public isInput: boolean = true;
 
   public readonly type = 'inject';
@@ -61,5 +61,3 @@ class InjectNode extends NodeInput {
 
   protected verifyInput = (_: NodeMessage) => {};
 }
-
-export default InjectNode;

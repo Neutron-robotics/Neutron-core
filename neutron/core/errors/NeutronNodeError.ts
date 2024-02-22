@@ -1,4 +1,4 @@
-class NeutronNodeComputeError extends Error {
+export class NeutronNodeComputeError extends Error {
   public nodeId?: string;
 
   constructor(message: string, nodeId?: string) {
@@ -7,5 +7,3 @@ class NeutronNodeComputeError extends Error {
     this.nodeId = nodeId;
   }
 }
-
-export default NeutronNodeComputeError;

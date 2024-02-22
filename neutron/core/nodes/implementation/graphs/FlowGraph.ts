@@ -1,16 +1,16 @@
-import NeutronGraphError from '../../../errors/NeutronGraphError';
-import NeutronNodeComputeError from '../../../errors/NeutronNodeError';
-import BaseNode from '../../BaseNode';
+import { NeutronGraphError } from '../../../errors/NeutronGraphError';
+import { NeutronNodeComputeError } from '../../../errors/NeutronNodeError';
+import { BaseNode } from '../../BaseNode';
 import { NeutronEdgeDB, NeutronNodeDB, NodeMessage } from '../../INeutronNode';
 import { IInputNode } from '../../InputNode';
-import NeutronBaseGraph from '../../NeutronBaseGraph';
-import NodeFactory, { inputNodesSet } from '../../NodeFactory';
+import { NeutronBaseGraph } from '../../NeutronBaseGraph';
+import { NodeFactory, inputNodesSet } from '../../NodeFactory';
 
 /*
  * The flow graph can be composed of severals input node.
  * This graph can have circles and possibly run forever.
  */
-class FlowGraph extends NeutronBaseGraph {
+export class FlowGraph extends NeutronBaseGraph {
   private inputNodes: BaseNode[];
 
   constructor(nodes: NeutronNodeDB[], edges: NeutronEdgeDB[]) {
@@ -56,7 +56,7 @@ class FlowGraph extends NeutronBaseGraph {
     if (!node.isInput) throw new NeutronNodeComputeError(`Node ${nodeId} is not an input`);
 
     this.shouldStop = false;
-    return await this.run(node, message);
+    return this.run(node, message);
   }
 
   public async run(node: BaseNode, message?: NodeMessage): Promise<void> {
@@ -81,12 +81,9 @@ class FlowGraph extends NeutronBaseGraph {
             `No node with id ${edge.target} has been provided`
           );
         }
-        node.nextNodes[edge.sourceHandle]
-          ? node.nextNodes[edge.sourceHandle].push(nextNode)
-          : (node.nextNodes[edge.sourceHandle] = [nextNode]);
+        if (node.nextNodes[edge.sourceHandle]) node.nextNodes[edge.sourceHandle].push(nextNode);
+        else node.nextNodes[edge.sourceHandle] = [nextNode];
       });
     });
   }
 }
-
-export default FlowGraph;

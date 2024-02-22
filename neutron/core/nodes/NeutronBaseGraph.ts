@@ -1,15 +1,15 @@
 import { ILiteEvent, LiteEvent } from '../../utils/LiteEvent';
-import NeutronGraphError from '../errors/NeutronGraphError';
-import NeutronConnectionContext from '../network/NeutronConnectionContext';
-import RosContext from '../network/RosContext';
-import { ConnectionContextType } from '../network/connection';
-import BaseNode from './BaseNode';
+import { NeutronGraphError } from '../errors/NeutronGraphError';
+import { ConnectionContextType } from '../network';
+import { NeutronConnectionContext } from '../network/NeutronConnectionContext';
+import { RosContext } from '../network/RosContext';
+import { BaseNode } from './BaseNode';
 import {
   IBaseNodeEvent, INodeBuilder, NeutronEdgeDB, NeutronNodeDB, NodeMessage
 } from './INeutronNode';
 import { IInputNode } from './InputNode';
-import NodeFactory from './NodeFactory';
-import { RosNode } from './implementation/nodes';
+import { NodeFactory } from './NodeFactory';
+import { RosNode } from './implementation/nodes/ros2/RosNode';
 
 export type NeutronGraphType = 'Flow' | 'Connector';
 
@@ -18,7 +18,7 @@ export interface INeutronGraphProcessEvent {
   status: 'running' | 'completed';
 }
 
-abstract class NeutronBaseGraph {
+export abstract class NeutronBaseGraph {
   public NodeProcessEvent: ILiteEvent<INeutronGraphProcessEvent>;
 
   protected nodes: BaseNode[];
@@ -92,5 +92,3 @@ abstract class NeutronBaseGraph {
     (node as unknown as IInputNode).ProcessingFinished.trigger(node.id);
   };
 }
-
-export default NeutronBaseGraph;

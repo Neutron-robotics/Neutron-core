@@ -1,5 +1,5 @@
 import { ILiteEvent, LiteEvent } from '../../../../../utils/LiteEvent';
-import BaseNode from '../../../BaseNode';
+import { BaseNode } from '../../../BaseNode';
 import { INodeBuilder, NodeMessage, OutputNodeMessage } from '../../../INeutronNode';
 
 export interface IErrorEvent {
@@ -18,7 +18,7 @@ export interface ErrorNodeSpecifics {
   exception: string;
 }
 
-class ErrorNode extends BaseNode {
+export class ErrorNode extends BaseNode {
   public isInput: boolean = false;
 
   public readonly type = 'error';
@@ -50,5 +50,3 @@ class ErrorNode extends BaseNode {
 
   protected verifyInput = (_: NodeMessage) => {};
 }
-
-export default ErrorNode;

@@ -1,10 +1,7 @@
-import { LiteEvent } from '../../../../../utils/LiteEvent';
-import RosContext from '../../../../network/RosContext';
-import BaseNode from '../../../BaseNode';
-import { IBaseNodeEvent } from '../../../INeutronNode';
-import { IInputNode } from '../../../InputNode';
+import { RosContext } from '../../../../network/RosContext';
+import { BaseNode } from '../../../BaseNode';
 
-abstract class RosNode extends BaseNode {
+export abstract class RosNode extends BaseNode {
   public abstract readonly type:
     | 'subscriber'
     | 'publisher'
@@ -20,15 +17,3 @@ abstract class RosNode extends BaseNode {
 
   public abstract onContextMount: () => void;
 }
-
-export abstract class RosNodeInput extends RosNode implements IInputNode {
-  public isInput: boolean = true;
-
-  public ProcessingBegin = new LiteEvent<IBaseNodeEvent>();
-
-  public ProcessingFinished = new LiteEvent<string>();
-
-  public abstract trigger(data: any): void
-}
-
-export default RosNode;

@@ -1,5 +1,5 @@
-import NeutronNodeComputeError from '../../../../errors/NeutronNodeError';
-import BaseNode from '../../../BaseNode';
+import { NeutronNodeComputeError } from '../../../../errors/NeutronNodeError';
+import { BaseNode } from '../../../BaseNode';
 import { INodeBuilder, NodeMessage, OutputNodeMessage } from '../../../INeutronNode';
 
 export interface ChangeField {
@@ -13,7 +13,7 @@ export interface ChangeNodeSpecifics {
   fields: ChangeField[];
 }
 
-class ChangeNode extends BaseNode {
+export class ChangeNode extends BaseNode {
   public isInput: boolean = false;
 
   public readonly type = 'Change';
@@ -58,5 +58,3 @@ class ChangeNode extends BaseNode {
 
   protected verifyInput = (_: NodeMessage) => {};
 }
-
-export default ChangeNode;
