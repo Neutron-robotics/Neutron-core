@@ -1,14 +1,20 @@
 {
-  "name": "neutron-core",
-  "version": "1.2.0",
-  "repository": "git@github.com:hugoperier/Neutron-core.git",
+  "name": "@hugoperier/neutron-core",
+  "version": "1.2.1",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:hugoperier/Neutron-core.git"
+},
   "author": "hugo <hugo.perier@protonmail.com>",
   "license": "MIT",
   "main": "dist/neutron-core.js",
   "types": "dist/index.d.ts",
   "files": [
-    "/dist"
+    "dist"
   ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/hugoperier"
+  },
   "scripts": {
     "start": "tsc && node build/index.js",
     "dev": "tsc && node dist/dev.js",
