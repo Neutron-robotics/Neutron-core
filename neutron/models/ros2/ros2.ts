@@ -1,21 +1,4 @@
-import { IDBObject } from "../common";
-
-export interface IRos2System extends IDBObject {
-  name: string;
-  topics: IRos2Topic[];
-  publishers: IRos2Publisher[];
-  subscribers: IRos2Subscriber[];
-  actions: IRos2Action[];
-  services: IRos2Service[];
-  robotId: string;
-}
-
-export interface IRos2PartSystem extends IRos2System {
-  partId: string;
-  messageTypes: IRos2Message[];
-  serviceTypes: IRos2ServiceMessage[];
-  actionTypes: IRos2ActionMessage[];
-}
+import { IDBObject } from '../common';
 
 export interface IRos2Field {
   fieldtype: string;
@@ -115,4 +98,21 @@ export interface Ros2Field {
 export interface IMessageType extends IDBObject {
   name: string;
   fields: Ros2Field[];
+}
+
+export interface IRos2System extends IDBObject {
+  name: string;
+  topics: IRos2Topic[];
+  publishers: IRos2Publisher[];
+  subscribers: IRos2Subscriber[];
+  actions: IRos2Action[];
+  services: IRos2Service[];
+  robotId: string;
+}
+
+export interface IRos2PartSystem extends IRos2System {
+  partId: string;
+  messageTypes: IRos2Message[];
+  serviceTypes: IRos2ServiceMessage[];
+  actionTypes: IRos2ActionMessage[];
 }

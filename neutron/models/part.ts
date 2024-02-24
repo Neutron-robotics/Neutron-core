@@ -1,4 +1,4 @@
-import { RobotPartCategory } from "./robot";
+import { RobotPartCategory } from './robot';
 
 export interface CreateRobotPartModel {
   type: string;

@@ -1,13 +1,9 @@
-export enum RobotPartCategory {
-  Actuator = "actuator",
-  Vison = "vision",
-  Base = "base",
-}
+import { ConnectionContextType } from '../core';
 
-export enum ConnectionContextType {
-  Ros2 = "ros2",
-  Tcp = "tcp",
-  WebSocket = "websocket",
+export enum RobotPartCategory {
+  Actuator = 'actuator',
+  Vison = 'vision',
+  Base = 'base',
 }
 
 export interface IRobotPart {

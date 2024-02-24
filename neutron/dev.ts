@@ -1,80 +1,181 @@
-import makeNodeGraph from "./core/node/NeutronGraphNode";
+import axios from 'axios';
+import * as fs from 'fs';
+import { sleep } from './utils/time';
+import { RosContext } from './core/network/RosContext';
 
 const nodes = [
   {
-    id: "69a5f4a5-6e08-4d00-88c0-77aa4929de4f",
-    type: "subscriberNode",
+    width: 150,
+    height: 40,
+    id: 'c4792d9d-f6c3-4e4c-a196-51dd7930f6dc',
+    type: 'flowNode',
     position: {
-      x: -80.60000000000002,
-      y: 318,
+      x: 155,
+      y: 368
     },
-    width: 81,
-    height: 116,
-    input: true,
+    data: {
+      color: '#FF0000',
+      name: 'subscriber',
+      inputHandles: 0,
+      outputHandles: 1,
+      icon: 'ros.svg',
+      specifics: {
+        topic: {
+          _id: '659e77573b29779172958c94',
+          name: 'test_pub',
+          messageType: {
+            _id: '65a2fc499088196bb9f933cc',
+            fields: [
+              {
+                fieldtype: 'string',
+                fieldname: 'name',
+                _id: '65a2fc499088196bb9f933cd'
+              },
+              {
+                fieldtype: 'int16',
+                fieldname: 'wheel_count',
+                _id: '65a2fc499088196bb9f933ce'
+              },
+              {
+                fieldtype: 'bool',
+                fieldname: 'is_moving',
+                _id: '65a2fc499088196bb9f933cf'
+              },
+              {
+                fieldtype: 'int16',
+                fieldname: 'speed',
+                _id: '65a2fc499088196bb9f933d0'
+              },
+              {
+                fieldtype: 'int16',
+                fieldname: 'max_speed',
+                _id: '65a2fc499088196bb9f933d1'
+              }
+            ],
+            name: 'myrobotics_protocol/msg/BaseInfos',
+            __v: 0
+          },
+          __v: 0
+        }
+      }
+    },
+    selected: true,
+    dragging: false,
+    positionAbsolute: {
+      x: 155,
+      y: 368
+    }
   },
   {
-    id: "288a3812-e455-4a34-9f8d-a54aa7f83bd5",
-    type: "andNode",
+    width: 150,
+    height: 40,
+    id: 'ab3819bd-4692-4144-b211-5364901ad233',
+    type: 'flowNode',
     position: {
-      x: 113.39999999999998,
-      y: 376,
+      x: 440,
+      y: 386
     },
-    width: 80,
-    height: 60,
-  },
-  {
-    id: "1c720c53-429f-4323-8088-2bc1fa9cf35a",
-    type: "purcentageNode",
-    position: {
-      x: 268.4,
-      y: 370,
+    data: {
+      color: '#018D20',
+      name: 'debug',
+      inputHandles: 1,
+      outputHandles: 0,
+      icon: 'info.svg',
+      specifics: {
+        output: 'full'
+      }
     },
-    width: 160,
-    height: 70,
-  },
-  {
-    id: "ce3ca636-01a5-4c53-8236-66e86bca141d",
-    type: "pickNode",
-    position: {
-      x: 499.4,
-      y: 372,
-    },
-    width: 120,
-    height: 70,
-  },
+    positionAbsolute: {
+      x: 440,
+      y: 386
+    }
+  }
 ];
 
 const edges = [
   {
-    source: "69a5f4a5-6e08-4d00-88c0-77aa4929de4f",
-    sourceHandle: "image",
-    target: "288a3812-e455-4a34-9f8d-a54aa7f83bd5",
-    targetHandle: "input-1-d5c8948e-b770-4fad-a4a6-ea0345f485ff",
-    id: "reactflow__edge-69a5f4a5-6e08-4d00-88c0-77aa4929de4fimage-288a3812-e455-4a34-9f8d-a54aa7f83bd5input-1-d5c8948e-b770-4fad-a4a6-ea0345f485ff",
-  },
-  {
-    source: "69a5f4a5-6e08-4d00-88c0-77aa4929de4f",
-    sourceHandle: "resolution",
-    target: "288a3812-e455-4a34-9f8d-a54aa7f83bd5",
-    targetHandle: "input-2-d5c8948e-b770-4fad-a4a6-ea0345f485ff",
-    id: "reactflow__edge-69a5f4a5-6e08-4d00-88c0-77aa4929de4fresolution-288a3812-e455-4a34-9f8d-a54aa7f83bd5input-2-d5c8948e-b770-4fad-a4a6-ea0345f485ff",
-  },
-  {
-    source: "288a3812-e455-4a34-9f8d-a54aa7f83bd5",
-    sourceHandle: "output-d5c8948e-b770-4fad-a4a6-ea0345f485ff",
-    target: "1c720c53-429f-4323-8088-2bc1fa9cf35a",
-    targetHandle: "input-8dc2f078-3c9f-4418-81cd-33362421894c",
-    id: "reactflow__edge-288a3812-e455-4a34-9f8d-a54aa7f83bd5output-d5c8948e-b770-4fad-a4a6-ea0345f485ff-1c720c53-429f-4323-8088-2bc1fa9cf35ainput-8dc2f078-3c9f-4418-81cd-33362421894c",
-  },
-  {
-    source: "1c720c53-429f-4323-8088-2bc1fa9cf35a",
-    sourceHandle: "output-8dc2f078-3c9f-4418-81cd-33362421894c",
-    target: "ce3ca636-01a5-4c53-8236-66e86bca141d",
-    targetHandle: "input-4e1a839a-7a13-44d3-baf2-ea258f77bdda",
-    id: "reactflow__edge-1c720c53-429f-4323-8088-2bc1fa9cf35aoutput-8dc2f078-3c9f-4418-81cd-33362421894c-ce3ca636-01a5-4c53-8236-66e86bca141dinput-4e1a839a-7a13-44d3-baf2-ea258f77bdda",
-  },
+    source: 'c4792d9d-f6c3-4e4c-a196-51dd7930f6dc',
+    sourceHandle: 'output-0',
+    target: 'ab3819bd-4692-4144-b211-5364901ad233',
+    targetHandle: 'input-0',
+    id: 'reactflow__edge-c4792d9d-f6c3-4e4c-a196-51dd7930f6dcoutput-0-ab3819bd-4692-4144-b211-5364901ad233input-0'
+  }
 ];
 
-const nodegraph = makeNodeGraph(nodes, edges);
+async function main() {
+  const connectionHostname = 'localhost';
+  const connectionPort = 3030;
+  const clientId = 'tester';
 
-console.log("finished");
+  const neutronContextConfiguration = {
+    hostname: connectionHostname,
+    port: connectionPort,
+    clientId
+  };
+
+  const robotContextConfiguration = {
+    hostname: '192.168.1.116',
+    port: 9090,
+    clientId: ''
+  };
+
+  const context = new RosContext(robotContextConfiguration);
+
+  const connected = await context.connect();
+
+  console.log('Connected! ', connected);
+
+  // context.subscribe(
+  //   '/video_frames',
+  //   'sensor_msgs/msg/CompressedImage',
+  //   (data: any) => {
+  //     console.log('Received data!', data);
+  //     fs.writeFileSync('./test.jpg', Buffer.from(data.data, 'base64'));
+  //     const jpg = Buffer.from(data.data, 'base64');
+  //   }
+  // );
+
+  // await axios.post(
+  //   `http://${connectionHostname}:${connectionPort}/register/${clientId}`
+  // );
+  // await context.connect();
+
+  // const infos = await context.getInfo();
+
+  // const graph = new ConnectorGraph(nodes, edges);
+
+  // graph.useContext(context)
+
+  // const debugNode = graph.getNodeById<DebugNode>('ab3819bd-4692-4144-b211-5364901ad233')
+
+  // const handleDebugEvent = (data: IDebugEvent): void | Promise<void> => {
+  //   console.log("debug event: ", data);
+  // }
+
+  // debugNode?.DebugEvent.on(handleDebugEvent)
+
+  // const trigger = (data: any) => {
+  //   console.log("Triggered data", data);
+  // };
+
+  // context.on(
+  //   {
+  //     methodType: "test_pub",
+  //     format: "myrobotics_protocol/msg/BaseInfos",
+  //     payload: null,
+  //   },
+  //   trigger
+  // );
+
+  while (true) {
+    await sleep(100);
+  }
+}
+
+main()
+  .then(() => {
+    console.log('Main function and async operations completed');
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });

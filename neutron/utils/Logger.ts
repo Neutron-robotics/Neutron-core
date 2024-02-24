@@ -1,7 +1,14 @@
 /* eslint-disable no-console */
-import moment from "moment";
-import { LiteEvent } from "./LiteEvent";
-import { isBlank } from "./string";
+import moment from 'moment';
+import { LiteEvent } from './LiteEvent';
+import { isBlank } from './string';
+
+export enum LogType {
+  DEBUG = 'DEBUG',
+  ERROR = 'ERROR',
+  INFO = 'INFO',
+  WARNING = 'WARNING',
+}
 
 export interface ILoggerMessage {
   _id?: string;
@@ -11,22 +18,9 @@ export interface ILoggerMessage {
   time: Date;
 }
 
-// export enum LogType {
-//   DEBUG = "#4f5051",
-//   ERROR = "#d81a1a",
-//   INFO = "#387a30",
-//   WARNING = "#d17e32",
-// }
-
-export enum LogType {
-  DEBUG = "DEBUG",
-  ERROR = "ERROR",
-  INFO = "INFO",
-  WARNING = "WARNING",
-}
-
 export class Logger {
   private source: string;
+
   private readonly onLog = new LiteEvent<ILoggerMessage>();
 
   constructor(source: string) {
@@ -43,16 +37,16 @@ export class Logger {
         type,
         content: message,
         source: this.source,
-        time: new Date(),
+        time: new Date()
       });
-      console.log(`%c[${moment().format("LTS")}][${this.source}] ${message}`);
+      console.log(`%c[${moment().format('LTS')}][${this.source}] ${message}`);
     } else {
       this.onLog.trigger({
         type,
         content: message,
-        time: new Date(),
+        time: new Date()
       });
-      console.log(`%c[${moment().format("LTS")}] ${message}`);
+      console.log(`%c[${moment().format('LTS')}] ${message}`);
     }
   }
 
