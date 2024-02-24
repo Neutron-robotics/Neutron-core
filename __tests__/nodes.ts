@@ -1,8 +1,7 @@
 import { NodeMessage } from '../neutron/core/nodes/INeutronNode';
-import NodeFactory from '../neutron/core/nodes/NodeFactory';
-import { InjectNode } from '../neutron/core/nodes/implementation/nodes';
-import DebugNode from '../neutron/core/nodes/implementation/nodes/functions/DebugNode';
-import ErrorNode from '../neutron/core/nodes/implementation/nodes/functions/ErrorNode';
+import { NodeFactory } from '../neutron/core/nodes/NodeFactory';
+import { ErrorNode, InjectNode } from '../neutron/core/nodes/implementation/nodes';
+import { DebugNode } from '../neutron/core/nodes/implementation/nodes/functions/DebugNode';
 import { flowGraphMock } from './__mixture__/flowGraphMock';
 
 jest.mock('../neutron/core/network/makeContext');

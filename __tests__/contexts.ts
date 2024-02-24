@@ -3,7 +3,7 @@ import {
 } from 'roslib';
 import { sleep } from '../neutron/utils/time';
 import { ConnectionContextType, makeConnectionContext } from '../neutron/core/network/makeContext';
-import RosContext from '../neutron/core/network/RosContext';
+import { RosContext } from '../neutron/core/network/RosContext';
 
 jest.mock('roslib');
 

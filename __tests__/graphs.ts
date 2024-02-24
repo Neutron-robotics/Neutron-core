@@ -1,13 +1,13 @@
-import NeutronGraphError from '../neutron/core/errors/NeutronGraphError';
+import { NeutronGraphError } from '../neutron/core/errors/NeutronGraphError';
 import { NodeMessage } from '../neutron/core/nodes/INeutronNode';
-import ConnectorGraph from '../neutron/core/nodes/implementation/graphs/ConnectorGraph';
-import FlowGraph from '../neutron/core/nodes/implementation/graphs/FlowGraph';
-import DebugNode from '../neutron/core/nodes/implementation/nodes/functions/DebugNode';
+import { ConnectorGraph } from '../neutron/core/nodes/implementation/graphs/ConnectorGraph';
+import { FlowGraph } from '../neutron/core/nodes/implementation/graphs/FlowGraph';
+import { DebugNode } from '../neutron/core/nodes/implementation/nodes/functions/DebugNode';
 import { graphTemplate } from './__mixture__/connectorGraphMock';
 import { flowGraphMock } from './__mixture__/flowGraphMock';
 import { sleep } from '../neutron/utils/time';
 import { PublisherNode } from '../neutron/core/nodes/implementation/nodes';
-import RosContext, { RosContextConfiguration } from '../neutron/core/network/RosContext';
+import { RosContext, RosContextConfiguration } from '../neutron/core/network/RosContext';
 
 jest.mock('../neutron/core/network/makeContext');
 jest.mock('roslib');

@@ -16,11 +16,9 @@
     "registry": "https://npm.pkg.github.com/hugoperier"
   },
   "scripts": {
-    "start": "tsc && node build/index.js",
+    "start": "tsc && node dist/index.js",
     "dev": "tsc && node dist/dev.js",
     "build": "vite build && sed -i -e 's|var f = require(\"+s(o)+\")|var f = require(`${s(o)}`)|g' dist/neutron-core.js",
-    "debug": "tsc && node --inspect build/index.js",
-    "debug-brk": "tsc && node --inspect-brk build/index.js",
     "test": "jest",
     "test:verbose": "jest --verbose --runInBand --silent",
     "tsc": "tsc",

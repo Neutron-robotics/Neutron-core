@@ -1,11 +1,7 @@
 import { IRos2System } from '../../models/ros2/ros2';
 import { ILiteEvent } from '../../utils/LiteEvent';
-import RosContext from '../network/RosContext';
+import { RosContext } from '../network/RosContext';
 import XYPosition from '../../types/XYPosition';
-
-export interface NodeMessage {
-  payload: any;
-}
 
 export type NeutronPrimitiveType =
   | 'string'
@@ -21,17 +17,6 @@ export interface IRepeatInterval {
 
 export interface IRepeatCron {
   expression: string;
-}
-
-export interface INeutronNode {
-  id: string;
-  type: string;
-  position: XYPosition;
-  isInput: boolean;
-  BeforeProcessingEvent: ILiteEvent<IBaseNodeEvent>;
-  AfterProcessingEvent: ILiteEvent<IBaseNodeEvent>;
-  ProcessingErrorEvent: ILiteEvent<IBaseNodeEvent>;
-  processNode(input: NodeMessage): Promise<NodeMessage | undefined>;
 }
 
 export interface INodeBuilder<T> {
@@ -82,4 +67,15 @@ export interface NeutronNodeDB {
   width?: number;
   height?: number;
   data: NeutronNodeData;
+}
+
+export interface INeutronNode {
+  id: string;
+  type: string;
+  position: XYPosition;
+  isInput: boolean;
+  BeforeProcessingEvent: ILiteEvent<IBaseNodeEvent>;
+  AfterProcessingEvent: ILiteEvent<IBaseNodeEvent>;
+  ProcessingErrorEvent: ILiteEvent<IBaseNodeEvent>;
+  processNode(input: NodeMessage): Promise<NodeMessage | undefined>;
 }

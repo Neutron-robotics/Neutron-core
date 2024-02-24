@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as fs from 'fs';
 import { sleep } from './utils/time';
-import RosContext from './core/network/RosContext';
+import { RosContext } from './core/network/RosContext';
 
 const nodes = [
   {
@@ -125,15 +125,15 @@ async function main() {
 
   console.log('Connected! ', connected);
 
-  context.subscribe(
-    '/video_frames',
-    'sensor_msgs/msg/CompressedImage',
-    (data: any) => {
-      console.log('Received data!', data);
-      fs.writeFileSync('./test.jpg', Buffer.from(data.data, 'base64'));
-      const jpg = Buffer.from(data.data, 'base64');
-    }
-  );
+  // context.subscribe(
+  //   '/video_frames',
+  //   'sensor_msgs/msg/CompressedImage',
+  //   (data: any) => {
+  //     console.log('Received data!', data);
+  //     fs.writeFileSync('./test.jpg', Buffer.from(data.data, 'base64'));
+  //     const jpg = Buffer.from(data.data, 'base64');
+  //   }
+  // );
 
   // await axios.post(
   //   `http://${connectionHostname}:${connectionPort}/register/${clientId}`
