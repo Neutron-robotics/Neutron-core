@@ -18,7 +18,7 @@
   "scripts": {
     "start": "tsc && node dist/index.js",
     "dev": "tsc && node dist/dev.js",
-    "build": "vite build && sed -i -e 's|var f = require(\"+s(o)+\")|var f = require(`${s(o)}`)|g' dist/neutron-core.js",
+    "build": "vite build",
     "test": "jest",
     "test:verbose": "jest --verbose --runInBand --silent",
     "tsc": "tsc",
