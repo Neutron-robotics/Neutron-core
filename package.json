@@ -7,7 +7,7 @@
 },
   "author": "hugo <hugo.perier@protonmail.com>",
   "license": "MIT",
-  "main": "dist/neutron-core.js",
+  "main": "dist/neutron-core.mjs",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
