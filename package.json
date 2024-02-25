@@ -1,6 +1,6 @@
 {
   "name": "@hugoperier/neutron-core",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "repository": {
     "type": "git",
     "url": "git@github.com:hugoperier/Neutron-core.git"
@@ -18,7 +18,7 @@
   "scripts": {
     "start": "tsc && node dist/index.js",
     "dev": "tsc && node dist/dev.js",
-    "build": "vite build",
+    "build": "vite build && sed -i -e 's|var f = require(\" + s(o) + \")|var f = require(`${s(o)}`)|g' dist/neutron-core.mjs",
     "test": "jest",
     "test:verbose": "jest --verbose --runInBand --silent",
     "tsc": "tsc",
