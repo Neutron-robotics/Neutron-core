@@ -8,7 +8,7 @@ export default defineConfig({
       entry: './neutron/index.ts',
       name: 'neutron-core',
       fileName: 'neutron-core',
-      formats: ['es']
+      formats: ['cjs']
     }
   },
   plugins: [
