@@ -21,13 +21,13 @@ The Neutron Core library serves the following key goals:
 To install the Neutron Core library, you can use npm or yarn:
 
 ```bash
-npm install @neutron/core
+npm install @hugoperier/neutron-core
 ```
 
 or
 
 ```bash
-yarn add @neutron/core
+yarn add @hugoperier/neutron-core
 ```
 
 For detailed usage instructions and API documentation, refer to the documentation provided with the Neutron Core library.
