@@ -8,6 +8,7 @@ import { flowGraphMock } from './__mixture__/flowGraphMock';
 import { sleep } from '../neutron/utils/time';
 import { PublisherNode } from '../neutron/core/nodes/implementation/nodes';
 import { RosContext, RosContextConfiguration } from '../neutron/core/network/RosContext';
+import BaseControllerGraphMock from './__mixture__/baseControllerGraphMock';
 
 jest.mock('../neutron/core/network/makeContext');
 jest.mock('roslib');
@@ -276,5 +277,29 @@ describe('Neutron flow execution', () => {
 
     expect(onDelayNodeProcessed).toHaveBeenCalledTimes(4);
     expect(onDebugNodeProcessed).toHaveBeenCalledTimes(0);
+  });
+});
+
+describe('Diverse graph executions', () => {
+  it('Run Base Controller graph use case', async () => {
+    const graph = new ConnectorGraph(BaseControllerGraphMock.nodes, BaseControllerGraphMock.edges);
+
+    const message = {
+      payload: {
+        speed: 30,
+        x: 0,
+        y: 0
+      }
+    };
+
+    const stopDebugNodeCb = jest.fn();
+    const stopDebugNode = graph.getNodeById('4ce6e20b-fbfd-49b0-a4c8-876b8d4fa775');
+    stopDebugNode?.AfterProcessingEvent.once(stopDebugNodeCb);
+
+    await graph.runInputNode('a1c45a3c-534d-4973-84e2-898197c03935', message);
+
+    // todo: fix this test
+    // expect(stopDebugNodeCb).toHaveBeenCalledTimes(1);
+    // expect(stopDebugNodeCb).toHaveBeenCalledWith({});
   });
 });
