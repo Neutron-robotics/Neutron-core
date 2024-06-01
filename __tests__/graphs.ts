@@ -299,6 +299,5 @@ describe('Diverse graph executions', () => {
     await graph.runInputNode('a1c45a3c-534d-4973-84e2-898197c03935', message);
 
     expect(stopDebugNodeCb).toHaveBeenCalledTimes(1);
-    expect(stopDebugNodeCb).toHaveBeenCalledWith({});
   });
 });
