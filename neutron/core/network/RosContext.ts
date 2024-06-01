@@ -9,14 +9,13 @@ import {
   Topic
 } from 'roslib';
 import WebSocket from 'ws';
-import { NeutronConnectionContext } from './NeutronConnectionContext';
+import { NeutronConnectionContext, NeutronContextConfiguration } from './NeutronConnectionContext';
 import { TopicSettings } from '../ros2/topicSettings';
 import { ConnectionContextType } from './makeContext';
 
-export interface RosContextConfiguration {
+export interface RosContextConfiguration extends NeutronContextConfiguration {
   hostname: string;
   port: number;
-  clientId: string;
 }
 
 export type RosActionCallback = (data: any) => void;
@@ -34,8 +33,6 @@ export interface RosActionGoal {
 export class RosContext extends NeutronConnectionContext {
   private ros: Ros;
 
-  private clientId: string;
-
   public hostname: string;
 
   public port: number;
@@ -49,9 +46,8 @@ export class RosContext extends NeutronConnectionContext {
   }
 
   constructor(config: RosContextConfiguration) {
-    super(ConnectionContextType.Ros2);
+    super(ConnectionContextType.Ros2, config);
     this.ros = new Ros({});
-    this.clientId = config.clientId;
     this.hostname = config.hostname;
     this.port = config.port;
   }

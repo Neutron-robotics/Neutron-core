@@ -1,3 +1,32 @@
+/**
+ * Graph Relation for graphMock
+ *
+ * Nodes:
+ *     (a1) [a1c45a3c-534d-4973-84e2-898197c03935] base controller
+ *     (d2) [d2145bae-d75e-4c54-9bdb-6fb584cfbd79] switch
+ *     (c8) [c8dc24f5-46d7-452a-a28e-abacbdd524aa] switch
+ *     (4c) [4ce6e20b-fbfd-49b0-a4c8-876b8d4fa775] debug
+ *     (3f) [3f897ba3-5098-41b9-ac4d-c58a7e40393c] function
+ *     (38) [38ebb899-bccd-40a5-a401-daae0ff8f210] debug
+ *
+ * Edges:
+ *     (a1) [a1c45a3c-534d-4973-84e2-898197c03935] --output-0--> [d2145bae-d75e-4c54-9bdb-6fb584cfbd79] (d2)
+ *     (d2) [d2145bae-d75e-4c54-9bdb-6fb584cfbd79] --output-0--> [c8dc24f5-46d7-452a-a28e-abacbdd524aa] (c8)
+ *     (d2) [d2145bae-d75e-4c54-9bdb-6fb584cfbd79] --output-1--> [3f897ba3-5098-41b9-ac4d-c58a7e40393c] (3f)
+ *     (3f) [3f897ba3-5098-41b9-ac4d-c58a7e40393c] --output-0--> [38ebb899-bccd-40a5-a401-daae0ff8f210] (38)
+ *     (c8) [c8dc24f5-46d7-452a-a28e-abacbdd524aa] --output-0--> [4ce6e20b-fbfd-49b0-a4c8-876b8d4fa775] (4c)
+ *
+ * Representation:
+ *
+ *        [a1]
+ *         |
+ *         v
+ *        [d2] -->[c8] --> [4c]
+ *         |         |
+ *         v         v
+ *        [3f] --> [38]
+ */
+
 const graphMock = {
   _id: '65e0e6add7d3a28f2dacf850',
   title: 'Wheeler Base',
@@ -134,7 +163,7 @@ const graphMock = {
           switchFields: [
             {
               type: 'number',
-              value: '0',
+              value: 0,
               operator: '==',
               id: 'a8c8a248-d0eb-442a-aaba-00129eba2b15'
             }

@@ -6,21 +6,36 @@ import {
 import { ILiteEvent, LiteEvent } from '../../utils/LiteEvent';
 import { ConnectionContextType } from './makeContext';
 
-export abstract class NeutronConnectionContext {
-  public type: ConnectionContextType;
+export interface NeutronContextConfiguration {
+  clientId: string;
+}
 
+export abstract class NeutronConnectionContext {
   public abstract isConnected: boolean;
 
-  protected abstract ws: WebSocket;
+  public type: ConnectionContextType;
+
+  protected clientId: string;
 
   public connectionUpdated: ILiteEvent<NeutronConnectionInfoMessage>;
 
   public robotUpdated: ILiteEvent<RobotStatus>;
 
-  constructor(type: ConnectionContextType) {
+  public promotedEvent: ILiteEvent<void>;
+
+  public removedEvent: ILiteEvent<void>;
+
+  private currentLeader: string | undefined;
+
+  protected abstract ws: WebSocket;
+
+  constructor(type: ConnectionContextType, config: NeutronContextConfiguration) {
     this.type = type;
     this.connectionUpdated = new LiteEvent<NeutronConnectionInfoMessage>();
     this.robotUpdated = new LiteEvent<RobotStatus>();
+    this.promotedEvent = new LiteEvent<void>();
+    this.removedEvent = new LiteEvent<void>();
+    this.clientId = config.clientId;
   }
 
   public abstract connect(): Promise<boolean>;
@@ -94,9 +109,18 @@ export abstract class NeutronConnectionContext {
     if (!message) return;
 
     if (message?.messageType === 'connectionInfos') {
-      this.connectionUpdated.trigger(message.message);
+      this.handleConnectionUpdatedMessage(message.message);
     } else if (message?.messageType === 'robotStatus') {
       this.robotUpdated.trigger(message.message);
+    } else if (message?.messageType === 'removedEvent') {
+      this.removedEvent.trigger();
     }
+  };
+
+  private handleConnectionUpdatedMessage = (data: NeutronConnectionInfoMessage) => {
+    if (this.currentLeader && this.currentLeader !== data.leaderId && this.clientId === data.leaderId) {
+      this.promotedEvent.trigger();
+    } else this.currentLeader = data.leaderId;
+    this.connectionUpdated.trigger(data);
   };
 }
