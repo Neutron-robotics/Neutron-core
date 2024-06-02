@@ -1,9 +1,9 @@
 {
-  "name": "@hugoperier/neutron-core",
+  "name": "@neutron/neutron-core",
   "version": "1.3.0",
   "repository": {
     "type": "git",
-    "url": "git@github.com:hugoperier/Neutron-core.git"
+    "url": "git@github.com:Neutron-robotics/Neutron-core.git"
   },
   "author": "hugo <hugo.perier@protonmail.com>",
   "license": "MIT",
