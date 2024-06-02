@@ -1,5 +1,5 @@
 {
-  "name": "@neutron/neutron-core",
+  "name": "@neutron-robotics/neutron-core",
   "version": "1.3.3",
   "repository": {
     "type": "git",
@@ -13,7 +13,7 @@
     "dist"
   ],
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/Neutron-robotics"
+    "registry": "https://npm.pkg.github.com/neutron-robotics"
   },
   "scripts": {
     "start": "tsc && node dist/index.js",
