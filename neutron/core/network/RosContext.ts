@@ -16,6 +16,7 @@ import { ConnectionContextType } from './makeContext';
 export interface RosContextConfiguration extends NeutronContextConfiguration {
   hostname: string;
   port: number;
+  wss?: boolean;
 }
 
 export type RosActionCallback = (data: any) => void;
@@ -37,6 +38,8 @@ export class RosContext extends NeutronConnectionContext {
 
   public port: number;
 
+  public wss?: boolean;
+
   public override get isConnected(): boolean {
     return this.ros?.isConnected ?? false;
   }
@@ -50,6 +53,7 @@ export class RosContext extends NeutronConnectionContext {
     this.ros = new Ros({});
     this.hostname = config.hostname;
     this.port = config.port;
+    this.wss = config.wss;
   }
 
   public connect(): Promise<boolean> {
@@ -69,7 +73,7 @@ export class RosContext extends NeutronConnectionContext {
       });
 
       this.ros.connect(
-        `ws://${this.hostname}:${this.port}/connection/${this.clientId}`
+        `${this.wss ? 'wss' : 'ws'}://${this.hostname}:${this.port}/connection/${this.clientId}`
       );
     });
   }
