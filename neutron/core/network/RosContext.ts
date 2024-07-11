@@ -72,9 +72,15 @@ export class RosContext extends NeutronConnectionContext {
         console.log('Connection to websocket server closed.');
       });
 
-      this.ros.connect(
-        `${this.wss ? 'wss' : 'ws'}://${this.hostname}:${this.port}/connection/${this.clientId}`
-      );
+      if (this.wss) {
+        this.ros.connect(
+          `wss://${this.hostname}:22358/ws/${this.port}/connection/${this.clientId}`
+        );
+      } else {
+        this.ros.connect(
+          `${this.wss ? 'wss' : 'ws'}://${this.hostname}:${this.port}/connection/${this.clientId}`
+        );
+      }
     });
   }
 
