@@ -74,7 +74,7 @@ export class RosContext extends NeutronConnectionContext {
 
       if (this.wss) {
         this.ros.connect(
-          `wss://${this.hostname}:22358/ws/${this.port}/connection/${this.clientId}`
+          `wss://${this.hostname}/ws/${this.port}/connection/${this.clientId}`
         );
       } else {
         this.ros.connect(
