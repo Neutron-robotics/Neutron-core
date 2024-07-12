@@ -74,11 +74,11 @@ export class RosContext extends NeutronConnectionContext {
 
       if (this.wss) {
         this.ros.connect(
-          `wss://${this.hostname}/ws/${this.port}/connection/${this.clientId}`
+          `wss://${this.hostname}/ws/${this.port}/${this.clientId}` // proxified
         );
       } else {
         this.ros.connect(
-          `${this.wss ? 'wss' : 'ws'}://${this.hostname}:${this.port}/connection/${this.clientId}`
+          `${this.wss ? 'wss' : 'ws'}://${this.hostname}:${this.port}/connection/${this.clientId}` // local
         );
       }
     });
